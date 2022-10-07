@@ -1,0 +1,34 @@
+[[package]]
+name = "bcrypt"
+version = "4.0.0"
+requires_python = ">=3.6"
+summary = "Modern password hashing for your software and your servers"
+
+[[package]]
+name = "pony"
+version = "0.7.16"
+summary = "Pony Object-Relational Mapper"
+
+[metadata]
+lock_version = "4.0"
+content_hash = "sha256:0386e5323fa2e9cf6fbd7499733f5bfe37dec3d48135fdc3b85916086ab92f4d"
+
+[metadata.files]
+"bcrypt 4.0.0" = [
+    {url = "https://files.pythonhosted.org/packages/19/c1/c808dc7bacc620fefa7e7f573fc6b26b5b3030afe5fea7b16e8d87b4be44/bcrypt-4.0.0-cp36-abi3-manylinux_2_24_x86_64.whl", hash = "sha256:7c7dd6c1f05bf89e65261d97ac3a6520f34c2acb369afb57e3ea4449be6ff8fd"},
+    {url = "https://files.pythonhosted.org/packages/3a/c4/085d1cbe08f2ac4933db949d5ad9d6d0210e451948e06f247857ab97c1f7/bcrypt-4.0.0-cp36-abi3-musllinux_1_1_aarch64.whl", hash = "sha256:bf413f2a9b0a2950fc750998899013f2e718d20fa4a58b85ca50b6df5ed1bbf9"},
+    {url = "https://files.pythonhosted.org/packages/54/e5/64354519c6e6aee70994b9a948b7e823b4012bc7f08a614456c3517560a9/bcrypt-4.0.0-cp36-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1c3334446fac200499e8bc04a530ce3cf0b3d7151e0e4ac5c0dddd3d95e97843"},
+    {url = "https://files.pythonhosted.org/packages/7e/d9/73369b68fba1a4c1c6977a98466af2872b3b81ec3de341cbd8222825ee8a/bcrypt-4.0.0-cp36-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:594780b364fb45f2634c46ec8d3e61c1c0f1811c4f2da60e8eb15594ecbf93ed"},
+    {url = "https://files.pythonhosted.org/packages/87/7b/b9bda96f6fc870d1125f8c259bf905510f526b9dbeed4ef2a0df6e0106dc/bcrypt-4.0.0-cp36-abi3-macosx_10_10_universal2.whl", hash = "sha256:845b1daf4df2dd94d2fdbc9454953ca9dd0e12970a0bfc9f3dcc6faea3fa96e4"},
+    {url = "https://files.pythonhosted.org/packages/95/d1/cdfcf698433b03af76df3f1ee15c840b1f6e54dcdd5a390a6d581d512ec4/bcrypt-4.0.0-cp36-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:2d0dd19aad87e4ab882ef1d12df505f4c52b28b69666ce83c528f42c07379227"},
+    {url = "https://files.pythonhosted.org/packages/99/f2/b71b9b5b2400fffac7d42c560ac89f302c4d8e328337b2f05f0a4d9e590d/bcrypt-4.0.0.tar.gz", hash = "sha256:c59c170fc9225faad04dde1ba61d85b413946e8ce2e5f5f5ff30dfd67283f319"},
+    {url = "https://files.pythonhosted.org/packages/b1/f9/8c8e387e1c560448ada45266b6457be8949e58a0b5cb59e36d7506546139/bcrypt-4.0.0-cp36-abi3-win_amd64.whl", hash = "sha256:0b0f0c7141622a31e9734b7f649451147c04ebb5122327ac0bd23744df84be90"},
+    {url = "https://files.pythonhosted.org/packages/b3/46/fe43bd0912f884c91532e7b3f30923bf43861509b1796f38e1ff841b9653/bcrypt-4.0.0-cp36-abi3-win32.whl", hash = "sha256:dc6ec3dc19b1c193b2f7cf279d3e32e7caf447532fbcb7af0906fe4398900c33"},
+    {url = "https://files.pythonhosted.org/packages/c5/77/14bbcd08ad265577ad6ea8e8980b9c0ad668cecfd241ae169b6747c4491b/bcrypt-4.0.0-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bfb67f6a6c72dfb0a02f3df51550aa1862708e55128b22543e2b42c74f3620d7"},
+    {url = "https://files.pythonhosted.org/packages/dd/be/70eee1a2a62b1986e9a60f74b0d7e095bc50fd7cd67109fd82377fa22b90/bcrypt-4.0.0-cp36-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.manylinux_2_24_aarch64.whl", hash = "sha256:8780e69f9deec9d60f947b169507d2c9816e4f11548f1f7ebee2af38b9b22ae4"},
+    {url = "https://files.pythonhosted.org/packages/f4/54/4bf31e9b77b1c64b3d45cd04d42dbac6b31e9599174d5429238a7a5913d8/bcrypt-4.0.0-cp36-abi3-musllinux_1_1_x86_64.whl", hash = "sha256:ede0f506554571c8eda80db22b83c139303ec6b595b8f60c4c8157bdd0bdee36"},
+]
+"pony 0.7.16" = [
+    {url = "https://files.pythonhosted.org/packages/16/3c/28d42c569dc8d4d11bf512bc4f5beb54834a1fd132ab84274133fa4827c7/pony-0.7.16.tar.gz", hash = "sha256:5f45fc67587f4520c560a57148cc573b097d42f82f5cb200d72c957b5708198d"},
+    {url = "https://files.pythonhosted.org/packages/68/2e/d7f36d21ce7e1df1d7a02bdb38541ccf5f9c18c2656ae3698acee29447a4/pony-0.7.16-py3-none-any.whl", hash = "sha256:608a1c1d662983bad2590e650f2bbc1cd6ed48558894ad8f50da4739ff98f614"},
+]
