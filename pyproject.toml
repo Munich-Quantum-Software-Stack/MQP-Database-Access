@@ -1,7 +1,7 @@
 [project]
-name = ""
-version = ""
-description = ""
+name = "BQP Database Access"
+version = "0.1"
+description = "Allow access to the Quantum DB for the Bavarian Quantum Portal."
 authors = [
     {name = "Martin Ruefenacht", email = "martin.ruefenacht@lrz.de"},
 ]
