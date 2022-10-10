@@ -10,10 +10,10 @@ from pony.orm import Database, PrimaryKey, Required, Optional, Set
 def _define_entities(database: Database):
     class User(database.Entity):
         email = PrimaryKey(str, auto=False)
-        salted_password_hash = Required(str)
+        secret_hash = Required(str)
         blocked = Optional(bool, default=False)
         block_reason = Optional(str)
-        force_password_reset = Optional(bool, default=True)
+        force_secret_reset = Optional(bool, default=True)
         tokens = Set("Token")
 
     class Token(database.Entity):
