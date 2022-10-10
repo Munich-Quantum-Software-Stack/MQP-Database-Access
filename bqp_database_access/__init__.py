@@ -16,13 +16,13 @@ def _define_entities(database: Database):
         tokens = Set("Token")
 
     class Token(database.Entity):
-        salted_token_hash = PrimaryKey(str, auto=False)
         revoke_reason = Optional(str)
         creation = Required(datetime)
         expiration = Required(datetime)
         owner = Required("User")
         remember_name = Required(str, unique=True)
         revoked = Optional(bool, default=False)
+        peppered_token_hash = PrimaryKey(str, auto=False)
 
 
 def open():
