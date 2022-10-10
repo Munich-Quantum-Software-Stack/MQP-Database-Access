@@ -62,7 +62,7 @@ def add_new_token(name: str, owner: str, token: str, expiration: datetime) -> No
     ):
         raise TooManyTokensError(token_count_limit, owner)
 
-    peppered_token_hash = hashpw(token.encode(), TOKEN_PEPPER).decode()
+    token_hash = hashpw(token.encode(), TOKEN_PEPPER).decode()
 
     if quantum_db.Token.exists(remember_name=name, owner=owner, revoked=False):
         raise TokenExistsError(name)
@@ -72,7 +72,7 @@ def add_new_token(name: str, owner: str, token: str, expiration: datetime) -> No
         expiration=expiration,
         owner=owner,
         remember_name=name,
-        peppered_token_hash=peppered_token_hash,
+        token_hash=token_hash,
     )
 
     quantum_db.commit()
