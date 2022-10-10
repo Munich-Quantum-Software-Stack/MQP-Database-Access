@@ -26,7 +26,7 @@ def _define_entities(database: Database):
         peppered_token_hash = PrimaryKey(str, auto=False)
 
 
-def _open_database():
+def open_database():
     database = Database()
 
     _define_entities(database)
