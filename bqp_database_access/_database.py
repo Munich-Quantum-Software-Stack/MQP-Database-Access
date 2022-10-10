@@ -23,7 +23,7 @@ def _define_entities(database: Database):
         owner = Required("User")
         remember_name = Required(str, unique=True)
         revoked = Optional(bool, default=False)
-        peppered_token_hash = PrimaryKey(str, auto=False)
+        token_hash = PrimaryKey(str, auto=False)
 
 
 def open_database():
