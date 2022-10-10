@@ -16,21 +16,21 @@ class UnknownIdentityError(IdentityError):
     pass
 
 
-def set_new_password_for_identity(
-    identity: str, new_password: str, forced: bool = False
+def set_new_secret_for_identity(
+    identity: str, new_secret: str, forced: bool = False
 ) -> None:
     """Set a new password (salted and peppered) for a given identity."""
 
     quantum_db = open_database()
 
-    # TODO handle identity not existing
-    user = quantum_db.User[identity]
+    user = quantum_db.User.get(identity)
 
-    peppered_password = new_password.encode() + PEPPER
+    if user is None:
+        raise UnknownIdentityError
 
-    user.salted_password_hash = bcrypt.hashpw(
-        peppered_password, bcrypt.gensalt()
-    ).decode()
+    peppered_password = new_secret.encode() + PEPPER
+
+    user.secret_hash = bcrypt.hashpw(peppered_password, bcrypt.gensalt()).decode()
 
     if forced:
         user.force_password_reset = False
@@ -41,12 +41,13 @@ def authenticate(identity: str, password: str) -> bool:
 
     quantum_db = open_database()
 
-    # TODO handle identity not existing
-    user = quantum_db.User[identity]
+    user = quantum_db.User.get(identity)
+    if user is None:
+        raise UnknownIdentityError
 
     peppered_password = password.encode() + PEPPER
 
-    return bcrypt.checkpw(peppered_password, user.salted_password_hash.encode())
+    return bcrypt.checkpw(peppered_password, user.secret_hash.encode())
 
 
 def fetch_user_by_identity(identity: str) -> "User":
