@@ -94,12 +94,9 @@ def revoke_token_by_name_and_identity(name: str, owner: str) -> None:
     quantum_db.commit()
 
 
-def fetch_active_tokens_of_identity(owner: str) -> tuple[str, ...]:
+def fetch_active_tokens_of_identity(owner: str) -> list["Token"]:
     """Fetch all tokens"""
 
     quantum_db = open_database()
 
-    return tuple(
-        token.remember_name
-        for token in quantum_db.Token.select(owner=owner, revoked=False)
-    )
+    return quantum_db.Token.select(owner=owner, revoked=False)
