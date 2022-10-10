@@ -46,7 +46,7 @@ def authenticate(identity: str, password: str) -> bool:
 
     peppered_password = password.encode() + PEPPER
 
-    return bcrypt.checkpw(peppered_password, user.salted_password_hash)
+    return bcrypt.checkpw(peppered_password, user.salted_password_hash.encode())
 
 
 def fetch_user_by_identity(identity: str) -> "User":
