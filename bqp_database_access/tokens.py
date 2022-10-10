@@ -5,7 +5,7 @@ from datetime import datetime
 import pony.orm as pony
 from bcrypt import hashpw
 
-from ._constants import PEPPER
+from ._constants import TOKEN_PEPPER
 from ._database import open_database
 
 
@@ -62,7 +62,7 @@ def add_new_token(name: str, owner: str, token: str, expiration: datetime) -> No
     ):
         raise TooManyTokensError(token_count_limit, owner)
 
-    peppered_token_hash = hashpw(token.encode(), PEPPER).decode()
+    peppered_token_hash = hashpw(token.encode(), TOKEN_PEPPER).decode()
 
     if quantum_db.Token.exists(remember_name=name, owner=owner, revoked=False):
         raise TokenExistsError(name)
