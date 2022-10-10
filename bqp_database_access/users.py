@@ -23,7 +23,7 @@ def set_new_secret_for_identity(
 
     quantum_db = open_database()
 
-    user = quantum_db.User.get(identity)
+    user = quantum_db.User.get(email=identity)
 
     if user is None:
         raise UnknownIdentityError
@@ -41,7 +41,7 @@ def authenticate(identity: str, password: str) -> bool:
 
     quantum_db = open_database()
 
-    user = quantum_db.User.get(identity)
+    user = quantum_db.User.get(email=identity)
     if user is None:
         raise UnknownIdentityError
 
