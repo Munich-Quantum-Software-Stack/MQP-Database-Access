@@ -18,7 +18,6 @@ def _define_entities(database: Database):
         block_reason = Optional(str)
         force_secret_reset = Optional(bool, default=True)
         tokens = Set("Token")
-        jobs = Set("Job")
 
     class Token(database.Entity):
         revoke_reason = Optional(str)
