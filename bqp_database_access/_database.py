@@ -4,7 +4,7 @@
 import os
 
 from datetime import datetime
-from pony.orm import Database, PrimaryKey, Required, Optional, Set
+from pony.orm import Database, PrimaryKey, Required, Optional, Set, UUID
 
 
 def _define_entities(database: Database):
@@ -24,6 +24,16 @@ def _define_entities(database: Database):
         remember_name = Required(str, unique=True)
         revoked = Optional(bool, default=False)
         token_hash = PrimaryKey(str, auto=False)
+
+    class Job(database.Entity):
+        id = PrimaryKey(UUID, auto=False)
+        shots = Required(int)
+        circuit = Required(str)
+        result = Optional(str)
+        owner = Set("User")
+        token = Set("Token")
+        cancelled = Required(bool, default=False)
+        cancel_reason = Optional(str)
 
 
 def open_database():
