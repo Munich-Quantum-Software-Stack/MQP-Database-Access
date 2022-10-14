@@ -5,10 +5,13 @@ from uuid import UUID
 from ._database import open_database
 
 
-def fetch_all_jobs_by_user(user: "User") -> list["Job"]:
+def fetch_by_identity(identity: str) -> list["Job"]:
     quantum_db = open_database()
 
-    return quantum_db.Job.select(owner=user)
+    user = quantum_db.User.get(email=identity)
+    assert user is not None
+
+    return list(user.jobs)
 
 
 def create_job(shots: int, circuit: str, user: "User", token: "Token") -> UUID:

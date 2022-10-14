@@ -1,4 +1,6 @@
-"""This module provides the basic database structure and helpers."""
+"""
+This module provides the basic database structure and helpers.
+"""
 
 
 import os
