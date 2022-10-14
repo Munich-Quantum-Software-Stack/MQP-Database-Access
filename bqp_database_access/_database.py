@@ -35,10 +35,7 @@ def _define_entities(database: Database):
         shots = Required(int)
         circuit = Required(str)
         result = Optional(str)
-        owner = Set(
-            "User",
-        )
-        token = Set("Token")
+        token = Required("Token")
         cancelled = Required(bool, default=False)
         cancel_reason = Optional(str)
 

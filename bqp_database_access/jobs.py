@@ -14,9 +14,9 @@ def fetch_by_identity(identity: str) -> list["Job"]:
     return list(user.jobs)
 
 
-def create_job(shots: int, circuit: str, user: "User", token: "Token") -> UUID:
+def create_job(shots: int, circuit: str, token: "Token") -> UUID:
     quantum_db = open_database()
 
-    job = quantum_db.Job(shots=shots, circuit=circuit, owner=user, token=token)
+    job = quantum_db.Job(shots=shots, circuit=circuit, token=token)
 
     return str(job.id)
