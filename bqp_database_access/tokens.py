@@ -103,7 +103,7 @@ def fetch_active_tokens_of_identity(owner: str) -> list["Token"]:
     return quantum_db.Token.select(owner=owner, revoked=False)
 
 
-def verify_token(token: str) -> Optional["User"]:
+def verify_token(token: str) -> Optional["Token"]:
     """
     This function verifies that a received token exists in the database
     and then returns the related user.
@@ -115,7 +115,4 @@ def verify_token(token: str) -> Optional["User"]:
 
     token_hash = hashlib.sha256(token.encode() + TOKEN_PEPPER).hexdigest()
 
-    if not (token := quantum_db.Token.get(token_hash=token_hash)):
-        return None
-
-    return token.owner
+    return quantum_db.Token.get(token_hash=token_hash)
