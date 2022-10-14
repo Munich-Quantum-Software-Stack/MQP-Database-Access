@@ -4,7 +4,8 @@
 import os
 
 from datetime import datetime
-from pony.orm import Database, PrimaryKey, Required, Optional, Set, UUID
+from pony.orm import Database, PrimaryKey, Required, Optional, Set
+import uuid
 
 
 def _define_entities(database: Database):
@@ -26,7 +27,7 @@ def _define_entities(database: Database):
         token_hash = PrimaryKey(str, auto=False)
 
     class Job(database.Entity):
-        id = PrimaryKey(UUID, auto=False)
+        id = PrimaryKey(uuid.UUID, default=uuid.uuid4())
         shots = Required(int)
         circuit = Required(str)
         result = Optional(str)
