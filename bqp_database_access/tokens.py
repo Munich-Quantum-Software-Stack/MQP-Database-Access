@@ -1,9 +1,10 @@
 """This module contains all helpers related to tokens in the database."""
 
 from datetime import datetime
+from typing import Optional
+import hashlib
 
 import pony.orm as pony
-from bcrypt import hashpw
 
 from ._constants import TOKEN_PEPPER
 from ._database import open_database
@@ -62,7 +63,7 @@ def add_new_token(name: str, owner: str, token: str, expiration: datetime) -> No
     ):
         raise TooManyTokensError(token_count_limit, owner)
 
-    token_hash = hashpw(token.encode(), TOKEN_PEPPER).decode()
+    token_hash = hashlib.sha256(token.encode() + TOKEN_PEPPER).hexdigest()
 
     if quantum_db.Token.exists(remember_name=name, owner=owner, revoked=False):
         raise TokenExistsError(name)
@@ -100,3 +101,21 @@ def fetch_active_tokens_of_identity(owner: str) -> list["Token"]:
     quantum_db = open_database()
 
     return quantum_db.Token.select(owner=owner, revoked=False)
+
+
+def verify_token(token: str) -> Optional["User"]:
+    """
+    This function verifies that a received token exists in the database
+    and then returns the related user.
+    """
+
+    # make sure token exists in database, then return user object
+
+    quantum_db = open_database()
+
+    token_hash = hashlib.sha256(token.encode() + TOKEN_PEPPER).hexdigest()
+
+    if not (token := quantum_db.Token.get(token_hash=token_hash)):
+        return None
+
+    return token.owner
