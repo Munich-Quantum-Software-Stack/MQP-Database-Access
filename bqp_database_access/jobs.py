@@ -11,7 +11,7 @@ def fetch_by_identity(identity: str) -> list["Job"]:
     user = quantum_db.User.get(email=identity)
     assert user is not None
 
-    return list(user.jobs)
+    return [job for token in user.tokens for job in token.jobs]
 
 
 def create_job(shots: int, circuit: str, token: "Token") -> UUID:
