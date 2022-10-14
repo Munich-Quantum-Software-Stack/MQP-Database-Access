@@ -53,6 +53,6 @@ def open_database():
         host=os.getenv("QUANTUM_DB_HOST"),
         database="quantumdb",
     )
-    database.generate_mapping(create_tables=True)
+    database.generate_mapping(create_tables=False)
 
     return database
