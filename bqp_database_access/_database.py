@@ -35,7 +35,7 @@ def _define_entities(database: Database):
         circuit = Required(str)
         result = Optional(str)
         token = Required("Token")
-        cancelled = Required(bool, default=False)
+        cancelled = Optional(bool, default=False)
         cancel_reason = Optional(str)
 
 
