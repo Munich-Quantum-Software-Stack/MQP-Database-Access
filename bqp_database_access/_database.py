@@ -16,6 +16,7 @@ def _define_entities(database: Database):
         block_reason = Optional(str)
         force_secret_reset = Optional(bool, default=True)
         tokens = Set("Token")
+        jobs = Set("Job")
 
     class Token(database.Entity):
         revoke_reason = Optional(str)
@@ -25,13 +26,16 @@ def _define_entities(database: Database):
         remember_name = Required(str, unique=True)
         revoked = Optional(bool, default=False)
         token_hash = PrimaryKey(str, auto=False)
+        jobs = Set("Job")
 
     class Job(database.Entity):
         id = PrimaryKey(uuid.UUID, default=uuid.uuid4())
         shots = Required(int)
         circuit = Required(str)
         result = Optional(str)
-        owner = Set("User")
+        owner = Set(
+            "User",
+        )
         token = Set("Token")
         cancelled = Required(bool, default=False)
         cancel_reason = Optional(str)
@@ -49,6 +53,6 @@ def open_database():
         host=os.getenv("QUANTUM_DB_HOST"),
         database="quantumdb",
     )
-    database.generate_mapping(create_tables=False)
+    database.generate_mapping(create_tables=True)
 
     return database
