@@ -115,4 +115,4 @@ def verify_token(token: str) -> Optional["Token"]:
 
     token_hash = hashlib.sha256(token.encode() + TOKEN_PEPPER).hexdigest()
 
-    return quantum_db.Token.get(token_hash=token_hash)
+    return quantum_db.Token.get(token_hash=token_hash, revoked=False)
