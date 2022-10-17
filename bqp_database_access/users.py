@@ -68,4 +68,4 @@ def is_admin(identity: str) -> bool:
 
     quantum_db = open_database()
 
-    return quantum_db.User.admin
+    return quantum_db.User.get(email=identity).admin
