@@ -10,5 +10,5 @@ def fetch_budget_names_of_identity(identity: str) -> tuple[str]:
 
     return tuple(
         budget.name
-        for budget in quantum_db.User.get(email="identity").budgets.select()[:]
+        for budget in quantum_db.User.get(email=identity).budgets.select()[:]
     )
