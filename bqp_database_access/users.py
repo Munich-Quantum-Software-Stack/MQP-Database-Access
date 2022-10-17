@@ -61,3 +61,11 @@ def fetch_user_by_identity(identity: str) -> "User":
         raise UnknownIdentityError
 
     return user
+
+
+def is_admin(identity: str) -> bool:
+    """Check whether user is an admin."""
+
+    quantum_db = open_database()
+
+    return quantum_db.User.admin
