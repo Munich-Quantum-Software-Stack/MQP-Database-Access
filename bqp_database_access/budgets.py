@@ -8,4 +8,7 @@ def fetch_budget_names_of_identity(identity: str) -> tuple[str]:
 
     quantum_db = open_database()
 
-    return tuple(budget.name for budget in quantum_db.User.budgets)
+    return tuple(
+        budget.name
+        for budget in quantum_db.User.get(email="identity").budgets.select()[:]
+    )
