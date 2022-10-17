@@ -18,6 +18,7 @@ def _define_entities(database: Database):
         block_reason = Optional(str)
         force_secret_reset = Optional(bool, default=True)
         tokens = Set("Token")
+        budgets = Set("Budget")
 
     class Token(database.Entity):
         revoke_reason = Optional(str)
@@ -38,8 +39,13 @@ def _define_entities(database: Database):
         cancelled = Optional(bool, default=False)
         cancel_reason = Optional(str)
 
+    class Budget(database.Entity):
+        name = PrimaryKey(str, auto=False)
+        remaining = Required(int)
+        users = Set("User")
 
-def open_database():
+
+def open_database(create_tables=False):
     database = Database()
 
     _define_entities(database)
@@ -51,6 +57,6 @@ def open_database():
         host=os.getenv("QUANTUM_DB_HOST"),
         database="quantumdb",
     )
-    database.generate_mapping(create_tables=False)
+    database.generate_mapping(create_tables=create_tables)
 
     return database
