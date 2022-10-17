@@ -14,11 +14,12 @@ def _define_entities(database: Database):
     class User(database.Entity):
         email = PrimaryKey(str, auto=False)
         secret_hash = Required(str)
-        blocked = Optional(bool, default=False)
+        blocked = Required(bool, default=False)
         block_reason = Optional(str)
-        force_secret_reset = Optional(bool, default=True)
+        force_secret_reset = Required(bool, default=True)
         tokens = Set("Token")
         budgets = Set("Budget")
+        admin = Required(bool, default=False)
 
     class Token(database.Entity):
         revoke_reason = Optional(str)
@@ -26,7 +27,7 @@ def _define_entities(database: Database):
         expiration = Required(datetime)
         owner = Required("User")
         remember_name = Required(str, unique=True)
-        revoked = Optional(bool, default=False)
+        revoked = Required(bool, default=False)
         token_hash = PrimaryKey(str, auto=False)
         jobs = Set("Job")
 
@@ -36,7 +37,7 @@ def _define_entities(database: Database):
         circuit = Required(str)
         result = Optional(str)
         token = Required("Token")
-        cancelled = Optional(bool, default=False)
+        cancelled = Required(bool, default=False)
         cancel_reason = Optional(str)
 
     class Budget(database.Entity):
