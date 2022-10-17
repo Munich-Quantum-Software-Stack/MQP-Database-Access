@@ -43,6 +43,12 @@ def _define_entities(database: Database):
         name = PrimaryKey(str, auto=False)
         remaining = Required(int)
         users = Set("User")
+        resources = Set("Resource")
+
+    class Resource(database.Entity):
+        name = PrimaryKey(str, auto=False)
+        qubits = Required(int)
+        budgets = Set("Budget")
 
 
 def open_database(create_tables=False):
