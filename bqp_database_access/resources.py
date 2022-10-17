@@ -9,7 +9,9 @@ def fetch_resource_names_available_to_identity(identity: str) -> tuple[str]:
     quantum_db = open_database()
 
     return tuple(
-        resource.name
-        for budget in quantum_db.User.get(email=identity).budgets
-        for resource in budget.resources
+        set(
+            resource.name
+            for budget in quantum_db.User.get(email=identity).budgets
+            for resource in budget.resources
+        )
     )
