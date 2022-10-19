@@ -7,7 +7,6 @@ import os
 
 from datetime import datetime
 from pony.orm import Database, PrimaryKey, Required, Optional, Set
-import uuid
 
 
 def _define_entities(database: Database):
@@ -32,13 +31,13 @@ def _define_entities(database: Database):
         jobs = Set("Job")
 
     class Job(database.Entity):
-        id = PrimaryKey(uuid.UUID, default=uuid.uuid4())
         shots = Required(int)
         circuit = Required(str)
         result = Optional(str)
         token = Required("Token")
         cancelled = Required(bool, default=False)
         cancel_reason = Optional(str)
+        id = PrimaryKey(int, auto=True)
 
     class Budget(database.Entity):
         name = PrimaryKey(str, auto=False)
