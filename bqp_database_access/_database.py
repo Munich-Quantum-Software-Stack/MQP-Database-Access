@@ -11,6 +11,8 @@ from pony.orm import Database, PrimaryKey, Required, Optional, Set
 
 def _define_entities(database: Database):
     class User(database.Entity):
+        _table_ = "user"
+
         email = PrimaryKey(str, auto=False)
         secret_hash = Required(str)
         blocked = Required(bool, default=False)
@@ -19,8 +21,18 @@ def _define_entities(database: Database):
         tokens = Set("Token")
         budgets = Set("Budget")
         admin = Required(bool, default=False)
+        user_groups = Set("UserGroup", table="user_group_user")
+
+    class UserGroup(database.Entity):
+        _table_ = "user_group"
+
+        name = PrimaryKey(str, auto=False)
+        users = Set("User", table="user_group_user")
+        budgets = Set("Budget", table="budget_user_group")
 
     class Token(database.Entity):
+        _table_ = "token"
+
         revoke_reason = Optional(str)
         creation = Required(datetime)
         expiration = Required(datetime)
@@ -31,6 +43,8 @@ def _define_entities(database: Database):
         jobs = Set("Job")
 
     class Job(database.Entity):
+        _table_ = "job"
+
         shots = Required(int)
         circuit = Required(str)
         result = Optional(str)
@@ -40,12 +54,17 @@ def _define_entities(database: Database):
         id = PrimaryKey(int, auto=True)
 
     class Budget(database.Entity):
+        _table_ = "budget"
+
         name = PrimaryKey(str, auto=False)
         remaining = Required(int)
         users = Set("User")
+        user_groups = Set("UserGroup", table="budget_user_group")
         resources = Set("Resource")
 
     class Resource(database.Entity):
+        _table_ = "resource"
+
         name = PrimaryKey(str, auto=False)
         qubits = Required(int)
         budgets = Set("Budget")
