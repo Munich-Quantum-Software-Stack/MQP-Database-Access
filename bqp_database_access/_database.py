@@ -85,6 +85,16 @@ def _define_entities(database: Database):
         note = Required(str)
         title = Required(str)
 
+    class Pointer(database.Entity):
+        _table_ = "pointers"
+
+        id = PrimaryKey(int, auto=True)
+        start_time = Required(datetime)
+        end_time = Required(datetime)
+        title = Required(str)
+        note = Required(str)
+        weight = Required(int)
+
 
 def open_database(create_tables=False):
     database = Database()
