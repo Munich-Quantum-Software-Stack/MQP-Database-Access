@@ -68,7 +68,9 @@ def _define_entities(database: Database):
         name = PrimaryKey(str, auto=False)
         qubits = Required(int)
         budgets = Set("Budget")
-        online = Required(bool, default=True)
+        maintenance = Required(bool, default=False)
+        box_note = Optional(str)
+        quantum_technology = Required(str)
 
 
 def open_database(create_tables=False):
