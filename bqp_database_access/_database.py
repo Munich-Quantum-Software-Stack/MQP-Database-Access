@@ -61,6 +61,8 @@ def _define_entities(database: Database):
         users = Set("User")
         user_groups = Set("UserGroup", table="budget_user_group")
         resources = Set("Resource")
+        box_note = Optional(str)
+        allocation = Required(int)
 
     class Resource(database.Entity):
         _table_ = "resource"
