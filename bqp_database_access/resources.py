@@ -3,14 +3,14 @@
 from ._database import open_database
 
 
-def fetch_resource_names_available_to_identity(identity: str) -> tuple[str]:
+def fetch_resources_available_to_identity(identity: str) -> tuple["Resource"]:
     """Fetch all budgets."""
 
     quantum_db = open_database()
 
     return tuple(
         set(
-            resource.name
+            resource
             for budget in quantum_db.User.get(email=identity).budgets
             for resource in budget.resources
         )
