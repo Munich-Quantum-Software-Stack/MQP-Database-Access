@@ -83,6 +83,7 @@ def _define_entities(database: Database):
         start_time = Required(datetime)
         end_time = Required(datetime)
         note = Required(str)
+        title = Required(str)
 
 
 def open_database(create_tables=False):
