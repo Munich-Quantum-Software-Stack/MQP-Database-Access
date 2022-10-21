@@ -53,6 +53,7 @@ def _define_entities(database: Database):
         cancel_reason = Optional(str)
         id = PrimaryKey(int, auto=True)
         shots_complete = Required(int)
+        submitted = Required(datetime)
 
     class Budget(database.Entity):
         _table_ = "budget"
