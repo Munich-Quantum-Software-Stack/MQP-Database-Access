@@ -76,6 +76,14 @@ def _define_entities(database: Database):
         box_note = Optional(str)
         quantum_technology = Required(str)
 
+    class Annoucement(database.Entity):
+        _table_ = "admin_announcements"
+
+        id = PrimaryKey(int, auto=True)
+        start_time = Required(datetime)
+        end_time = Required(datetime)
+        note = Required(str)
+
 
 def open_database(create_tables=False):
     database = Database()
