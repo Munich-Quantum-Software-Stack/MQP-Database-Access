@@ -76,7 +76,7 @@ def _define_entities(database: Database):
         box_note = Optional(str)
         quantum_technology = Required(str)
 
-    class Annoucement(database.Entity):
+    class Announcement(database.Entity):
         _table_ = "admin_announcements"
 
         id = PrimaryKey(int, auto=True)
