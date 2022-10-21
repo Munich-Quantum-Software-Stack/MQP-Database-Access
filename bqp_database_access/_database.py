@@ -49,7 +49,7 @@ def _define_entities(database: Database):
         circuit = Required(str)
         result = Optional(str)
         token = Required("Token")
-        cancelled = Required(bool, default=False)
+        status = Required(str)
         cancel_reason = Optional(str)
         id = PrimaryKey(int, auto=True)
 

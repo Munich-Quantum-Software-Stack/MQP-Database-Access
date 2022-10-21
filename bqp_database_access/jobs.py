@@ -9,7 +9,9 @@ def fetch_by_identity(identity: str) -> list["Job"]:
     quantum_db = open_database()
 
     user = quantum_db.User.get(email=identity)
-    assert user is not None
+
+    if user is None:
+        return []
 
     return [job for token in user.tokens for job in token.jobs]
 
