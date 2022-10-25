@@ -22,6 +22,8 @@ def _define_entities(database: Database):
         budgets = Set("Budget")
         admin = Required(bool, default=False)
         user_groups = Set("UserGroup", table="user_group_user")
+        last_login = Optional(datetime)
+        last_secret_change = Optional(datetime)
 
     class UserGroup(database.Entity):
         _table_ = "user_group"
@@ -41,6 +43,7 @@ def _define_entities(database: Database):
         revoked = Required(bool, default=False)
         token_hash = PrimaryKey(str, auto=False)
         jobs = Set("Job")
+        last_used = Optional(datetime)
 
     class Job(database.Entity):
         _table_ = "job"

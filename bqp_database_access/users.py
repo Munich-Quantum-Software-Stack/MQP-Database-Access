@@ -2,6 +2,7 @@
 
 
 import bcrypt
+from datetime import datetime
 
 
 from ._database import open_database
@@ -31,6 +32,7 @@ def set_new_secret_for_identity(
     peppered_password = new_secret.encode() + PEPPER
 
     user.secret_hash = bcrypt.hashpw(peppered_password, bcrypt.gensalt()).decode()
+    user.last_secret_change = datetime.now()
 
     if forced:
         user.force_password_reset = False
@@ -38,6 +40,8 @@ def set_new_secret_for_identity(
 
 def authenticate(identity: str, password: str) -> bool:
     """Authenticate the identity against the database identities."""
+
+    # TODO this is used for both logging in and password reset as old password verify
 
     quantum_db = open_database()
 
@@ -47,7 +51,13 @@ def authenticate(identity: str, password: str) -> bool:
 
     peppered_password = password.encode() + PEPPER
 
-    return bcrypt.checkpw(peppered_password, user.secret_hash.encode())
+    authenticated = bcrypt.checkpw(peppered_password, user.secret_hash.encode())
+
+    if authenticated:
+        # TODO this should exclude the password reset
+        user.last_login = datetime.now()
+
+    return authenticated
 
 
 def fetch_user_by_identity(identity: str) -> "User":
