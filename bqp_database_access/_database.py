@@ -87,6 +87,7 @@ def _define_entities(database: Database):
         end_time = Required(datetime)
         note = Required(str)
         title = Required(str)
+        color = Optional(str, default="status_A1")
 
     class Pointer(database.Entity):
         _table_ = "pointers"
@@ -97,6 +98,7 @@ def _define_entities(database: Database):
         title = Required(str)
         note = Required(str)
         weight = Required(int)
+        color = Optional(str, default="status_B1")
 
 
 def open_database(create_tables=False):
