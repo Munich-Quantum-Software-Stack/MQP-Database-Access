@@ -52,11 +52,11 @@ def _define_entities(database: Database):
         circuit = Required(str)
         result = Optional(str)
         token = Required("Token")
-        status = Required(str)
+        status = Required(str, default="PENDING")
         cancel_reason = Optional(str)
         id = PrimaryKey(int, auto=True)
-        shots_complete = Required(int)
-        submitted = Required(datetime)
+        shots_complete = Required(int, default=0)
+        submitted = Required(datetime, default=datetime.now)
 
     class Budget(database.Entity):
         _table_ = "budget"
