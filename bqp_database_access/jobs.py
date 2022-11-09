@@ -21,4 +21,6 @@ def create_job(shots: int, circuit: str, token: "Token") -> "Job":
 
     job = quantum_db.Job(shots=shots, circuit=circuit, token=token.token_hash)
 
+    quantum_db.commit()
+
     return job
