@@ -4,6 +4,7 @@ from ._database import open_database
 
 from pony.orm import db_session
 
+
 @db_session
 def fetch_by_identity(identity: str) -> list["Job"]:
     quantum_db = open_database()
@@ -15,6 +16,7 @@ def fetch_by_identity(identity: str) -> list["Job"]:
 
     return [job for token in user.tokens for job in token.jobs]
 
+
 @db_session
 def create_job(shots: int, circuit: str, token: "Token") -> "Job":
     quantum_db = open_database()
@@ -24,3 +26,12 @@ def create_job(shots: int, circuit: str, token: "Token") -> "Job":
     quantum_db.commit()
 
     return job
+
+
+@db_session
+def fetch_all_pending_jobs() -> list["Job"]:
+    quantum_db = open_database()
+
+    jobs = quantum_db.Job.select(status="PENDING")
+
+    return list(jobs)
