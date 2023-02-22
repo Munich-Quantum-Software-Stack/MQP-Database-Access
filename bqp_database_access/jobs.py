@@ -35,3 +35,14 @@ def fetch_all_pending_jobs() -> list["Job"]:
     jobs = quantum_db.Job.select(status="PENDING")
 
     return list(jobs)
+
+
+@db_session
+def complete_job_with_result(job_id: int, result: str) -> None:
+    quantum_db = open_database()
+
+    job = quantum_db.Job.get(id=job_id)
+
+    job.result = result
+    job.status = "COMPLETE"
+    # TODO set shots completed
