@@ -3,7 +3,7 @@
 from ._database import open_database
 
 
-def fetch_resources_available_to_identity(identity: str) -> tuple["Resource"]:
+def fetch_resources_available_to_identity(identity: str) -> tuple["Resource", ...]:
     """Fetch all budgets."""
 
     quantum_db = open_database()
