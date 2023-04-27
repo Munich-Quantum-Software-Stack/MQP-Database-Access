@@ -1,21 +1,18 @@
-[project]
-name = "bqp_database_access"
-version = "0.1"
-description = "Allow access to the Quantum DB for the Bavarian Quantum Portal."
-authors = [
-    {name = "Martin Ruefenacht", email = "martin.ruefenacht@lrz.de"},
-]
-dependencies = [
-    "pony>=0.7.16",
-    "bcrypt>=4.0.0",
-    "psycopg2-binary>=2.9.5",
-]
-requires-python = ">=3.10,<3.11"
-license = {text = "MIT"}
+[tool.poetry]
+name = "bqp-database-access"
+version = "0.1.0"
+description = ""
+authors = ["Martin Ruefenacht <martin.ruefenacht@lrz.de>"]
+readme = "README.md"
+packages = [{include = "bqp_database_access"}]
+
+[tool.poetry.dependencies]
+python = "~3.10"
+pony = "^0.7"
+bcrypt = "^4.0"
+psycopg2-binary = "^2.9"
+
 
 [build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
-
-[tool]
-[tool.pdm]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
