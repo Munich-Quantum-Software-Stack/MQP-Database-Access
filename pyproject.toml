@@ -1,5 +1,5 @@
 [project]
-name = "BQP Database Access"
+name = "bqp_database_access"
 version = "0.1"
 description = "Allow access to the Quantum DB for the Bavarian Quantum Portal."
 authors = [
