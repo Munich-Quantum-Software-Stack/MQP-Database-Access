@@ -1,18 +1,21 @@
-[tool.poetry]
+[tool.pdm]
+
+[project]
 name = "bqp-database-access"
 version = "0.1.0"
 description = ""
-authors = ["Martin Ruefenacht <martin.ruefenacht@lrz.de>"]
+authors = [
+    {name = "Martin Ruefenacht", email = "martin.ruefenacht@lrz.de"},
+]
+dependencies = [
+    "pony>=0.7,<1.0",
+    "bcrypt>=4.0,<4.1",
+    "psycopg2-binary<3.0,>=2.9",
+]
+requires-python = ">=3.10, <3.11"
 readme = "README.md"
-packages = [{include = "bqp_database_access"}]
-
-[tool.poetry.dependencies]
-python = "~3.10"
-pony = "^0.7"
-bcrypt = "^4.0"
-psycopg2-binary = "^2.9"
-
+license = {text = "MIT"}
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
