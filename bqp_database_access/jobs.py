@@ -44,5 +44,5 @@ def complete_job_with_result(job_id: int, result: str) -> None:
     job = quantum_db.Job.get(id=job_id)
 
     job.result = result
-    job.status = "COMPLETE"
+    job.status = "COMPLETED"
     # TODO set shots completed
