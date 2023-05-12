@@ -32,9 +32,14 @@ def create_job(shots: int, circuit: str, token: "Token") -> "Job":
 def fetch_all_pending_jobs() -> list["Job"]:
     quantum_db = open_database()
 
-    jobs = quantum_db.Job.select(status="PENDING")
+    jobs = list(quantum_db.Job.select(status="PENDING"))
 
-    return list(jobs)
+    for job in jobs:
+        quantum_db.execute(
+            "update job set status = 'WAITING' where id = $job.id"
+        )
+
+    return jobs
 
 
 @db_session
