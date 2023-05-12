@@ -20,8 +20,9 @@ summary = "psycopg2 - Python-PostgreSQL Database Adapter"
 
 [metadata]
 lock_version = "4.2"
+cross_platform = true
 groups = ["default"]
-content_hash = "sha256:b65bcd59e3df11986d3480cc1b335e25b8fef8bf271fb4f6d869922c60292acf"
+content_hash = "sha256:30d1274384de0263e51ccf14a5e70af34f30a47402cb74f1fb17ecdd8f727790"
 
 [metadata.files]
 "bcrypt 4.0.1" = [
