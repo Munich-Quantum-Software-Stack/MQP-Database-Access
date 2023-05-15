@@ -1,6 +1,6 @@
 [project]
 name = "bqp-database-access"
-version = "0.1.3"
+version = "0.1.4"
 description = ""
 authors = [
     {name = "Martin Ruefenacht", email = "martin.ruefenacht@lrz.de"},
@@ -17,3 +17,4 @@ license = {text = "MIT"}
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
+
