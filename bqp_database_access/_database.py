@@ -4,10 +4,14 @@ This module provides the basic database structure and helpers.
 
 
 import os
+import time
+import smtplib
 
 from datetime import datetime
 from pony.orm import Database, PrimaryKey, Required, Optional, Set
+from pony.orm.dbapiprovider import OperationalError
 
+from loguru import logger  # type: ignore
 
 def _define_entities(database: Database):
     class User(database.Entity):
@@ -102,17 +106,58 @@ def _define_entities(database: Database):
 
 
 def open_database(create_tables=False):
-    database = Database()
+    sleep_time = 5
+    attempt    = 1
+    success    = False
+    database   = Database()
 
     _define_entities(database)
 
-    database.bind(
-        provider="postgres",
-        user=os.getenv("QUANTUM_DB_USER"),
-        password=os.getenv("QUANTUM_DB_PASS"),
-        host=os.getenv("QUANTUM_DB_HOST"),
-        database="quantumdb",
-    )
+    # for attempt in range(no_tries):
+    while success == False:
+        try:
+            database.bind(
+                provider = "postgres",
+                user     = os.getenv("QUANTUM_DB_USER"),
+                password = os.getenv("QUANTUM_DB_PASS"),
+                host     = os.getenv("QUANTUM_DB_HOST"),
+                database = "quantumdb",
+            )
+
+            success = True
+        except Exception as e:
+            if attempt == 1 or not attempt % 10:
+                try:
+                    SERVER  = "mailout.lrz.de"
+                    FROM    = "jorge.echavarria@lrz.de"
+                    TO      = ["jorge.echavarria@lrz.de", "farooqi@lrz.de"]
+                    SUBJECT = "Database Exception!"
+                    TEXT    = f"{str(e)}\nAttempt number:{attempt}"
+
+                    message = """
+                    From: %s
+                    To: %s
+                    Subject: %s
+
+                    %s
+                    """ % (FROM, ", ".join(TO), SUBJECT, TEXT)
+
+                    server = smtplib.SMTP(SERVER)
+
+                    try:
+                        server.sendmail(FROM, TO, message)
+                    finally:
+                        server.quit()
+                except:
+                    logger.warning(f"Couldn't send email with Database exception to {TO}")
+                    pass
+
+            logger.warning(f"Unsuccessful binding with Database, attempt number {attempt} trying again in {sleep_time} seconds")
+
+            attempt += 1
+
+            time.sleep(sleep_time)
+
     database.generate_mapping(create_tables=create_tables)
 
     return database
