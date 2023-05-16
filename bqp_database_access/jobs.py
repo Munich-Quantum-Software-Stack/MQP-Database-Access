@@ -51,3 +51,12 @@ def complete_job_with_result(job_id: int, result: str) -> None:
     job.result = result
     job.status = "COMPLETED"
     # TODO set shots completed
+
+
+@db_session
+def cancel_job(job_id: int) -> None:
+    quantum_db = open_database()
+
+    job = quantum_db.Job.get(id=job_id)
+
+    job.status = "CANCELLED"
