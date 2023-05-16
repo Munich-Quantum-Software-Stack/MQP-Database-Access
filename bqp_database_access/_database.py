@@ -113,7 +113,6 @@ def open_database(create_tables=False):
 
     _define_entities(database)
 
-    # for attempt in range(no_tries):
     while success == False:
         try:
             database.bind(
