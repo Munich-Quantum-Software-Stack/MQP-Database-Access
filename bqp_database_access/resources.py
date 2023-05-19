@@ -2,6 +2,8 @@
 
 from ._database import open_database
 
+from pony.orm import db_session
+
 
 def fetch_resources_available_to_identity(identity: str) -> tuple["Resource", ...]:
     """Fetch all budgets."""
@@ -22,3 +24,24 @@ def fetch_resources_available_to_identity(identity: str) -> tuple["Resource", ..
     }
 
     return tuple(direct_resources.union(user_group_budget_resources))
+
+
+@db_session
+def set_maintenance(name: str, value: bool) -> None:
+    """Sets the maintenance entry of a given resource"""
+
+    quantum_db = open_database()
+
+    match name:
+        case "QLM":
+            resource = quantum_db.Resource.get(name = "QLM Noisy-shot")
+            resource.maintenance = value
+        case "IQM5":
+            resource = quantum_db.Resource.get(name = "Test Q5")
+            resource.maintenance = value
+        case "Q20":
+            resource = quantum_db.Resource.get(name = "Test Q20")
+            resource.maintenance = value
+        case "SVS":
+            resource = quantum_db.Resource.get(name = "Statevector Simulator")
+            resource.maintenance = value

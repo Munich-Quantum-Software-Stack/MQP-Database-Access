@@ -35,9 +35,7 @@ def fetch_all_pending_jobs() -> list["Job"]:
     jobs = list(quantum_db.Job.select(status="PENDING"))
 
     for job in jobs:
-        quantum_db.execute(
-            "update job set status = 'WAITING' where id = $job.id"
-        )
+        job.status = "WAITING"
 
     return jobs
 
@@ -54,9 +52,10 @@ def complete_job_with_result(job_id: int, result: str) -> None:
 
 
 @db_session
-def cancel_job(job_id: int) -> None:
+def cancel_job(job_id: int, note: str) -> None:
     quantum_db = open_database()
 
     job = quantum_db.Job.get(id=job_id)
 
+    job.cancel_reason = note
     job.status = "CANCELLED"
