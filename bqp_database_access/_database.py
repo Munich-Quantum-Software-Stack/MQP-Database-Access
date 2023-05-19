@@ -5,13 +5,10 @@ This module provides the basic database structure and helpers.
 
 import os
 import time
-import smtplib
 
 from datetime import datetime
 from pony.orm import Database, PrimaryKey, Required, Optional, Set
 from pony.orm.dbapiprovider import OperationalError
-
-from loguru import logger  # type: ignore
 
 def _define_entities(database: Database):
     class User(database.Entity):
