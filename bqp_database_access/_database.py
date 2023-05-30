@@ -53,6 +53,7 @@ def _define_entities(database: Database):
         circuit = Required(str)
         result = Optional(str)
         token = Required("Token")
+        resource_name = Required(str, default="QLM")
         status = Required(str, default="PENDING")
         cancel_reason = Optional(str)
         id = PrimaryKey(int, auto=True)
