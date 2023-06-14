@@ -10,6 +10,7 @@ from datetime import datetime
 from pony.orm import Database, PrimaryKey, Required, Optional, Set
 from pony.orm.dbapiprovider import OperationalError
 
+
 def _define_entities(database: Database):
     class User(database.Entity):
         _table_ = "user"
@@ -59,6 +60,7 @@ def _define_entities(database: Database):
         shots_complete = Required(int, default=0)
         submitted = Required(datetime, default=datetime.now)
         resource_name = Required(str, default="QLM")
+        circuit_format = Required(str, default="qasm")
 
     class Budget(database.Entity):
         _table_ = "budget"
