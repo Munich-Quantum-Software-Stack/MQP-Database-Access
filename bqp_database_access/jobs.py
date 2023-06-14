@@ -18,13 +18,22 @@ def fetch_by_identity(identity: str) -> list["Job"]:
 
 
 @db_session
-def create_job(shots: int, circuit: str, token: "Token", resource_name: str = "QLM") -> "Job":
+def create_job(
+    shots: int,
+    circuit: str,
+    token: "Token",
+    resource_name: str = "QLM",
+    circuit_format: str = "qasm",
+) -> "Job":
     quantum_db = open_database()
 
-    job = quantum_db.Job(shots=shots,
-                         circuit=circuit,
-                         token=token.token_hash,
-                         resource_name=resource_name)
+    job = quantum_db.Job(
+        shots=shots,
+        circuit=circuit,
+        token=token.token_hash,
+        resource_name=resource_name,
+        circuit_format=circuit_format,
+    )
 
     quantum_db.commit()
 
