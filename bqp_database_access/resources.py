@@ -10,11 +10,7 @@ def fetch_resources_available_to_identity(identity: str) -> tuple["Resource", ..
 
     quantum_db = open_database()
 
-    user = quantum_db.User.get(email=identity)
-
-    direct_resources = {
-        resource for budget in user.budgets for resource in budget.resources
-    }
+    user = quantum_db.User.get(identity=identity)
 
     user_group_budget_resources = {
         resource
@@ -23,7 +19,7 @@ def fetch_resources_available_to_identity(identity: str) -> tuple["Resource", ..
         for resource in budget.resources
     }
 
-    return tuple(direct_resources.union(user_group_budget_resources))
+    return user_group_budget_resources
 
 
 @db_session

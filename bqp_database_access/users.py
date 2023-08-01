@@ -24,7 +24,7 @@ def set_new_secret_for_identity(
 
     quantum_db = open_database()
 
-    user = quantum_db.User.get(email=identity)
+    user = quantum_db.User.get(identity=identity)
 
     if user is None:
         raise UnknownIdentityError
@@ -33,9 +33,7 @@ def set_new_secret_for_identity(
 
     user.secret_hash = bcrypt.hashpw(peppered_password, bcrypt.gensalt()).decode()
     user.last_secret_change = datetime.now()
-
-    if forced:
-        user.force_password_reset = False
+    user.force_secret_reset = False
 
 
 def authenticate(identity: str, password: str) -> bool:
@@ -45,7 +43,7 @@ def authenticate(identity: str, password: str) -> bool:
 
     quantum_db = open_database()
 
-    user = quantum_db.User.get(email=identity)
+    user = quantum_db.User.get(identity=identity)
     if user is None:
         raise UnknownIdentityError
 
@@ -65,17 +63,9 @@ def fetch_user_by_identity(identity: str) -> "User":
 
     quantum_db = open_database()
 
-    user = quantum_db.User.get(email=identity)
+    user = quantum_db.User.get(identity=identity)
 
     if user is None:
         raise UnknownIdentityError
 
     return user
-
-
-def is_admin(identity: str) -> bool:
-    """Check whether user is an admin."""
-
-    quantum_db = open_database()
-
-    return quantum_db.User.get(email=identity).admin
