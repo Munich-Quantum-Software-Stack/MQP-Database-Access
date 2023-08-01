@@ -8,12 +8,10 @@ def fetch_budgets_of_identity(identity: str) -> tuple["Budget"]:
 
     quantum_db = open_database()
 
-    user = quantum_db.User.get(email=identity)
-
-    direct_budgets = {budget for budget in user.budgets}
+    user = quantum_db.User.get(identity=identity)
 
     user_group_budgets = {
         budget for user_group in user.user_groups for budget in user_group.budgets
     }
 
-    return tuple(direct_budgets.union(user_group_budgets))
+    return user_group_budgets

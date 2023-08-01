@@ -45,7 +45,7 @@ class TokenNotFound(TokenError):
         super().__init__(f"Token {name} not found of identity {owner}.")
 
 
-def add_new_token(name: str, owner: str, token: str, expiration: datetime) -> None:
+def add_new_token(name: str, owner: str, token: str, expiration: datetime, max_budget_usage: int, max_jobs: int) -> None:
     """Add a new token for a given identity to the database with an expiration."""
 
     # check if expiration is too soon
@@ -74,6 +74,8 @@ def add_new_token(name: str, owner: str, token: str, expiration: datetime) -> No
         owner=owner,
         remember_name=name,
         token_hash=token_hash,
+        max_budget_usage=max_budget_usage,
+        max_jobs=max_jobs,
     )
 
     quantum_db.commit()
@@ -90,7 +92,8 @@ def revoke_token_by_name_and_identity(name: str, owner: str) -> None:
         raise TokenNotFound(name, owner)
 
     token.revoked = True
-    token.revoke_reason = f"User revoked token {datetime.now()}"
+    token.revoke_reason = "user revoked"
+    token.revoke_timestmap = datetime.now()
 
     quantum_db.commit()
 

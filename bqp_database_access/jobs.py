@@ -9,12 +9,12 @@ from pony.orm import db_session
 def fetch_by_identity(identity: str) -> list["Job"]:
     quantum_db = open_database()
 
-    user = quantum_db.User.get(email=identity)
+    user = quantum_db.User.get(identity=identity)
 
     if user is None:
         return []
 
-    return [job for token in user.tokens for job in token.jobs]
+    return list(quantum_db.CircuitJob.select(owner=identity))
 
 
 @db_session
@@ -27,7 +27,7 @@ def create_job(
 ) -> "Job":
     quantum_db = open_database()
 
-    job = quantum_db.Job(
+    job = quantum_db.CircuitJob(
         shots=shots,
         circuit=circuit,
         token=token.token_hash,
@@ -44,7 +44,7 @@ def create_job(
 def fetch_all_pending_jobs() -> list["Job"]:
     quantum_db = open_database()
 
-    jobs = list(quantum_db.Job.select(status="PENDING"))
+    jobs = list(quantum_db.CircuitJob.select(status="PENDING"))
 
     for job in jobs:
         job.status = "WAITING"
@@ -56,7 +56,7 @@ def fetch_all_pending_jobs() -> list["Job"]:
 def complete_job_with_result(job_id: int, result: str) -> None:
     quantum_db = open_database()
 
-    job = quantum_db.Job.get(id=job_id)
+    job = quantum_db.CircuitJob.get(id=job_id)
 
     job.result = result
     job.status = "COMPLETED"
@@ -67,7 +67,7 @@ def complete_job_with_result(job_id: int, result: str) -> None:
 def cancel_job(job_id: int, note: str) -> None:
     quantum_db = open_database()
 
-    job = quantum_db.Job.get(id=job_id)
+    job = quantum_db.CircuitJob.get(id=job_id)
 
     job.cancel_reason = note
     job.status = "CANCELLED"
