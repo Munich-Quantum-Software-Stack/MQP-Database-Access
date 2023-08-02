@@ -235,6 +235,8 @@ def _define_database(**db_params):
 
 def open_database():
     if os.getenv("QUANTUM_DB_TESTING") is not None:
+        print("testing is on")
+
         return _define_database(
             provider="sqlite", filename=os.getenv("QUANTUM_DB_FILENAME"), create_db=True
         )
