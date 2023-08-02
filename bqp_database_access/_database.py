@@ -223,22 +223,23 @@ def _define_entities(database: Database):
         color = Optional(str, default="status_B1")
 
 
-def _define_database(**db_params):
+def _define_database(create_tables: bool = False, **db_params):
     db = Database(**db_params)
 
     _define_entities(db)
 
-    db.generate_mapping(create_tables=True)
+    db.generate_mapping(create_tables=create_tables)
 
     return db
 
 
-def open_database():
+def open_database(create_tables: bool = False):
     if os.getenv("QUANTUM_DB_TESTING") is not None:
-        print("testing is on")
-
         return _define_database(
-            provider="sqlite", filename=os.getenv("QUANTUM_DB_FILENAME"), create_db=True
+            create_tables=create_tables,
+            provider="sqlite",
+            filename=os.getenv("QUANTUM_DB_FILENAME"),
+            create_db=True,
         )
 
     return _define_database(
