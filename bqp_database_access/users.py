@@ -17,6 +17,23 @@ class UnknownIdentityError(IdentityError):
     pass
 
 
+def create_new_user_with_secret(
+    identity: str, secret: str, force_secret_reset: bool = False
+) -> None:
+    quantum_db = open_database()
+
+    peppered_password = secret.encode() + PEPPER
+    passhash = bcrypt.hashpw(peppered_password, bcrypt.gensalt())
+
+    quantum_db.User(
+        email=identity,
+        secret_hash=passhash.decode(),
+        force_secret_reset=force_secret_reset,
+    )
+
+    quantum_db.commit()
+
+
 def set_new_secret_for_identity(
     identity: str, new_secret: str, forced: bool = False
 ) -> None:
