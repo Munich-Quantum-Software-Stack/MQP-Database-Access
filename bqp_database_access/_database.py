@@ -238,7 +238,7 @@ def open_database(create_tables: bool = False):
         return _define_database(
             create_tables=create_tables,
             provider="sqlite",
-            filename=os.getenv("QUANTUM_DB_FILENAME"),
+            filename=os.getcwd() + os.getenv("QUANTUM_DB_FILENAME"),
             create_db=True,
         )
 
