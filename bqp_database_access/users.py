@@ -37,7 +37,7 @@ def create_new_user_with_secret(
         force_secret_reset=force_secret_reset,
         email=email,
         affiliation=affiliation,
-        assocation=association,
+        association=association,
         security_level=security_level,
     )
 
