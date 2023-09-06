@@ -18,7 +18,13 @@ class UnknownIdentityError(IdentityError):
 
 
 def create_new_user_with_secret(
-    identity: str, secret: str, force_secret_reset: bool = False
+    identity: str,
+    secret: str,
+    security_level: str,
+    email: str,
+    affiliation: str,
+    association: str,
+    force_secret_reset: bool = False,
 ) -> None:
     quantum_db = open_database()
 
@@ -26,9 +32,39 @@ def create_new_user_with_secret(
     passhash = bcrypt.hashpw(peppered_password, bcrypt.gensalt())
 
     quantum_db.User(
-        email=identity,
+        identity=identity,
         secret_hash=passhash.decode(),
         force_secret_reset=force_secret_reset,
+        email=email,
+        affiliation=affiliation,
+        assocation=association,
+        security_level=security_level,
+    )
+
+    quantum_db.commit()
+
+
+def create_new_security_level(
+    name: str,
+    token_max_live_count: int,
+    token_max_lifetime: int,
+    token_min_creation_interval: int,
+    token_max_jobs: int,
+    token_max_budget: int,
+    token_max_rate: int,
+    login_max_interval: int,
+) -> None:
+    quantum_db = open_database()
+
+    quantum_db.UserSecurityLevel(
+        name=name,
+        token_max_live_count=token_max_live_count,
+        token_max_lifetime=token_max_lifetime,
+        token_min_creation_interval=token_min_creation_interval,
+        token_max_jobs=token_max_jobs,
+        token_max_budget=token_max_budget,
+        token_max_rate=token_max_rate,
+        login_max_interval=login_max_interval,
     )
 
     quantum_db.commit()
