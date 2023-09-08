@@ -38,6 +38,15 @@ class TokenExpirationBeforeNow(TokenError):
         super().__init__(f"Token {name} being created with expiration before now.")
 
 
+class TokenExpirationAfterMaximum(TokenError):
+    """This exception occurs when a token is created with an expiration that is before now."""
+
+    def __init__(self, name: str):
+        super().__init__(
+            f"Token {name} being created with expiration after allowed time range."
+        )
+
+
 class TokenNotFound(TokenError):
     """This exception occurs when a identity attempts to find a token which doesn't exist."""
 
