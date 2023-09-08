@@ -1,6 +1,6 @@
 """This module contains all helpers related to tokens in the database."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 import hashlib
 
@@ -69,6 +69,15 @@ def add_new_token(
         raise TokenExpirationBeforeNow(name)
 
     quantum_db = open_database()
+
+    # check if expiration is past the allowed
+    token_max_lifetime = quantum_db.User[owner].security_level.token_max_lifetime
+    maximum_time = datetime.combine(
+        datetime.now().date() + timedelta(days=token_max_lifetime), datetime.max.time()
+    )
+
+    if expiration > maximum_time:
+        raise TokenExpirationAfterMaximum(name)
 
     token_count_limit = quantum_db.User[owner].security_level.token_max_live_count
 
