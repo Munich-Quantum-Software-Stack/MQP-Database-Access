@@ -45,7 +45,14 @@ class TokenNotFound(TokenError):
         super().__init__(f"Token {name} not found of identity {owner}.")
 
 
-def add_new_token(name: str, owner: str, token: str, expiration: datetime, max_budget_usage: int, max_jobs: int) -> None:
+def add_new_token(
+    name: str,
+    owner: str,
+    token: str,
+    expiration: datetime,
+    max_budget_usage: int,
+    max_jobs: int,
+) -> None:
     """Add a new token for a given identity to the database with an expiration."""
 
     # check if expiration is too soon
@@ -54,8 +61,7 @@ def add_new_token(name: str, owner: str, token: str, expiration: datetime, max_b
 
     quantum_db = open_database()
 
-    # TODO add as configuration
-    token_count_limit = 100
+    token_count_limit = quantum_db.User[owner].security_level.token_max_live_count
 
     if (
         pony.count(token for token in quantum_db.Token if token.revoked == False)
