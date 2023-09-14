@@ -2,7 +2,7 @@
 
 from ._database import open_database
 
-from pony.orm import db_session
+from pony.orm import db_session  # type: ignore
 
 
 def fetch_resources_available_to_identity(identity: str) -> tuple["Resource", ...]:
@@ -30,14 +30,14 @@ def set_maintenance(name: str, value: bool) -> None:
 
     match name:
         case "QLM":
-            resource = quantum_db.Resource.get(name = "QLM Noisy-shot")
+            resource = quantum_db.Resource.get(name="QLM Noisy-shot")
             resource.maintenance = value
         case "IQM5":
-            resource = quantum_db.Resource.get(name = "Test Q5")
+            resource = quantum_db.Resource.get(name="Test Q5")
             resource.maintenance = value
         case "Q20":
-            resource = quantum_db.Resource.get(name = "Test Q20")
+            resource = quantum_db.Resource.get(name="Test Q20")
             resource.maintenance = value
         case "SVS":
-            resource = quantum_db.Resource.get(name = "Statevector Simulator")
+            resource = quantum_db.Resource.get(name="Statevector Simulator")
             resource.maintenance = value
