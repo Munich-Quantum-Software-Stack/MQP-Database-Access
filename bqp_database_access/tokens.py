@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 import hashlib
 
-import pony.orm as pony
+import pony.orm as pony  # type: ignore
 
 from ._constants import TOKEN_PEPPER
 from ._database import open_database

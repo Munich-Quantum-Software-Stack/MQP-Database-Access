@@ -7,8 +7,8 @@ import os
 import time
 
 from datetime import datetime
-from pony.orm import Database, PrimaryKey, Required, Optional, Set
-from pony.orm.dbapiprovider import OperationalError
+from pony.orm import Database, PrimaryKey, Required, Optional, Set  # type: ignore
+from pony.orm.dbapiprovider import OperationalError  # type: ignore
 
 
 def _define_entities(database: Database):
