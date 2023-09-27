@@ -130,7 +130,7 @@ def _define_entities(database: Database):
         timestamp_completed = Optional(datetime)
         timestamp_cancelled = Optional(datetime)
 
-        cost = Required(int)
+        cost = Optional(int)
         result = Optional(str)
 
         owner = Required("User")

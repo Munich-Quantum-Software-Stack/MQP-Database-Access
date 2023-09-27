@@ -2,6 +2,8 @@
 from datetime import datetime
 from pony.orm import db_session  # type: ignore
 
+from datetime import datetime
+
 from ._database import open_database
 from .budgets import fetch_budgets_of_identity
 
@@ -22,30 +24,28 @@ def fetch_by_identity(identity: str) -> list["CircuitJob"]:
 def create_job(
     shots: int,
     circuit: str,
-    circuit_format: str,
-    token: "Token",
-    target_specification: str,
-    no_modify: bool = False,
-) -> "CircuitJob":
+    owner: str,
+    budget: str,
+    target_spec: str,
+    circuit_format: str = "qasm",
+) -> "Job":
     quantum_db = open_database()
 
     # TODO calculate cost when it is decided
     _cost = 0
     # TODO select the budget to be used for this job
-    _budget = list(fetch_budgets_of_identity(identity=token.owner))
+    _budget = list(fetch_budgets_of_identity(identity=owner))
     assert len(_budget) > 0
 
     job = quantum_db.CircuitJob(
         shots=shots,
         circuit=circuit,
         circuit_format=circuit_format,
-        no_modify=no_modify,
-        cost=_cost,
-        owner=token.owner,
-        budget=_budget[0],
-        target_specification=quantum_db.TargetSpecification.select(
-            name=target_specification
-        ),
+        timestamp_submitted=datetime.now(),
+        cost=0,
+        owner=owner,
+        budget=budget,
+        target_specification=target_spec,
     )
 
     quantum_db.commit()
