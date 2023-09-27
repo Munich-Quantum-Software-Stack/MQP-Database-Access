@@ -60,7 +60,7 @@ def fetch_all_pending_jobs() -> list["CircuitJob"]:
     jobs = list(quantum_db.CircuitJob.select(status="PENDING"))
 
     for job in jobs:
-        job.timestamp_scheduled = datetime.now
+        job.timestamp_scheduled = datetime.now()
         job.status = "WAITING"
 
     return jobs
@@ -89,7 +89,7 @@ def complete_job_with_result(
     job.note = note
     job.executed_resource = quantum_db.Resource.select(name=executed_resource)
     job.executed_circuit = executed_circuit
-    job.timestamp_completed = datetime.now
+    job.timestamp_completed = datetime.now()
     job.status = "COMPLETED"
     # TODO set shots completed
 
@@ -101,5 +101,5 @@ def cancel_job(job_id: int, note: str) -> None:
     job = quantum_db.CircuitJob.get(id=job_id)
 
     job.note = note
-    job.timestamp_cancelled = datetime.now
+    job.timestamp_cancelled = datetime.now()
     job.status = "CANCELLED"
