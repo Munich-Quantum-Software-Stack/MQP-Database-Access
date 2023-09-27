@@ -77,9 +77,9 @@ def fetch_all_waiting_jobs() -> list["CircuitJob"]:
 def complete_job_with_result(
     job_id: int,
     result: str,
+    executed_resource: str,
+    executed_circuit: str,
     note: str = "",
-    executed_resource: str = "",
-    executed_circuit: str = "",
 ) -> None:
     quantum_db = open_database()
 
