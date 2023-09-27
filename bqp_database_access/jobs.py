@@ -87,7 +87,7 @@ def complete_job_with_result(
 
     job.result = result
     job.note = note
-    job.executed_resource = quantum_db.Resource.select(name=executed_resource)
+    job.executed_resource = quantum_db.Resource.get(name=executed_resource)
     job.executed_circuit = executed_circuit
     job.timestamp_completed = datetime.now()
     job.status = "COMPLETED"
