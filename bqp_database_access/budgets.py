@@ -3,6 +3,15 @@
 from ._database import open_database
 
 
+def create_new_budget(name: str, owner: str, credits: int):
+    raise NotImplementedError
+    quantum_db = open_database()
+
+    budget = quantum_db.Budget(name=name, owner=owner, credits=credits)
+
+    quantum_db.commit()
+
+
 def fetch_budgets_of_identity(identity: str) -> tuple["Budget"]:
     """Fetch all budgets."""
 
