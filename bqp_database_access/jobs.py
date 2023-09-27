@@ -27,7 +27,7 @@ def create_job(
     owner: str,
     budget: str,
     target_spec: str,
-    circuit_format: str = "qasm",
+    circuit_format: str,
 ) -> "Job":
     quantum_db = open_database()
 
