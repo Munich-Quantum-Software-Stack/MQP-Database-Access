@@ -14,12 +14,6 @@ requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "MIT"}
 
-[project.optional-dependencies]
-dev = [
-    "mypy>=1.4.1",
-    "pylint>=2.17.5",
-    "black>=23.7.0",
-]
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
@@ -47,3 +41,19 @@ max-line-length=88
 
 [tool.black]
 target-version = ['py310']
+
+[tool.pytest.ini_options]
+env = [
+    "QUANTUM_DB_TESTING=TRUE",
+    "QUANTUM_DB_FILENAME=test_db.sqlite",
+    "QUANTUM_DB_USER=",
+    "QUANTUM_DB_PASS=",
+    "QUANTUM_DB_HOST="
+]
+pythonpath = ["."]
+
+[tool.pdm.dev-dependencies]
+test = [
+    "pytest>=7.4.2",
+    "pytest-env>=1.0.1",
+]
