@@ -70,6 +70,12 @@ def create_new_security_level(
     quantum_db.commit()
 
 
+def fetch_user_security_level(name: str):
+    quantum_db = open_database()
+
+    return quantum_db.UserSecurityLevel.get(name=name)
+
+
 def set_new_secret_for_identity(
     identity: str, new_secret: str, forced: bool = False
 ) -> None:
