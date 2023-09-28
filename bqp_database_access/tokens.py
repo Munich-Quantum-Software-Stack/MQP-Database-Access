@@ -64,6 +64,8 @@ def add_new_token(
 ) -> None:
     """Add a new token for a given identity to the database with an expiration."""
 
+    # TODO verify token requirements, 64 character no underscore or dash
+
     # check if expiration is too soon
     if datetime.now() >= expiration:
         raise TokenExpirationBeforeNow(name)
