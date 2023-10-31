@@ -17,6 +17,14 @@ class UnknownIdentityError(IdentityError):
     pass
 
 
+class BlockedIdentityError(IdentityError):
+    pass
+
+
+class IncorrectSecretError(IdentityError):
+    pass
+
+
 def create_new_user_with_secret(
     identity: str,
     secret: str,
@@ -95,7 +103,7 @@ def set_new_secret_for_identity(
     user.force_secret_reset = False
 
 
-def authenticate(identity: str, password: str) -> bool:
+def authenticate(identity: str, password: str) -> None:
     """Authenticate the identity against the database identities."""
 
     # TODO this is used for both logging in and password reset as old password verify
@@ -114,7 +122,8 @@ def authenticate(identity: str, password: str) -> bool:
         # TODO this should exclude the password reset
         user.last_login = datetime.now()
 
-    return authenticated
+    else:
+        raise IncorrectSecretError
 
 
 def fetch_user_by_identity(identity: str) -> "User":
