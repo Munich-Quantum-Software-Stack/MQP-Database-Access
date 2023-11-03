@@ -52,6 +52,22 @@ def create_new_user_with_secret(
     quantum_db.commit()
 
 
+def create_new_ldap_user(
+    identity: str, security_level: str, email: str, affiliation: str, association: str
+) -> None:
+    quantum_db = open_database()
+
+    quantum_db.User(
+        identity=identity,
+        email=email,
+        affiliation=affiliation,
+        association=association,
+        security_level=security_level,
+    )
+
+    quantum_db.commit()
+
+
 def create_new_security_level(
     name: str,
     token_max_live_count: int,
