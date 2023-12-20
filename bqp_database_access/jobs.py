@@ -6,6 +6,7 @@ from datetime import datetime
 
 from ._database import open_database
 from .budgets import fetch_budgets_of_identity
+from .tokens import verify_token
 
 
 @db_session
@@ -24,17 +25,21 @@ def fetch_by_identity(identity: str) -> list["CircuitJob"]:
 def create_job(
     shots: int,
     circuit: str,
-    owner: str,
-    budget: str,
+    token: str,
     target_spec: str,
     circuit_format: str,
 ) -> "Job":
     quantum_db = open_database()
 
+    owner: str = verify_token(token=token).owner
+
     # TODO calculate cost when it is decided
     _cost = 0
     # TODO select the budget to be used for this job
     _budget = list(fetch_budgets_of_identity(identity=owner))
+    # TODO Temp Fix need to do budgeting properly
+    budget: str = _budget[0]
+
     assert len(_budget) > 0
 
     job = quantum_db.CircuitJob(
