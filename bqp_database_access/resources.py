@@ -23,21 +23,15 @@ def fetch_resources_available_to_identity(identity: str) -> tuple["Resource", ..
 
 
 @db_session
-def set_maintenance(name: str, value: bool) -> None:
+def set_maintenance(name: str, value: bool) -> bool:
     """Sets the maintenance entry of a given resource"""
 
     quantum_db = open_database()
 
-    match name:
-        case "QLM":
-            resource = quantum_db.Resource.get(name="QLM Noisy-shot")
-            resource.maintenance = value
-        case "IQM5":
-            resource = quantum_db.Resource.get(name="Test Q5")
-            resource.maintenance = value
-        case "Q20":
-            resource = quantum_db.Resource.get(name="Test Q20")
-            resource.maintenance = value
-        case "SVS":
-            resource = quantum_db.Resource.get(name="Statevector Simulator")
-            resource.maintenance = value
+    resource = quantum_db.Resource.get(name=name)
+
+    if resource is not None:
+        resource.maintenance = value
+        return True
+    # Resource not found
+    return False
