@@ -5,6 +5,18 @@ from ._database import open_database
 from pony.orm import db_session  # type: ignore
 
 
+def fetch_all_resources() -> tuple["Resource", ...]:
+    """Fetch all resources."""
+
+    quantum_db = open_database()
+
+    resources = quantum_db.select('name FROM resource')
+
+    all_resources = {resource for resource in resources}
+
+    return all_resources
+
+
 def fetch_resources_available_to_identity(identity: str) -> tuple["Resource", ...]:
     """Fetch all budgets."""
 
