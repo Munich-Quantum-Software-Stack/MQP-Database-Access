@@ -10,7 +10,7 @@ def fetch_all_resources() -> tuple["Resource", ...]:
 
     quantum_db = open_database()
 
-    resources = quantum_db.select('name FROM resource')
+    resources = quantum_db.select('* FROM resource')
 
     all_resources = {resource for resource in resources}
 
