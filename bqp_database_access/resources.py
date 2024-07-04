@@ -5,6 +5,7 @@ from ._database import open_database
 from pony.orm import db_session  # type: ignore
 
 
+@db_session
 def fetch_all_resources() -> tuple["Resource", ...]:
     """Fetch all resources."""
 
@@ -16,21 +17,85 @@ def fetch_all_resources() -> tuple["Resource", ...]:
     return all_resources
 
 
+@db_session
+def fetch_all_target_specification_names() -> list[str]:
+    """Fetch all target specification names."""
+
+    quantum_db = open_database()
+
+    target_specifications = quantum_db.TargetSpecification.select()
+    target_specification_names = [target.name for target in target_specifications]
+
+    return target_specification_names
+
+
+@db_session
 def fetch_resources_available_to_identity(identity: str) -> tuple["Resource", ...]:
     """Fetch all budgets."""
+
+    _restricted_resource_names = fetch_resource_names_restricted_to_identity(identity)
+    quantum_db = open_database()
+
+    resources = quantum_db.Resource.select()
+    user_resources = {
+        resource
+        for resource in resources
+        if resource.name not in _restricted_resource_names and not resource.maintenance
+    }
+
+    return user_resources
+    # TODO reactivate after budgeting is implemented
+    # quantum_db = open_database()
+
+    # user = quantum_db.User.get(identity=identity)
+
+    # user_group_budget_resources = {
+    #    resource
+    #    for user_group in user.user_groups
+    #    for budget in user_group.budgets
+    #    for resource in budget.resources
+    # }
+
+    # return user_group_budget_resources
+
+
+@db_session
+def fetch_resource_names_restricted_to_identity(identity: str) -> list[str]:
+    """Restrict users access to resources."""
 
     quantum_db = open_database()
 
     user = quantum_db.User.get(identity=identity)
+    _user_group_names = [user_group.name.upper() for user_group in user.user_groups]
 
-    user_group_budget_resources = {
-        resource
-        for user_group in user.user_groups
-        for budget in user_group.budgets
-        for resource in budget.resources
-    }
+    restricted_resource_names = []
 
-    return user_group_budget_resources
+    # Hardcode any restrictions here
+    # TODO after budgeting, replace implement restrictions through budget allocation.
+    if "IQM" in _user_group_names:
+        restricted_resource_names.append("WMI3")
+
+    return restricted_resource_names
+
+
+@db_session
+def fetch_resource_names_available_to_identity(identity: str) -> list[str]:
+    """Fetch all resource names that a user can access/have budget."""
+
+    _restricted_resource_names = fetch_resource_names_restricted_to_identity(identity)
+    quantum_db = open_database()
+
+    available_resource_names = [
+        _resource.name
+        for _resource in quantum_db.Resource.select()
+        if _resource.maintenance is False
+    ]
+
+    for _restricted_resource in _restricted_resource_names:
+        if _restricted_resource in available_resource_names:
+            available_resource_names.remove(_restricted_resource)
+
+    return available_resource_names
 
 
 @db_session
