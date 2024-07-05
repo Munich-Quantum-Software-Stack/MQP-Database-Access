@@ -4,3 +4,4 @@ from . import jobs
 from . import budgets
 from . import resources
 from . import status
+from . import feedback
