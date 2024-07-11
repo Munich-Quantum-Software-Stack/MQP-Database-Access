@@ -74,6 +74,7 @@ def fetch_resource_names_restricted_to_identity(identity: str) -> list[str]:
     # TODO after budgeting, replace implement restrictions through budget allocation.
     if "IQM" in _user_group_names:
         restricted_resource_names.append("WMI3")
+        restricted_resource_names.append("AQT20")
 
     return restricted_resource_names
 
