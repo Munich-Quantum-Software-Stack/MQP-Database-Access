@@ -2,7 +2,6 @@
 This module provides the basic database structure and helpers.
 """
 
-
 import os
 import time
 
@@ -222,15 +221,6 @@ def _define_entities(database: Database):
         weight = Required(int)
         color = Optional(str, default="status_B1")
 
-    class Feedback(database.Entity):
-        _table_ = "feedback"
-
-        feedbackID = PrimaryKey(int, auto=True)
-        owner = Required("User")
-        rating   = Optional(int)
-        category = Required(str)
-        feedbackDate = Required(datetime)
-        note     = Required(str)
 
 def _define_database(create_tables: bool = False, **db_params):
     db = Database(**db_params)
