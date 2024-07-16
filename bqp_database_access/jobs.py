@@ -1,4 +1,5 @@
 """"""
+
 from datetime import datetime
 from pony.orm import db_session  # type: ignore
 
@@ -28,6 +29,7 @@ def create_job(
     budget: str,
     target_spec: str,
     circuit_format: str,
+    no_modify: bool = False,
 ) -> "Job":
     quantum_db = open_database()
 
@@ -47,6 +49,7 @@ def create_job(
         owner=owner,
         budget=budget,
         target_specification=target_spec,
+        no_modify=no_modify,
     )
 
     quantum_db.commit()
