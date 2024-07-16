@@ -178,6 +178,7 @@ def _define_entities(database: Database):
 
         qubits = Required(int)
         connectivity = Required(str)
+        instructions = Required(str)
 
         budgets = Set("Budget")
         quantum_technology = Required(str)

@@ -112,3 +112,17 @@ def set_maintenance(name: str, value: bool) -> bool:
         return True
     # Resource not found
     return False
+
+
+@db_session
+def fetch_resource_attributes_for_transpilation(name: str) -> tuple[int, str, str]:
+    """Fetch qubits, connectivity and instructions for the specified resource"""
+
+    quantum_db = open_database()
+
+    resource = quantum_db.Resource.get(name=name)
+
+    if resource is None:
+        return None
+
+    return (resource.qubits, resource.connectivity, resource.instructions)
