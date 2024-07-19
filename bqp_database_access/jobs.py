@@ -1,9 +1,9 @@
 """"""
 
 from datetime import datetime
-from pony.orm import db_session  # type: ignore
+from typing import Optional
 
-from datetime import datetime
+from pony.orm import db_session  # type: ignore
 
 from ._database import open_database
 from .budgets import fetch_budgets_of_identity
@@ -19,6 +19,21 @@ def fetch_by_identity(identity: str) -> list["CircuitJob"]:
         return []
 
     return list(quantum_db.CircuitJob.select(owner=identity))
+
+
+@db_session
+def fetch_result_by_job_id_and_identity(
+    job_id: str, identity: str
+) -> Optional["CircuitJob"]:
+
+    if len(identity) == 0 or len(job_id) == 0:
+        return None
+
+    quantum_db = open_database()
+
+    return quantum_db.CircuitJob.get(
+        lambda job: job.id == job_id and job.owner.identity == identity
+    )
 
 
 @db_session
