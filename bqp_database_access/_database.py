@@ -41,6 +41,7 @@ def _define_entities(database: Database):
         tokens_owned = Set("Token")
         budgets_owned = Set("Budget")
         circuit_jobs = Set("CircuitJob")
+        feedbacks = Set("Feedback")
 
     class UserSecurityLevel(database.Entity):
         _table_ = "user_security_level"
@@ -221,6 +222,16 @@ def _define_entities(database: Database):
         note = Required(str)
         weight = Required(int)
         color = Optional(str, default="status_B1")
+
+    class Feedback(database.Entity):
+        _table_ = "feedback"
+
+        id = PrimaryKey(int, auto=True)
+        owner = Required("User")
+        rating = Optional(int)
+        category = Required(str)
+        date = Required(datetime)
+        note = Required(str)
 
 
 def _define_database(create_tables: bool = False, **db_params):
