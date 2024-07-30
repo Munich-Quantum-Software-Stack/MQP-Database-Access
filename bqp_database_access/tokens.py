@@ -84,7 +84,11 @@ def add_new_token(
     token_count_limit = quantum_db.User[owner].security_level.token_max_live_count
 
     if (
-        pony.count(token for token in quantum_db.Token if token.revoked == False)
+        pony.count(
+            token
+            for token in quantum_db.Token
+            if token.owner.identity == owner and token.revoked is False
+        )
         >= token_count_limit
     ):
         raise TooManyTokensError(token_count_limit, owner)

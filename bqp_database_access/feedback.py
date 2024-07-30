@@ -5,17 +5,13 @@ from ._database import open_database
 
 
 def create_feedback_for_identity(
-	 owner : str, rating : int, category : str, note: str 
+    owner: str, rating: int, category: str, note: str
 ) -> None:
 
     quantum_db = open_database()
 
     quantum_db.Feedback(
-	owner=owner,
-	rating=rating,
-	category=category,
-	feedbackDate=datetime.now(),
-	note=note
+        owner=owner, rating=rating, category=category, date=datetime.now(), note=note
     )
 
     quantum_db.commit()
