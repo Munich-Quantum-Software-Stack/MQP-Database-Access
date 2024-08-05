@@ -22,6 +22,22 @@ def fetch_by_identity(identity: str) -> list["CircuitJob"]:
 
 
 @db_session
+def fetch_hamiltonian_job_by_identity(identity: str) -> list["HamiltonianJob"]:
+    quantum_db = open_database()
+
+    user = quantum_db.User.get(identity=identity)
+
+    if user is None:
+        return []
+
+    return list(quantum_db.HamiltonianJob.select(owner=identity))
+
+
+@db_session
+def fetch_hamiltonian_job_by_task_id(task_id: int) -> list["HamiltonianJob"]:
+    quantum_db = open_database()
+
+    return list(quantum_db.HamiltonianJob.select(id=task_id))
 def fetch_result_by_job_id_and_identity(
     job_id: str, identity: str
 ) -> Optional["CircuitJob"]:
@@ -73,6 +89,37 @@ def create_job(
 
 
 @db_session
+def create_hamiltonian_job(
+    interaction_str: str,
+    coefficients_str: str,
+    owner: str,
+    budget: str,
+    target_spec: str,
+) -> "HamiltonianJob":
+    quantum_db = open_database()
+
+    _cost = 0
+
+    _budget = list(fetch_budgets_of_identity(identity=owner))
+
+    assert len(_budget) > 0
+
+    job = quantum_db.HamiltonianJob(
+        interaction_str=interaction_str,
+        coefficients_str=coefficients_str,
+        timestamp_submitted=datetime.now(),
+        cost=0,
+        owner=owner,
+        budget=budget,
+        target_specification=target_spec,
+    )
+
+    quantum_db.commit()
+
+    return job
+
+
+@db_session
 def fetch_all_pending_jobs() -> list["CircuitJob"]:
     quantum_db = open_database()
 
@@ -86,10 +133,30 @@ def fetch_all_pending_jobs() -> list["CircuitJob"]:
 
 
 @db_session
+def fetch_all_pending_hamiltonian_jobs() -> list["HamiltonianJob"]:
+    quantum_db = open_database()
+
+    jobs = list(quantum_db.HamiltonianJob.select(status="PENDING"))
+
+    for job in jobs:
+        job.timestamp_scheduled = datetime.now()
+        job.status = "WAITING"
+
+    return jobs
+
+
+@db_session
 def fetch_all_waiting_jobs() -> list["CircuitJob"]:
     quantum_db = open_database()
 
     return list(quantum_db.CircuitJob.select(status="WAITING"))
+
+
+@db_session
+def fetch_all_waiting_hamiltonian_jobs() -> list["HamiltonianJob"]:
+    quantum_db = open_database()
+
+    return list(quantum_db.HamiltonianJob.select(status="WAITING"))
 
 
 @db_session
@@ -114,10 +181,56 @@ def complete_job_with_result(
 
 
 @db_session
+def update_hybrid_job(
+    job_id: int, epochs: int, params: str, parametric_circuit: str, note: str
+) -> None:
+    quantum_db = open_database()
+
+    job = quantum_db.HamiltonianJob.get(id=job_id)
+
+    job.parametric_circuit = parametric_circuit
+    job.params = params
+    job.epochs = epochs
+    job.note = note
+
+
+@db_session
+def complete_hamiltonian_job_with_result(
+    job_id: int,
+    result: str,
+    executed_resource: str,
+    executed_circuit: str,
+    note: str = "",
+) -> None:
+    quantum_db = open_database()
+
+    job = quantum_db.HamiltonianJob.get(id=job_id)
+
+    job.result = result
+    job.note = note
+    job.executed_resource = quantum_db.Resource.get(name=executed_resource)
+    job.executed_circuit = executed_circuit
+    job.timestamp_completed = datetime.now()
+    job.status = "COMPLETED"
+    # TODO set shots completed
+
+
+@db_session
 def cancel_job(job_id: int, note: str) -> None:
     quantum_db = open_database()
 
     job = quantum_db.CircuitJob.get(id=job_id)
+
+    job.note = note
+    job.timestamp_cancelled = datetime.now()
+    job.status = "CANCELLED"
+
+
+@db_session
+def cancel_hamiltonian_job(job_id: int, note: str) -> None:
+    quantum_db = open_database()
+
+    job = quantum_db.HamiltonianJob.get(id=job_id)
 
     job.note = note
     job.timestamp_cancelled = datetime.now()

@@ -41,6 +41,7 @@ def _define_entities(database: Database):
         tokens_owned = Set("Token")
         budgets_owned = Set("Budget")
         circuit_jobs = Set("CircuitJob")
+        hamiltonian_jobs = Set("HamiltonianJob")
         feedbacks = Set("Feedback")
 
     class UserSecurityLevel(database.Entity):
@@ -142,6 +143,27 @@ def _define_entities(database: Database):
 
         executed_circuit = Optional(str)
 
+    class HamiltonianJob(database.Entity):
+        _table_ = "hamiltonian_job"
+
+        id = PrimaryKey(int, auto=True)
+        note = Optional(str)
+        status = Required(str, default="PENDING")
+        interaction_str = Required(str)
+        coefficients_str = Required(str)
+        no_modify = Required(bool, default=False)
+        timestamp_submitted = Required(datetime, default=datetime.now)
+        timestamp_scheduled = Optional(datetime)
+        timestamp_completed = Optional(datetime)
+        timestamp_cancelled = Optional(datetime)
+
+        cost = Optional(int)
+        result = Optional(str)
+
+        owner = Required("User")
+        executed_resource = Optional("Resource")
+        target_specification = Required("TargetSpecification")
+
     class Budget(database.Entity):
         _table_ = "budget"
 
@@ -168,6 +190,7 @@ def _define_entities(database: Database):
         resource_name = Optional(str)
 
         circuit_jobs = Set("CircuitJob")
+        hamiltonian_jobs = Set("HamiltonianJob")
 
     class Resource(database.Entity):
         _table_ = "resource"
@@ -188,6 +211,7 @@ def _define_entities(database: Database):
 
         security_level = Required("ResourceSecurityLevel")
         circuit_jobs = Set("CircuitJob")
+        hamiltonian_jobs = Set("HamiltonianJob")
 
     class ResourceSecurityLevel(database.Entity):
         _table_ = "resource_security_level"
