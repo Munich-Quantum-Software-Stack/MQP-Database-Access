@@ -40,7 +40,7 @@ def fetch_resources_available_to_identity(identity: str) -> tuple["Resource", ..
     user_resources = {
         resource
         for resource in resources
-        if resource.name not in _restricted_resource_names and not resource.maintenance
+        if resource.name not in _restricted_resource_names
     }
 
     return user_resources
@@ -77,6 +77,19 @@ def fetch_resource_names_restricted_to_identity(identity: str) -> list[str]:
         restricted_resource_names.append("AQT20")
 
     return restricted_resource_names
+
+
+@db_session
+def fetch_resources_restricted_to_identity(identity: str) -> tuple["Resource", ...]:
+    """Restrict users access to resources."""
+
+    restricted_resource_names = fetch_resource_names_restricted_to_identity(identity)
+    resources = fetch_all_resources()
+    restricted_resources = {
+        resource for resource in resources if resource.name in restricted_resource_names
+    }
+
+    return restricted_resources
 
 
 @db_session
