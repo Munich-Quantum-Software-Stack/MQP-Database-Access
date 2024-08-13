@@ -18,6 +18,18 @@ def fetch_all_resources() -> tuple["Resource", ...]:
 
 
 @db_session
+def fetch_all_resource_names() -> list[str]:
+    """Fetch all resource names."""
+
+    quantum_db = open_database()
+
+    resources = quantum_db.Resource.select()
+    all_resource_names = [resource.name for resource in resources]
+
+    return all_resource_names
+
+
+@db_session
 def fetch_all_target_specification_names() -> list[str]:
     """Fetch all target specification names."""
 
@@ -72,7 +84,12 @@ def fetch_resource_names_restricted_to_identity(identity: str) -> list[str]:
 
     # Hardcode any restrictions here
     # TODO after budgeting, replace implement restrictions through budget allocation.
-    if "IQM" in _user_group_names:
+    if "HQS" in _user_group_names:
+        # block access to all resources except QExa20
+        restricted_resource_names = fetch_all_resource_names()
+        restricted_resource_names.remove("QExa20")
+    elif "IQM" in _user_group_names:
+        # block access to WMI3 and AQT20
         restricted_resource_names.append("WMI3")
         restricted_resource_names.append("AQT20")
 
