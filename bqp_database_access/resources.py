@@ -92,7 +92,8 @@ def fetch_resource_names_restricted_to_identity(identity: str) -> list[str]:
         # block access to WMI3 and AQT20
         restricted_resource_names.append("WMI3")
         restricted_resource_names.append("AQT20")
-
+    elif "mqp_edu" in _user_group_names:
+        restricted_resource_names = fetch_all_resource_names()
     return restricted_resource_names
 
 
