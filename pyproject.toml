@@ -1,18 +1,12 @@
 [project]
 name = "bqp-database-access"
-version = "0.2.48"
+version = "0.2.51"
 description = ""
-authors = [
-    {name = "Martin Ruefenacht", email = "martin.ruefenacht@lrz.de"},
-]
-dependencies = [
-    "pony>=0.7",
-    "bcrypt>=4.0",
-    "psycopg2-binary>=2.9",
-]
+authors = [{ name = "Martin Ruefenacht", email = "martin.ruefenacht@lrz.de" }]
+dependencies = ["pony>=0.7", "bcrypt>=4.0", "psycopg2-binary>=2.9"]
 requires-python = ">=3.10,<3.12"
 readme = "README.md"
-license = {text = "MIT"}
+license = { text = "MIT" }
 
 [build-system]
 requires = ["pdm-backend"]
@@ -22,22 +16,23 @@ build-backend = "pdm.backend"
 profile = "black"
 
 [tool.pylint.'MESSAGES CONTROL']
-disable = ["too-many-arguments",
-           "too-many-nested-blocks",
-           "too-few-public-methods",
-           "too-many-instance-attributes",
-           "too-many-branches",
-           "too-many-function-args",
-           "W0511",
-           "import-outside-toplevel"
-           ]
+disable = [
+    "too-many-arguments",
+    "too-many-nested-blocks",
+    "too-few-public-methods",
+    "too-many-instance-attributes",
+    "too-many-branches",
+    "too-many-function-args",
+    "W0511",
+    "import-outside-toplevel",
+]
 
 [tool.pylint.'SIMILARITIES']
-min-similarity-lines=8
+min-similarity-lines = 8
 ignore-imports = "yes"
 
 [tool.pylint.'FORMAT']
-max-line-length=88
+max-line-length = 88
 
 [tool.black]
 target-version = ['py310']
@@ -48,12 +43,9 @@ env = [
     "QUANTUM_DB_FILENAME=test_db.sqlite",
     "QUANTUM_DB_USER=",
     "QUANTUM_DB_PASS=",
-    "QUANTUM_DB_HOST="
+    "QUANTUM_DB_HOST=",
 ]
 pythonpath = ["."]
 
 [tool.pdm.dev-dependencies]
-test = [
-    "pytest>=7.4.2",
-    "pytest-env>=1.0.1",
-]
+test = ["pytest>=7.4.2", "pytest-env>=1.0.1"]

@@ -159,7 +159,7 @@ def _define_entities(database: Database):
 
         cost = Optional(int)
         result = Optional(str)
-
+        budget = Required("Budget")
         owner = Required("User")
         executed_resource = Optional("Resource")
         target_specification = Required("TargetSpecification")
@@ -176,6 +176,7 @@ def _define_entities(database: Database):
 
         user_groups = Set("UserGroup", table="user_groups_in_budgets")
         circuit_jobs = Set("CircuitJob")
+        hamiltonian_jobs = Set("HamiltonianJob")
 
     class TargetSpecification(database.Entity):
         _table_ = "target_specification"
