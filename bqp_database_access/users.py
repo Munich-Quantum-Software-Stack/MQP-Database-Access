@@ -1,12 +1,11 @@
 """This module contains all helpers for the users handling."""
 
-
-import bcrypt
 from datetime import datetime
 
+import bcrypt
 
-from ._database import open_database
 from ._constants import PEPPER
+from ._database import open_database
 
 
 class IdentityError(Exception):
@@ -116,7 +115,7 @@ def set_new_secret_for_identity(
 
     user.secret_hash = bcrypt.hashpw(peppered_password, bcrypt.gensalt()).decode()
     user.last_secret_change = datetime.now()
-    user.force_secret_reset = False
+    user.force_secret_reset = forced
 
 
 def authenticate(identity: str, password: str) -> None:
@@ -142,7 +141,7 @@ def authenticate(identity: str, password: str) -> None:
         raise IncorrectSecretError
 
 
-def fetch_user_by_identity(identity: str) -> "User":
+def fetch_user_by_identity(identity: str) -> "User":  # type: ignore
     """Fetch database user data through identity."""
 
     quantum_db = open_database()

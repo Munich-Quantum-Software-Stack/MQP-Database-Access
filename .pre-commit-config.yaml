@@ -1,0 +1,48 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-ast
+      - id: check-yaml
+      - id: check-toml
+      - id: detect-private-key
+      - id: trailing-whitespace
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-json
+      - id: check-merge-conflict
+      - id: pretty-format-json
+        args:
+          - "--autofix"
+          - "--indent=4"
+          - "--no-sort-keys"
+  - repo: local
+    hooks:
+      - id: black
+        name: black
+        entry: pdm run black bqp_database_access/
+        language: system
+        always_run: true
+        pass_filenames: false
+
+      - id: isort
+        name: isort
+        entry: pdm run isort bqp_database_access/
+        language: system
+        always_run: true
+        pass_filenames: false
+
+      - id: mypy
+        name: mypy
+        entry: pdm run python -m mypy bqp_database_access/
+        language: system
+        always_run: true
+        pass_filenames: false
+
+      - id: pylint
+        name: pylint
+        entry: pdm run python -m pylint bqp_database_access/
+        language: system
+        always_run: true
+        pass_filenames: false

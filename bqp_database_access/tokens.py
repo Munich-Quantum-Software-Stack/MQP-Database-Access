@@ -1,8 +1,8 @@
 """This module contains all helpers related to tokens in the database."""
 
+import hashlib
 from datetime import datetime, timedelta
 from typing import Optional
-import hashlib
 
 import pony.orm as pony  # type: ignore
 
@@ -128,7 +128,7 @@ def revoke_token_by_name_and_identity(name: str, owner: str) -> None:
     quantum_db.commit()
 
 
-def fetch_active_tokens_of_identity(owner: str) -> list["Token"]:
+def fetch_active_tokens_of_identity(owner: str) -> list["Token"]:  # type: ignore
     """Fetch all tokens"""
 
     quantum_db = open_database()
@@ -136,7 +136,7 @@ def fetch_active_tokens_of_identity(owner: str) -> list["Token"]:
     return quantum_db.Token.select(owner=owner, revoked=False)
 
 
-def verify_token(token: str) -> Optional["Token"]:
+def verify_token(token: str) -> Optional["Token"]:  # type: ignore
     """
     This function verifies that a received token exists in the database
     and then returns the related user.

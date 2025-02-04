@@ -1,6 +1,6 @@
 [project]
 name = "bqp-database-access"
-version = "0.2.51"
+version = "0.3.0"
 description = ""
 authors = [{ name = "Martin Ruefenacht", email = "martin.ruefenacht@lrz.de" }]
 dependencies = ["pony>=0.7", "bcrypt>=4.0", "psycopg2-binary>=2.9"]
@@ -8,6 +8,14 @@ requires-python = ">=3.10,<3.12"
 readme = "README.md"
 license = { text = "MIT" }
 
+[project.optional-dependencies]
+dev = [
+    "black>=25.1.0",
+    "isort>=6.0.0",
+    "mypy>=1.14.1",
+    "pylint>=3.3.4",
+    "pre-commit>=4.1.0",
+]
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
@@ -25,6 +33,8 @@ disable = [
     "too-many-function-args",
     "W0511",
     "import-outside-toplevel",
+    "missing-docstring",
+    "E1101",
 ]
 
 [tool.pylint.'SIMILARITIES']
@@ -32,7 +42,8 @@ min-similarity-lines = 8
 ignore-imports = "yes"
 
 [tool.pylint.'FORMAT']
-max-line-length = 88
+max-line-length = 95
+max-positional-arguments = 10
 
 [tool.black]
 target-version = ['py310']
@@ -47,5 +58,9 @@ env = [
 ]
 pythonpath = ["."]
 
-[tool.pdm.dev-dependencies]
-test = ["pytest>=7.4.2", "pytest-env>=1.0.1"]
+
+[dependency-groups]
+test = [
+    "pytest>=7.4.2",
+    "pytest-env>=1.0.1"
+]

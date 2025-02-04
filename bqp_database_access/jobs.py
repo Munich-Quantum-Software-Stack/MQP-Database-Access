@@ -1,4 +1,4 @@
-""""""
+"""This module implement the circuit job related database access functions."""
 
 from datetime import datetime
 from typing import Optional
@@ -10,7 +10,7 @@ from .budgets import fetch_budgets_of_identity
 
 
 @db_session
-def fetch_by_identity(identity: str) -> list["CircuitJob"]:
+def fetch_by_identity(identity: str) -> list["CircuitJob"]:  # type: ignore
     quantum_db = open_database()
 
     user = quantum_db.User.get(identity=identity)
@@ -22,7 +22,7 @@ def fetch_by_identity(identity: str) -> list["CircuitJob"]:
 
 
 @db_session
-def fetch_hamiltonian_job_by_identity(identity: str) -> list["HamiltonianJob"]:
+def fetch_hamiltonian_job_by_identity(identity: str) -> list["HamiltonianJob"]:  # type: ignore
     quantum_db = open_database()
 
     user = quantum_db.User.get(identity=identity)
@@ -34,13 +34,15 @@ def fetch_hamiltonian_job_by_identity(identity: str) -> list["HamiltonianJob"]:
 
 
 @db_session
-def fetch_hamiltonian_job_by_task_id(task_id: int) -> list["HamiltonianJob"]:
+def fetch_hamiltonian_job_by_task_id(task_id: int) -> list["HamiltonianJob"]:  # type: ignore
     quantum_db = open_database()
 
     return list(quantum_db.HamiltonianJob.select(id=task_id))
+
+
 def fetch_result_by_job_id_and_identity(
     job_id: str, identity: str
-) -> Optional["CircuitJob"]:
+) -> Optional["CircuitJob"]:  # type: ignore
 
     if len(identity) == 0 or len(job_id) == 0:
         return None
@@ -61,7 +63,7 @@ def create_job(
     target_spec: str,
     circuit_format: str,
     no_modify: bool = False,
-) -> "Job":
+) -> "CircuitJob":  # type: ignore
     quantum_db = open_database()
 
     # TODO calculate cost when it is decided
@@ -95,7 +97,7 @@ def create_hamiltonian_job(
     owner: str,
     budget: str,
     target_spec: str,
-) -> "HamiltonianJob":
+) -> "HamiltonianJob":  # type: ignore
     quantum_db = open_database()
 
     _cost = 0
@@ -120,7 +122,7 @@ def create_hamiltonian_job(
 
 
 @db_session
-def fetch_all_pending_jobs() -> list["CircuitJob"]:
+def fetch_all_pending_jobs() -> list["CircuitJob"]:  # type: ignore
     quantum_db = open_database()
 
     jobs = list(quantum_db.CircuitJob.select(status="PENDING"))
@@ -133,7 +135,7 @@ def fetch_all_pending_jobs() -> list["CircuitJob"]:
 
 
 @db_session
-def fetch_all_pending_hamiltonian_jobs() -> list["HamiltonianJob"]:
+def fetch_all_pending_hamiltonian_jobs() -> list["HamiltonianJob"]:  # type: ignore
     quantum_db = open_database()
 
     jobs = list(quantum_db.HamiltonianJob.select(status="PENDING"))
@@ -146,14 +148,14 @@ def fetch_all_pending_hamiltonian_jobs() -> list["HamiltonianJob"]:
 
 
 @db_session
-def fetch_all_waiting_jobs() -> list["CircuitJob"]:
+def fetch_all_waiting_jobs() -> list["CircuitJob"]:  # type: ignore
     quantum_db = open_database()
 
     return list(quantum_db.CircuitJob.select(status="WAITING"))
 
 
 @db_session
-def fetch_all_waiting_hamiltonian_jobs() -> list["HamiltonianJob"]:
+def fetch_all_waiting_hamiltonian_jobs() -> list["HamiltonianJob"]:  # type: ignore
     quantum_db = open_database()
 
     return list(quantum_db.HamiltonianJob.select(status="WAITING"))
