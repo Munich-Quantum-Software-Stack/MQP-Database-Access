@@ -1,6 +1,7 @@
 """This module contains all helpers for the feedback handling."""
 
 from datetime import datetime
+
 from ._database import open_database
 
 

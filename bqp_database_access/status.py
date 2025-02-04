@@ -1,5 +1,5 @@
-from datetime import datetime
 import random
+from datetime import datetime
 
 from ._database import open_database
 
@@ -10,7 +10,7 @@ def _weighted_sample_without_replacement(population, weights, k, rng=random):
     return [population[i] for i in order[-k:]]
 
 
-def fetch_current_announcements() -> tuple["Announcement"]:
+def fetch_current_announcements() -> tuple["Announcement"]:  # type: ignore
     """Fetch all mandatory announcements."""
 
     quantum_db = open_database()
@@ -22,7 +22,7 @@ def fetch_current_announcements() -> tuple["Announcement"]:
     return tuple(announcements)
 
 
-def get_random_pointers(count: int) -> list["Pointer"]:
+def get_random_pointers(count: int) -> list["Pointer"]:  # type: ignore
 
     quantum_db = open_database()
 

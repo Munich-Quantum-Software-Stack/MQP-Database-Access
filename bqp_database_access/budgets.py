@@ -3,16 +3,14 @@
 from ._database import open_database
 
 
-def create_new_budget(name: str, owner: str, credits: int):
+def create_new_budget(name: str, owner: str, credits: int):  # pylint: disable=W0622
     raise NotImplementedError
-    quantum_db = open_database()
-
-    budget = quantum_db.Budget(name=name, owner=owner, credits=credits)
-
-    quantum_db.commit()
+    # quantum_db = open_database()
+    # budget = quantum_db.Budget(name=name, owner=owner, credits=credits)
+    # quantum_db.commit()
 
 
-def fetch_budgets_of_identity(identity: str) -> tuple["Budget"]:
+def fetch_budgets_of_identity(identity: str) -> set["Budget", ...]:  # type: ignore
     """Fetch all budgets."""
 
     quantum_db = open_database()

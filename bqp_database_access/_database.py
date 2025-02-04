@@ -3,14 +3,14 @@ This module provides the basic database structure and helpers.
 """
 
 import os
-import time
-
 from datetime import datetime
-from pony.orm import Database, PrimaryKey, Required, Optional, Set  # type: ignore
-from pony.orm.dbapiprovider import OperationalError  # type: ignore
+
+from pony.orm import Database, Optional, PrimaryKey, Required, Set  # type: ignore
 
 
-def _define_entities(database: Database):
+# pylint: disable=unused-variable
+# pylint: disable=too-many-locals
+def _define_entities(database: Database):  # pylint: disable=too-many-statements
     class User(database.Entity):
         _table_ = "user"
 
@@ -214,6 +214,8 @@ def _define_entities(database: Database):
         circuit_jobs = Set("CircuitJob")
         hamiltonian_jobs = Set("HamiltonianJob")
 
+        num_queued_jobs = Required(int, default=0)
+
     class ResourceSecurityLevel(database.Entity):
         _table_ = "resource_security_level"
 
@@ -259,6 +261,10 @@ def _define_entities(database: Database):
         note = Required(str)
 
 
+# pylint: enable=too-many-locals
+# pylint: enable=unused-variable
+
+
 def _define_database(create_tables: bool = False, **db_params):
     db = Database(**db_params)
 
@@ -274,7 +280,7 @@ def open_database(create_tables: bool = False):
         return _define_database(
             create_tables=create_tables,
             provider="sqlite",
-            filename=os.getcwd() + "/" + os.getenv("QUANTUM_DB_FILENAME"),
+            filename=os.getcwd() + "/" + str(os.getenv("QUANTUM_DB_FILENAME")),
             create_db=True,
         )
 

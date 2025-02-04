@@ -1,18 +1,21 @@
 """This module contains all helpers related to resources in the database."""
 
-from ._database import open_database
+from typing import Optional
+from warnings import warn
 
 from pony.orm import db_session  # type: ignore
 
+from ._database import open_database
+
 
 @db_session
-def fetch_all_resources() -> tuple["Resource", ...]:
+def fetch_all_resources() -> set["Resource", ...]:  # type: ignore
     """Fetch all resources."""
 
     quantum_db = open_database()
 
     resources = quantum_db.Resource.select()
-    all_resources = {resource for resource in resources}
+    all_resources = {resource for resource in resources}  # pylint: disable=R1721
 
     return all_resources
 
@@ -42,7 +45,9 @@ def fetch_all_target_specification_names() -> list[str]:
 
 
 @db_session
-def fetch_resources_available_to_identity(identity: str) -> tuple["Resource", ...]:
+def fetch_resources_available_to_identity(
+    identity: str,
+) -> set["Resource", ...]:  # type: ignore
     """Fetch all budgets."""
 
     _restricted_resource_names = fetch_resource_names_restricted_to_identity(identity)
@@ -97,7 +102,9 @@ def fetch_resource_names_restricted_to_identity(identity: str) -> list[str]:
 
 
 @db_session
-def fetch_resources_restricted_to_identity(identity: str) -> tuple["Resource", ...]:
+def fetch_resources_restricted_to_identity(
+    identity: str,
+) -> set["Resource", ...]:  # type: ignore
     """Restrict users access to resources."""
 
     restricted_resource_names = fetch_resource_names_restricted_to_identity(identity)
@@ -133,6 +140,12 @@ def fetch_resource_names_available_to_identity(identity: str) -> list[str]:
 def set_maintenance(name: str, value: bool) -> bool:
     """Sets the maintenance entry of a given resource"""
 
+    warn(
+        "set_maintenance is deprecated, use update_resource_status instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
     quantum_db = open_database()
 
     resource = quantum_db.Resource.get(name=name)
@@ -144,9 +157,52 @@ def set_maintenance(name: str, value: bool) -> bool:
     return False
 
 
-@db_session
 def fetch_resource_attributes_for_transpilation(name: str) -> tuple[int, str, str]:
     """Fetch qubits, connectivity and instructions for the specified resource"""
+
+    return fetch_resource_info(name)
+
+
+@db_session
+def update_resource_status(
+    name: str, maintenance: bool, num_queued_jobs: int = 0
+) -> bool:
+    """Update the maintenance flag and number of queued jobs of a resource"""
+
+    quantum_db = open_database()
+
+    resource = quantum_db.Resource.get(name=name)
+
+    if resource is not None:
+        resource.maintenance = maintenance
+        resource.num_queued_jobs = num_queued_jobs
+        return True
+    # Resource not found
+    return False
+
+
+@db_session
+def update_resource_info(
+    name: str, num_qubits: int, connectivity: str, instructions: str
+) -> bool:
+    """Update the qubits, connectivity and instructions of a resource"""
+
+    quantum_db = open_database()
+
+    resource = quantum_db.Resource.get(name=name)
+
+    if resource is not None:
+        resource.qubits = num_qubits
+        resource.connectivity = connectivity
+        resource.instructions = instructions
+        return True
+    # Resource not found
+    return False
+
+
+@db_session
+def fetch_resource_info(name: str) -> Optional[tuple[int, str, str]]:
+    """Fetch the qubits, connectivity and instructions of a resource"""
 
     quantum_db = open_database()
 
@@ -156,3 +212,18 @@ def fetch_resource_attributes_for_transpilation(name: str) -> tuple[int, str, st
         return None
 
     return (resource.qubits, resource.connectivity, resource.instructions)
+
+
+@db_session
+def fetch_resource_num_queued_jobs(name: str) -> Optional[int]:
+    """Fetch the number of queued jobs for a resource"""
+
+    quantum_db = open_database()
+
+    resource = quantum_db.Resource.get(name=name)
+
+    if resource is None:
+        # Resource not found
+        return None
+
+    return resource.num_queued_jobs
