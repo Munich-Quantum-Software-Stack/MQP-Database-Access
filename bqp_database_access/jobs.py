@@ -8,6 +8,8 @@ from pony.orm import db_session  # type: ignore
 from ._database import open_database
 from .budgets import fetch_budgets_of_identity
 
+MAX_QUEUING_TIME = 3600  # 1 hour
+
 
 @db_session
 def fetch_by_identity(identity: str) -> list["CircuitJob"]:  # type: ignore
@@ -63,6 +65,7 @@ def create_job(
     target_spec: str,
     circuit_format: str,
     no_modify: bool = False,
+    queued: bool = False,
 ) -> "CircuitJob":  # type: ignore
     quantum_db = open_database()
 
@@ -83,6 +86,7 @@ def create_job(
         budget=budget,
         target_specification=target_spec,
         no_modify=no_modify,
+        queued=queued,
     )
 
     quantum_db.commit()
@@ -121,17 +125,115 @@ def create_hamiltonian_job(
     return job
 
 
+def filter_queued_if_offline_and_fetch(
+    qdb, jobs: list["CircuitJob"]  # type: ignore
+) -> list["CircuitJob"]:  # type: ignore
+    filtered_jobs = []
+    for job in jobs:
+        if (
+            not job.queued
+            or not qdb.Resource.get(
+                name=job.target_specification.resource_name
+            ).maintenance
+            or (datetime.now() - job.timestamp_submitted).total_seconds()
+            > MAX_QUEUING_TIME
+        ):
+            job.timestamp_scheduled = datetime.now()
+            job.status = "WAITING"
+            filtered_jobs.append(job)
+    return filtered_jobs
+
+
 @db_session
 def fetch_all_pending_jobs() -> list["CircuitJob"]:  # type: ignore
     quantum_db = open_database()
 
     jobs = list(quantum_db.CircuitJob.select(status="PENDING"))
 
-    for job in jobs:
-        job.timestamp_scheduled = datetime.now()
-        job.status = "WAITING"
+    return filter_queued_if_offline_and_fetch(quantum_db, jobs)
 
-    return jobs
+
+@db_session
+def fetch_all_pending_jobs_from_users(
+    userids: list[str],
+) -> list["CircuitJob"]:  # type: ignore
+    quantum_db = open_database()
+
+    jobs = list(
+        quantum_db.CircuitJob.select(status="PENDING").filter(
+            lambda job: job.owner.identity in userids
+        )
+    )
+
+    return filter_queued_if_offline_and_fetch(quantum_db, jobs)
+
+
+@db_session
+def fetch_all_pending_jobs_for_resource_from_users(
+    resource: str, userids: list[str]
+) -> list["CircuitJob"]:  # type: ignore
+    quantum_db = open_database()
+
+    jobs = list(
+        quantum_db.CircuitJob.select(status="PENDING").filter(
+            lambda job: job.target_specification.resource_name == resource
+            and job.owner.identity in userids
+        )
+    )
+
+    return filter_queued_if_offline_and_fetch(quantum_db, jobs)
+
+
+@db_session
+def fetch_all_pending_jobs_for_resource_not_from_users(
+    resource: str, userids: list[str]
+) -> list["CircuitJob"]:  # type: ignore
+    quantum_db = open_database()
+
+    jobs = list(
+        quantum_db.CircuitJob.select(status="PENDING").filter(
+            lambda job: job.target_specification.resource_name == resource
+            and job.owner.identity not in userids
+        )
+    )
+
+    return filter_queued_if_offline_and_fetch(quantum_db, jobs)
+
+
+@db_session
+def fetch_all_pending_jobs_except_for_resources(
+    resources: list[str],
+) -> list["CircuitJob"]:  # type: ignore
+    quantum_db = open_database()
+
+    jobs = list(
+        quantum_db.CircuitJob.select(status="PENDING").filter(
+            lambda job: job.target_specification.resource_name not in resources
+        )
+    )
+
+    return filter_queued_if_offline_and_fetch(quantum_db, jobs)
+
+
+@db_session
+def fetch_all_pending_jobs_except_for_resource_not_from_users(
+    resource: str, userids: list[str]
+) -> list["CircuitJob"]:  # type: ignore
+    quantum_db = open_database()
+
+    jobs = list(
+        quantum_db.CircuitJob.select(status="PENDING").filter(
+            lambda job: (
+                job.target_specification.resource_name != resource
+                or (
+                    job.target_specification.resource_name == resource
+                    and job.owner.identity in userids
+                )
+            )
+        )
+    )
+
+    return filter_queued_if_offline_and_fetch(quantum_db, jobs)
 
 
 @db_session
@@ -225,7 +327,22 @@ def cancel_job(job_id: int, note: str) -> None:
 
     job.note = note
     job.timestamp_cancelled = datetime.now()
-    job.status = "CANCELLED"
+
+    # If the job is queued and the resource is offline, maintenance or down
+    # and the job has been submitted less than an hour ago, then set the job as pending
+    if (
+        job.queued
+        and (
+            note.find("offline") != -1
+            or note.find("maintenance") != -1
+            or note.find("down") != -1
+        )
+        and (datetime.now() - job.timestamp_submitted).total_seconds()
+        < MAX_QUEUING_TIME
+    ):
+        job.status = "PENDING"
+    else:
+        job.status = "CANCELLED"
 
 
 @db_session
