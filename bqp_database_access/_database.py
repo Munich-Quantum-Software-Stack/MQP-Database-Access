@@ -44,6 +44,8 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         hamiltonian_jobs = Set("HamiltonianJob")
         feedbacks = Set("Feedback")
 
+        time_slots = Set("TimeSlots", table="users_in_time_slots")
+
     class UserSecurityLevel(database.Entity):
         _table_ = "user_security_level"
 
@@ -84,6 +86,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         note = Optional(str)
         users = Set("User", table="users_in_user_groups", reverse="user_groups")
         budgets = Set("Budget", table="user_groups_in_budgets")
+        time_slots = Set("TimeSlots", table="user_groups_in_time_slots")
         owner = Required("User")
         cost_modifier = Required(float)
 
@@ -142,6 +145,8 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         token_usage = Optional("TokenUsage")
 
         executed_circuit = Optional(str)
+
+        queued = Required(bool, default=False)
 
     class HamiltonianJob(database.Entity):
         _table_ = "hamiltonian_job"
@@ -216,6 +221,8 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
         num_queued_jobs = Required(int, default=0)
 
+        time_slots = Set("TimeSlots")
+
     class ResourceSecurityLevel(database.Entity):
         _table_ = "resource_security_level"
 
@@ -259,6 +266,17 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         category = Required(str)
         date = Required(datetime)
         note = Required(str)
+
+    class TimeSlots(database.Entity):
+        _table_ = "time_slots"
+
+        id = PrimaryKey(int, auto=True)
+        start_time = Required(datetime)
+        end_time = Required(datetime)
+        resource_name = Required("Resource")
+        users = Set("User", table="users_in_time_slots")
+        user_groups = Set("UserGroup", table="user_groups_in_time_slots")
+        note = Optional(str)
 
 
 # pylint: enable=too-many-locals
