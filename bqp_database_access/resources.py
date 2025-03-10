@@ -97,6 +97,11 @@ def fetch_resource_names_restricted_to_identity(identity: str) -> list[str]:
         # block access to WMI3 and AQT20
         restricted_resource_names.append("WMI3")
         restricted_resource_names.append("AQT20")
+    elif "AQT" in _user_group_names:
+        # block access to IQM devices
+        restricted_resource_names.append("Q5")
+        restricted_resource_names.append("Q20")
+        restricted_resource_names.append("QExa20")
 
     return restricted_resource_names
 
