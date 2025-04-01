@@ -153,6 +153,7 @@ def filter_queued_if_offline_and_fetch(
         ) and (is_within_active_job_limit(qdb, job)):
             job.timestamp_scheduled = datetime.now()
             job.status = "WAITING"
+            job.flush()
             filtered_jobs.append(job)
     return filtered_jobs
 
