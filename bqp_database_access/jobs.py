@@ -8,7 +8,8 @@ from pony.orm import db_session  # type: ignore
 from ._database import open_database
 from .budgets import fetch_budgets_of_identity
 
-MAX_QUEUING_TIME = 3600  # 1 hour
+MAX_QUEUING_TIME = 86400  # 24 hour
+MAX_ACTIVE_JOBS_PER_USER_PER_RESOURCE = 2
 
 
 @db_session
@@ -125,6 +126,18 @@ def create_hamiltonian_job(
     return job
 
 
+def is_within_active_job_limit(qdb, job: "CircuitJob") -> bool:  # type: ignore
+    """Count the number of active jobs for a given user."""
+    return (
+        qdb.CircuitJob.select(
+            owner=job.owner.identity,
+            status="WAITING",
+            target_specification=job.target_specification.name,
+        ).count()
+        < MAX_ACTIVE_JOBS_PER_USER_PER_RESOURCE
+    )
+
+
 def filter_queued_if_offline_and_fetch(
     qdb, jobs: list["CircuitJob"]  # type: ignore
 ) -> list["CircuitJob"]:  # type: ignore
@@ -137,7 +150,7 @@ def filter_queued_if_offline_and_fetch(
             ).maintenance
             or (datetime.now() - job.timestamp_submitted).total_seconds()
             > MAX_QUEUING_TIME
-        ):
+        ) and (is_within_active_job_limit(qdb, job)):
             job.timestamp_scheduled = datetime.now()
             job.status = "WAITING"
             filtered_jobs.append(job)
