@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pony.orm import db_session  # type: ignore
+from pony.orm import db_session, commit  # type: ignore
 
 from ._database import open_database
 from .budgets import fetch_budgets_of_identity
@@ -154,6 +154,7 @@ def filter_queued_if_offline_and_fetch(
             job.timestamp_scheduled = datetime.now()
             job.status = "WAITING"
             job.flush()
+            commit()
             filtered_jobs.append(job)
     return filtered_jobs
 
