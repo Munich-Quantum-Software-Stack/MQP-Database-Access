@@ -25,6 +25,35 @@ def fetch_by_identity(identity: str) -> list["CircuitJob"]:  # type: ignore
 
 
 @db_session
+def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int) -> \
+    list["CircuitJob"]:  # type: ignore
+    """
+    fetch all Circuit jobs belonging to a user with particular identity and pagintate the
+    results (instead of fetchign all db entries, only a certain range is fetched which is
+    expected to reduce fetch time and ease query load) for the case where jobs have to be
+    displayed on MQP website page
+    """
+    quantum_db = open_database()
+    user = quantum_db.User.get(identity=identity)
+    if user is None:
+        return []
+    start_list = page*jobs_per_page
+    return list(quantum_db.CircuitJob.select(owner=identity, ).
+                order_by(quantum_db.CircuitJob.timestamp_submitted).
+                limit(jobs_per_page, offset=start_list))
+
+def fetch_by_identity_total_job_nr(identity: str) -> int:  # type: ignore
+    """
+    fetch total nr of circuit jobs belonging to a user
+    """
+    quantum_db = open_database()
+
+    user = quantum_db.User.get(identity=identity)
+    if user is None:
+        return 0
+    return quantum_db.CircuitJob.select(owner=identity).count()
+
+@db_session
 def fetch_hamiltonian_job_by_identity(identity: str) -> list["HamiltonianJob"]:  # type: ignore
     quantum_db = open_database()
 
@@ -265,14 +294,14 @@ def fetch_all_pending_hamiltonian_jobs() -> list["HamiltonianJob"]:  # type: ign
 
 
 @db_session
-def fetch_all_waiting_jobs() -> list["CircuitJob"]:  # type: ignore
+def fetch_all_waiting_jobs() -> list["CircuitJob"]: # type: ignore
     quantum_db = open_database()
 
     return list(quantum_db.CircuitJob.select(status="WAITING"))
 
 
 @db_session
-def fetch_all_waiting_hamiltonian_jobs() -> list["HamiltonianJob"]:  # type: ignore
+def fetch_all_waiting_hamiltonian_jobs() -> list["HamiltonianJob"]: # type: ignore
     quantum_db = open_database()
 
     return list(quantum_db.HamiltonianJob.select(status="WAITING"))

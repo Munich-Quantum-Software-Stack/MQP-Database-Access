@@ -4,8 +4,10 @@ This module provides the basic database structure and helpers.
 
 import os
 from datetime import datetime
-
 from pony.orm import Database, Optional, PrimaryKey, Required, Set  # type: ignore
+
+# if os.getenv("QUANTUM_DB_TESTING") is not None:
+#     db_config.set_test_env()
 
 
 # pylint: disable=unused-variable
@@ -84,7 +86,8 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
         name = PrimaryKey(str, auto=False)
         note = Optional(str)
-        users = Set("User", table="users_in_user_groups", reverse="user_groups")
+        users = Set("User", table="users_in_user_groups",
+                    reverse="user_groups")
         budgets = Set("Budget", table="user_groups_in_budgets")
         time_slots = Set("TimeSlots", table="user_groups_in_time_slots")
         owner = Required("User")
@@ -294,7 +297,8 @@ def _define_database(create_tables: bool = False, **db_params):
 
 
 def open_database(create_tables: bool = False):
-    if os.getenv("QUANTUM_DB_TESTING") is not None:
+    if os.getenv("QUANTUM_DB_TESTING") is not None and [os.getenv("USER_TESTING") == ""
+    or os.getenv("USER_TESTING") is None]:
         return _define_database(
             create_tables=create_tables,
             provider="sqlite",
