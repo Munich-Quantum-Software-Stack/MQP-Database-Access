@@ -1,6 +1,6 @@
 [project]
 name = "bqp-database-access"
-version = "0.3.4"
+version = "0.3.13"
 description = ""
 authors = [{ name = "Martin Ruefenacht", email = "martin.ruefenacht@lrz.de" }]
 dependencies = ["pony>=0.7", "bcrypt>=4.0", "psycopg2-binary>=2.9.10"]
@@ -13,7 +13,7 @@ dev = [
     "black>=25.1.0",
     "isort>=6.0.0",
     "mypy>=1.14.1",
-    "pylint>=3.3.4",
+    "pylint>=3.3.8",
     "pre-commit>=4.1.0",
 ]
 [build-system]
