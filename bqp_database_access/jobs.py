@@ -25,8 +25,9 @@ def fetch_by_identity(identity: str) -> list["CircuitJob"]:  # type: ignore
 
 
 @db_session
-def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int, order: str, order_by: str, filter: str) -> \
-    list["CircuitJob"]:  # type: ignore
+def fetch_by_identity_pages(
+    identity: str, page: int, jobs_per_page: int, order: str, order_by: str, filter: str
+) -> list["CircuitJob"]:  # type: ignore
     """
     fetch all Circuit jobs belonging to a user with particular identity and pagintate the
     results (instead of fetchign all db entries, only a certain range is fetched which is
@@ -38,7 +39,7 @@ def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int, order:
     user = quantum_db.User.get(identity=identity)
     if user is None:
         return []
-    
+
     query = quantum_db.CircuitJob.select(lambda j: j.owner == identity)
 
     if filter:
@@ -47,17 +48,20 @@ def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int, order:
     n_total = query.count()
 
     if order == "DESC":
-        page =  n_total - page
+        page = n_total - page
 
-    start_list = page*jobs_per_page
-    
+    start_list = page * jobs_per_page
+
     if order_by == "ID":
-        query = query.order_by(quantum_db.CircuitJob.id).limit(jobs_per_page, offset=start_list)
+        query = query.order_by(quantum_db.CircuitJob.id).limit(
+            jobs_per_page, offset=start_list
+        )
     elif order_by == "DATE":
         query = query.order_by(quantum_db.CircuitJob.timestamp_submitted)
     elif order_by == "STATUS":
         query = query.order_by(quantum_db.CircuitJob.id)
     return list(query.limit(jobs_per_page, offset=start_list))
+
 
 def fetch_by_identity_total_job_nr(identity: str) -> int:  # type: ignore
     """
@@ -69,6 +73,7 @@ def fetch_by_identity_total_job_nr(identity: str) -> int:  # type: ignore
     if user is None:
         return 0
     return quantum_db.CircuitJob.select(owner=identity).count()
+
 
 @db_session
 def fetch_hamiltonian_job_by_identity(identity: str) -> list["HamiltonianJob"]:  # type: ignore
@@ -311,14 +316,14 @@ def fetch_all_pending_hamiltonian_jobs() -> list["HamiltonianJob"]:  # type: ign
 
 
 @db_session
-def fetch_all_waiting_jobs() -> list["CircuitJob"]: # type: ignore
+def fetch_all_waiting_jobs() -> list["CircuitJob"]:  # type: ignore
     quantum_db = open_database()
 
     return list(quantum_db.CircuitJob.select(status="WAITING"))
 
 
 @db_session
-def fetch_all_waiting_hamiltonian_jobs() -> list["HamiltonianJob"]: # type: ignore
+def fetch_all_waiting_hamiltonian_jobs() -> list["HamiltonianJob"]:  # type: ignore
     quantum_db = open_database()
 
     return list(quantum_db.HamiltonianJob.select(status="WAITING"))
