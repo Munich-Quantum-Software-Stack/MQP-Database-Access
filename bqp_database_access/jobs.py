@@ -58,7 +58,8 @@ def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
         query = query.order_by(quantum_db.CircuitJob.timestamp_submitted)
     elif order_by == "STATUS":
         query = query.order_by(quantum_db.CircuitJob.id)
-    return {"jobs": list(query.limit(jobs_per_page, offset=start_list)), "totaljob_nr": int(n_total)}
+    return {"jobs": list(query.limit(jobs_per_page, offset=start_list)),
+            "totaljob_nr": int(n_total)}
 
 def fetch_by_identity_total_job_nr(identity: str) -> int:  # type: ignore
     """
