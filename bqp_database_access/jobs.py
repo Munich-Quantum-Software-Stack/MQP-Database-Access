@@ -40,7 +40,7 @@ def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
     if user is None:
         return {"jobs": [], "totaljob_nr": 0}
 
-    query = quantum_db.CircuitJob.select(lambda j: j.owner == identity)
+    query = quantum_db.CircuitJob.select(lambda j: str(j.owner) == identity)
 
     if filter_query:
         query = query.filter(lambda j: j.status == filter_query)
