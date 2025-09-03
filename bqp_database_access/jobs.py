@@ -25,22 +25,41 @@ def fetch_by_identity(identity: str) -> list["CircuitJob"]:  # type: ignore
 
 
 @db_session
-def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int) -> \
-    list["CircuitJob"]:  # type: ignore
+def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
+                             order: str, order_by: str, filter_query: str) -> \
+    dict[str, list["CircuitJob"] | int]:  # type: ignore
     """
     fetch all Circuit jobs belonging to a user with particular identity and pagintate the
     results (instead of fetchign all db entries, only a certain range is fetched which is
     expected to reduce fetch time and ease query load) for the case where jobs have to be
     displayed on MQP website page
     """
+
     quantum_db = open_database()
     user = quantum_db.User.get(identity=identity)
     if user is None:
-        return []
+        return {"jobs": [], "totaljob_nr": 0}
+
+    query = quantum_db.CircuitJob.select(lambda j: str(j.owner) == identity)
+
+    if filter_query:
+        query = query.filter(lambda j: j.status == filter_query)
+
+    n_total = query.count()
+
+    if order == "DESC":
+        page =  n_total - page
+
     start_list = page*jobs_per_page
-    return list(quantum_db.CircuitJob.select(owner=identity, ).
-                order_by(quantum_db.CircuitJob.timestamp_submitted).
-                limit(jobs_per_page, offset=start_list))
+
+    if order_by == "ID":
+        query = query.order_by(quantum_db.CircuitJob.id)
+    elif order_by == "DATE":
+        query = query.order_by(quantum_db.CircuitJob.timestamp_submitted)
+    elif order_by == "STATUS":
+        query = query.order_by(quantum_db.CircuitJob.id)
+    return {"jobs": list(query.limit(jobs_per_page, offset=start_list)),
+            "totaljob_nr": int(n_total)}
 
 def fetch_by_identity_total_job_nr(identity: str) -> int:  # type: ignore
     """
