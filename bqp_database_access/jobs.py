@@ -27,7 +27,7 @@ def fetch_by_identity(identity: str) -> list["CircuitJob"]:  # type: ignore
 @db_session
 def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
                              order: str, order_by: str, filter_query: str) -> \
-    list["CircuitJob"]:  # type: ignore
+    dict[str, list["CircuitJob"] | int]:  # type: ignore
     """
     fetch all Circuit jobs belonging to a user with particular identity and pagintate the
     results (instead of fetchign all db entries, only a certain range is fetched which is
@@ -38,7 +38,7 @@ def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
     quantum_db = open_database()
     user = quantum_db.User.get(identity=identity)
     if user is None:
-        return []
+        return {"jobs": [], "totaljob_nr": 0}
 
     query = quantum_db.CircuitJob.select(lambda j: j.owner == identity)
 
@@ -58,7 +58,7 @@ def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
         query = query.order_by(quantum_db.CircuitJob.timestamp_submitted)
     elif order_by == "STATUS":
         query = query.order_by(quantum_db.CircuitJob.id)
-    return list(query.limit(jobs_per_page, offset=start_list)), n_total
+    return {"jobs": list(query.limit(jobs_per_page, offset=start_list)), "totaljob_nr": int(n_total)}
 
 def fetch_by_identity_total_job_nr(identity: str) -> int:  # type: ignore
     """
