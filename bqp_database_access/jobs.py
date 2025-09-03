@@ -51,7 +51,7 @@ def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int, order:
 
     start_list = page*jobs_per_page
     
-    if order_by == "ID"
+    if order_by == "ID":
         query = query.order_by(quantum_db.CircuitJob.id).limit(jobs_per_page, offset=start_list)
     elif order_by == "DATE":
         query = query.order_by(quantum_db.CircuitJob.timestamp_submitted)
