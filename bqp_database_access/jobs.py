@@ -26,7 +26,7 @@ def fetch_by_identity(identity: str) -> list["CircuitJob"]:  # type: ignore
 
 @db_session
 def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
-                             order: str, order_by: str, filter: str) -> \
+                             order: str, order_by: str, filter_query: str) -> \
     list["CircuitJob"]:  # type: ignore
     """
     fetch all Circuit jobs belonging to a user with particular identity and pagintate the
@@ -39,11 +39,11 @@ def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
     user = quantum_db.User.get(identity=identity)
     if user is None:
         return []
-    
+
     query = quantum_db.CircuitJob.select(lambda j: j.owner == identity)
 
-    if filter:
-        query = query.filter(lambda j: j.status == filter)
+    if filter_query:
+        query = query.filter(lambda j: j.status == filter_query)
 
     n_total = query.count()
 
@@ -51,14 +51,14 @@ def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
         page =  n_total - page
 
     start_list = page*jobs_per_page
-    
+
     if order_by == "ID":
         query = query.order_by(quantum_db.CircuitJob.id)
     elif order_by == "DATE":
         query = query.order_by(quantum_db.CircuitJob.timestamp_submitted)
     elif order_by == "STATUS":
         query = query.order_by(quantum_db.CircuitJob.id)
-    return list(query.limit(jobs_per_page, offset=start_list))
+    return list(query.limit(jobs_per_page, offset=start_list)), n_total
 
 def fetch_by_identity_total_job_nr(identity: str) -> int:  # type: ignore
     """
