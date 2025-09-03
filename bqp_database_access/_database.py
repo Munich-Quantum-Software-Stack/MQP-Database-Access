@@ -297,8 +297,8 @@ def _define_database(create_tables: bool = False, **db_params):
 
 
 def open_database(create_tables: bool = False):
-    if os.getenv("QUANTUM_DB_TESTING") is not None and [os.getenv("USER_TESTING") == ""
-    or os.getenv("USER_TESTING") is None]:
+    if os.getenv("QUANTUM_DB_TESTING") is not None and (os.getenv("USER_TESTING") == ""
+    or os.getenv("USER_TESTING") is None):
         return _define_database(
             create_tables=create_tables,
             provider="sqlite",
