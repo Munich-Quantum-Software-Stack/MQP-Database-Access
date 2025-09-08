@@ -29,11 +29,16 @@ sql_queries = {
             true::boolean )  \
             ; """,
     "budget": """INSERT INTO public.budget (name, note, owner, credits) VALUES \
-    (%s::text, 'temporary budget'::text, %s::text, 10) returning name;""",
+            (%s::text, 'temporary budget'::text, %s::text, 10) returning name;""",
     "target_specification": """INSERT INTO public.target_specification (
                 name ,       note,          specification_type , minimum_qubits, quantum_technology, resource_name \
             ) VALUES (
                 'qubits sim', 'qubit sim',  'spec'             , '1000'::text,   'ion trap',         'resource 1'); """,
+    "admin" : """INSERT INTO public.admin_announcements (
+                    id,     start_time,      end_time,           note,   title,              color)
+              VALUES (
+                  %s, %s::timestamp,   %s::timestamp,     'admin', 'title',         'status_A1'
+                  )"""
 }
 
 
@@ -83,6 +88,7 @@ def insert_random_data(table_name, n_entries=10, clear_table=True):
         start_date = datetime(2024, 1, 1, 0, 0, 0)
         end_date = datetime(2025, 12, 31, 23, 59, 59)
         cur.execute("""TRUNCATE public.budget CASCADE;""")
+        cur.execute("""TRUNCATE public.admin_announcements CASCADE;""")
         cur.execute("""TRUNCATE public.target_specification CASCADE;""")
         cur.execute(sql_queries["target_specification"])
         for i in range(0, n_entries):
@@ -114,6 +120,9 @@ def insert_random_data(table_name, n_entries=10, clear_table=True):
                 random_cost,
             )
             cur.execute(sql_queries["circuit_job"], values)
+            
+            values = (id, random_timestamp, random_timestamp)
+            cur.execute(sql_queries["admin"], values)
 
     connection.commit()
     cur.close()

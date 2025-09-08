@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pony.orm import db_session, commit  # type: ignore
+from pony.orm import db_session, commit, desc  # type: ignore
 
 from ._database import open_database
 from .budgets import fetch_budgets_of_identity
@@ -306,6 +306,26 @@ def fetch_all_waiting_hamiltonian_jobs() -> list["HamiltonianJob"]: # type: igno
 
     return list(quantum_db.HamiltonianJob.select(status="WAITING"))
 
+@db_session
+def retrieve_timestamps(num_recent_timestamps: int, timestamp_scheduled: bool = False , timestamp_cancelled: bool = False) -> dict:
+    data = {
+        "timestamp_submitted" : [],
+        "timestamp_scheduled" : [],
+        "timestamp_completed" : [],
+        "timestamp_cancelled" : []
+    }
+    quantum_db = open_database()
+    jobs = list(quantum_db.CircuitJob.select(status="COMPLETED").
+                order_by(desc(quantum_db.CircuitJob.timestamp_submitted)).
+                limit(num_recent_timestamps, offset=0))
+    for job in jobs:
+        data["timestamp_submitted"].append(job.timestamp_submitted)
+        if timestamp_scheduled:
+            data["timestamp_scheduled"].append(job.timestamp_scheduled)
+        if timestamp_cancelled:
+            data["timestamp_cancelled"].append(job.timestamp_cancelled)
+        data["timestamp_completed"].append(job.timestamp_completed)
+    return data
 
 @db_session
 def complete_job_with_result(
