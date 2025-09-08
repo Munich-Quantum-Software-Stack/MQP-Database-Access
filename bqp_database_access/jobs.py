@@ -307,7 +307,7 @@ def fetch_all_waiting_hamiltonian_jobs() -> list["HamiltonianJob"]: # type: igno
     return list(quantum_db.HamiltonianJob.select(status="WAITING"))
 
 @db_session
-def retrieve_timestamps(num_recent_timestamps: int, timestamp_scheduled: bool = False , timestamp_cancelled: bool = False) -> dict:
+def retrieve_timestamps(num_recent_timestamps: int, timestamp_scheduled: bool = False , timestamp_cancelled: bool = False) -> dict: # type: ignore
     data = {
         "timestamp_submitted" : [],
         "timestamp_scheduled" : [],
