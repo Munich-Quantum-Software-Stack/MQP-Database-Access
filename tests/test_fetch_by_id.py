@@ -37,7 +37,7 @@ def test_timestamp_retrievaal():
     utils.insert_random_data("user", 1000)
     utils.insert_random_data("circuit_job", 1000)
     num_recent_timestamps = 20
-    result = db_access.jobs.retrieve_timestamps(num_recent_timestamps)
-
+    result = db_access.jobs.retrieve_timestamps(num_recent_timestamps, True, True)
+    
     db_access.db_config.reset_test_env()
     assert is_sorted_loop(result["timestamp_submitted"])

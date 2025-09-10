@@ -23,7 +23,7 @@ sql_queries = {
             result,     owner,                budget,               executed_resource,   target_specification, executed_circuit, \
             queued
         ) VALUES (
-            %s,        'COMPLETED',           'COMPLETED'::text,    10000,               'OPENQASM 2.0'::text, 'circuit format', \
+            %s,        %s,           %s::text,    10000,               'OPENQASM 2.0'::text, 'circuit format', \
             false::boolean , %s::timestamp,   %s::timestamp,        %s::timestamp,       %s::timestamp,         %s, \
             'PASS',     'testuser1'::text,                'temp_budget1',          Null::text,         'qubits sim',         'done', 
             true::boolean )  \
@@ -111,25 +111,33 @@ def insert_random_data(table_name, n_entries=10, clear_table=True):
             random_timestamp = start_date + timedelta(seconds=random_seconds)
 
             random_cost = np.random.randint(10, 100)
-            values = (
-                id,
-                random_timestamp,
-                random_timestamp,
-                random_timestamp,
-                random_timestamp,
-                random_cost,
-            )
+            if i%2 == 0:
+                values = (
+                    id,
+                    'COMPLETED',
+                    'COMPLETED',
+                    random_timestamp,
+                    random_timestamp + timedelta(hours=1),
+                    random_timestamp + timedelta(hours=2),
+                    None,
+                    random_cost,
+                )
+            else:
+                values = (
+                    id,
+                    'CANCELLED',
+                    'CANCELLED',
+                    random_timestamp,
+                    random_timestamp + timedelta(hours=1),
+                    None,
+                    random_timestamp + timedelta(hours=2),
+                    random_cost,
+                )
             cur.execute(sql_queries["circuit_job"], values)
             
-            values = (id, random_timestamp, random_timestamp)
+            values = (id, random_timestamp, random_timestamp + timedelta(hours=2))
             cur.execute(sql_queries["admin"], values)
 
     connection.commit()
     cur.close()
     connection.close()
-
-
-if __name__ == "__main__":
-    pass
-    insert_random_data("user", 20)
-    insert_random_data("circuit_job", 20)

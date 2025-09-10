@@ -316,7 +316,7 @@ def retrieve_timestamps(num_recent_timestamps: int, timestamp_scheduled: bool = 
         "timestamp_cancelled" : []
     } # type: ignore
     quantum_db = open_database()
-    jobs = list(quantum_db.CircuitJob.select(status="COMPLETED").
+    jobs = list(quantum_db.CircuitJob.select().
                 order_by(desc(quantum_db.CircuitJob.timestamp_submitted)).
                 limit(num_recent_timestamps, offset=0))
     for job in jobs:
