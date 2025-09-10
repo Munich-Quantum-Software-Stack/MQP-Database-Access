@@ -23,17 +23,22 @@ sql_queries = {
             result,     owner,                budget,               executed_resource,   target_specification, executed_circuit, \
             queued
         ) VALUES (
-            %s,        'COMPLETED',           'COMPLETED'::text,    10000,               'OPENQASM 2.0'::text, 'circuit format', \
+            %s,        %s,           %s::text,    10000,               'OPENQASM 2.0'::text, 'circuit format', \
             false::boolean , %s::timestamp,   %s::timestamp,        %s::timestamp,       %s::timestamp,         %s, \
             'PASS',     'testuser1'::text,                'temp_budget1',          Null::text,         'qubits sim',         'done', 
             true::boolean )  \
             ; """,
     "budget": """INSERT INTO public.budget (name, note, owner, credits) VALUES \
-    (%s::text, 'temporary budget'::text, %s::text, 10) returning name;""",
+            (%s::text, 'temporary budget'::text, %s::text, 10) returning name;""",
     "target_specification": """INSERT INTO public.target_specification (
                 name ,       note,          specification_type , minimum_qubits, quantum_technology, resource_name \
             ) VALUES (
                 'qubits sim', 'qubit sim',  'spec'             , '1000'::text,   'ion trap',         'resource 1'); """,
+    "admin" : """INSERT INTO public.admin_announcements (
+                    id,     start_time,      end_time,           note,   title,              color)
+              VALUES (
+                  %s, %s::timestamp,   %s::timestamp,     'admin', 'title',         'status_A1'
+                  )"""
 }
 
 
@@ -83,6 +88,7 @@ def insert_random_data(table_name, n_entries=10, clear_table=True):
         start_date = datetime(2024, 1, 1, 0, 0, 0)
         end_date = datetime(2025, 12, 31, 23, 59, 59)
         cur.execute("""TRUNCATE public.budget CASCADE;""")
+        cur.execute("""TRUNCATE public.admin_announcements CASCADE;""")
         cur.execute("""TRUNCATE public.target_specification CASCADE;""")
         cur.execute(sql_queries["target_specification"])
         for i in range(0, n_entries):
@@ -105,22 +111,33 @@ def insert_random_data(table_name, n_entries=10, clear_table=True):
             random_timestamp = start_date + timedelta(seconds=random_seconds)
 
             random_cost = np.random.randint(10, 100)
-            values = (
-                id,
-                random_timestamp,
-                random_timestamp,
-                random_timestamp,
-                random_timestamp,
-                random_cost,
-            )
+            if i%2 == 0:
+                values = (
+                    id,
+                    'COMPLETED',
+                    'COMPLETED',
+                    random_timestamp,
+                    random_timestamp + timedelta(hours=1),
+                    random_timestamp + timedelta(hours=2),
+                    None,
+                    random_cost,
+                )
+            else:
+                values = (
+                    id,
+                    'CANCELLED',
+                    'CANCELLED',
+                    random_timestamp,
+                    random_timestamp + timedelta(hours=1),
+                    None,
+                    random_timestamp + timedelta(hours=2),
+                    random_cost,
+                )
             cur.execute(sql_queries["circuit_job"], values)
+            
+            values = (id, random_timestamp, random_timestamp + timedelta(hours=2))
+            cur.execute(sql_queries["admin"], values)
 
     connection.commit()
     cur.close()
     connection.close()
-
-
-if __name__ == "__main__":
-    pass
-    insert_random_data("user", 20)
-    insert_random_data("circuit_job", 20)
