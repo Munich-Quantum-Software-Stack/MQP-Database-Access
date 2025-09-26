@@ -43,10 +43,9 @@ def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
     query = f"SELECT * FROM circuit_job WHERE owner = '{identity}'"
 
     if filter_query:
-        query+=f" AND status = '{filter_query}'"
-        n_total = int(table.select_by_sql(f"SELECT COUNT(*) FROM circuit_job WHERE owner = '{identity} AND status = '{filter_query}'"))
+        n_total = int(table.select_by_sql(f"SELECT COUNT(*) FROM circuit_job WHERE owner = {identity} AND status = {filter_query}"))
     else:
-        n_total = int(table.select_by_sql(f"SELECT COUNT(*) FROM circuit_job WHERE owner = '{identity}"))
+        n_total = int(table.select_by_sql(f"SELECT COUNT(*) FROM circuit_job WHERE owner = {identity}"))
 
     if order_by:
         query+=f" ORDER BY {order_by}"
