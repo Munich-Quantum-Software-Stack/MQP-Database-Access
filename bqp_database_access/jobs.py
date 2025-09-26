@@ -34,31 +34,29 @@ def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
     expected to reduce fetch time and ease query load) for the case where jobs have to be
     displayed on MQP website page
     """
-
+    start_list = page*jobs_per_page
     quantum_db = open_database()
     user = quantum_db.User.get(identity=identity)
+    table = quantum_db.CircuitJob
     if user is None:
         return {"jobs": [], "totaljob_nr": 0}
-
-    query = quantum_db.CircuitJob.select(lambda j: str(j.owner) == identity)
+    query = f"SELECT * FROM circuit_job WHERE owner = '{identity}'"
 
     if filter_query:
-        query = query.filter(lambda j: j.status == filter_query)
+        query+=f" AND status = '{filter_query}'"
 
-    n_total = query.count()
+    if order_by:
+        query+=f" ORDER BY {order_by}"
 
-    if order == "DESC":
-        page =  n_total - page
+    query+=f" {order}"
+    query+=f" LIMIT {jobs_per_page}"
+    query+=f" OFFSET {start_list}"
+    print(f"Query was {query}")
+    query_res = table.select_by_sql(query)
+    print(f"query_res was {query_res}")
+    n_total = len(query_res)
 
-    start_list = page*jobs_per_page
-
-    if order_by == "ID":
-        query = query.order_by(quantum_db.CircuitJob.id)
-    elif order_by == "DATE":
-        query = query.order_by(quantum_db.CircuitJob.timestamp_submitted)
-    elif order_by == "STATUS":
-        query = query.order_by(quantum_db.CircuitJob.id)
-    return {"jobs": list(query.limit(jobs_per_page, offset=start_list)),
+    return {"jobs": query_res,
             "totaljob_nr": int(n_total)}
 
 def fetch_by_identity_total_job_nr(identity: str) -> int:  # type: ignore
