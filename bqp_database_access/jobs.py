@@ -44,6 +44,7 @@ def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
 
     if filter_query:
         n_total = quantum_db.select(f"SELECT COUNT(*) FROM circuit_job WHERE owner = '{identity}' AND status = '{filter_query}'")[0]
+        query += f"AND status = '{filter_query}'"
     else:
         n_total = quantum_db.select(f"SELECT COUNT(*) FROM circuit_job WHERE OWNER = '{identity}'")[0]
     
