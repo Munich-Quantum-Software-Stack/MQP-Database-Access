@@ -54,9 +54,7 @@ def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
     query+=f" {order}"
     query+=f" LIMIT {jobs_per_page}"
     query+=f" OFFSET {start_list}"
-    print(f"Query was {query}")
     query_res = table.select_by_sql(query)
-    print(f"query_res was {query_res}")
 
     return {"jobs": query_res,
             "totaljob_nr": int(n_total)}
