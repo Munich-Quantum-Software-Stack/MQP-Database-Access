@@ -43,10 +43,10 @@ def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
     query = f"SELECT * FROM circuit_job WHERE owner = '{identity}'"
 
     if filter_query:
-        n_total = int(table.select_by_sql(f"SELECT COUNT(*) FROM circuit_job WHERE owner = {identity} AND status = {filter_query}"))
+        n_total = quantum_db.select(f"SELECT COUNT(*) FROM circuit_job WHERE owner = '{identity}' AND status = '{filter_query}'")[0]
     else:
-        n_total = int(table.select_by_sql(f"SELECT COUNT(*) FROM circuit_job WHERE owner = {identity}"))
-
+        n_total = quantum_db.select(f"SELECT COUNT(*) FROM circuit_job WHERE OWNER = '{identity}'")[0]
+    
     if order_by:
         query+=f" ORDER BY {order_by}"
 
@@ -54,20 +54,8 @@ def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
     query+=f" LIMIT {jobs_per_page}"
     query+=f" OFFSET {start_list}"
     query_res = table.select_by_sql(query)
-
     return {"jobs": query_res,
             "totaljob_nr": int(n_total)}
-
-def fetch_by_identity_total_job_nr(identity: str) -> int:  # type: ignore
-    """
-    fetch total nr of circuit jobs belonging to a user
-    """
-    quantum_db = open_database()
-
-    user = quantum_db.User.get(identity=identity)
-    if user is None:
-        return 0
-    return quantum_db.CircuitJob.select(owner=identity).count()
 
 @db_session
 def fetch_hamiltonian_job_by_identity(identity: str) -> list["HamiltonianJob"]:  # type: ignore
