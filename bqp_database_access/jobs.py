@@ -44,7 +44,7 @@ def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
 
     if filter_query:
         query+=f" AND status = '{filter_query}'"
-
+    query_len = table.select_by_sql(query).count()
     if order_by:
         query+=f" ORDER BY {order_by}"
 
