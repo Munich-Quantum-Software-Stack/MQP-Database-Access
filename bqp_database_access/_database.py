@@ -86,8 +86,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
         name = PrimaryKey(str, auto=False)
         note = Optional(str)
-        users = Set("User", table="users_in_user_groups",
-                    reverse="user_groups")
+        users = Set("User", table="users_in_user_groups", reverse="user_groups")
         budgets = Set("Budget", table="user_groups_in_budgets")
         time_slots = Set("TimeSlots", table="user_groups_in_time_slots")
         owner = Required("User")
@@ -150,6 +149,53 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         executed_circuit = Optional(str)
 
         queued = Required(bool, default=False)
+
+    class timestamp_data(database.Entity):
+        _table_ = "timestamp_data"
+        id = Required(CircuitJob)
+
+        API_entry = Required(datetime)
+        API_exit = Required(datetime)
+
+        QDB_entry = Optional(datetime)
+        QDB_exit = Optional(datetime)
+
+        QJR_entry = Optional(datetime)
+        QJR_exit = Optional(datetime)
+
+        ISV_JR_entry = Optional(datetime)
+        ISV_JR_exit = Optional(datetime)
+
+        Quantum_Daemon_JR_entry = Optional(datetime)
+        Quantum_Daemon_JR_exit = Optional(datetime)
+
+        Generator_entry = Optional(datetime)
+        Generator_exit = Optional(datetime)
+
+        Scheduler_entry = Optional(datetime)
+        Scheduler_exit = Optional(datetime)
+
+        Pass_runner_entry = Optional(datetime)
+        Pass_runner_exit = Optional(datetime)
+
+        Passes_applied = Optional(
+            datetime
+        )  # This is a dictionary listing entry and exit-times for passes
+
+        Transpiler_entry = Optional(datetime)
+        Trnaspiler_exit = Optional(datetime)
+
+        Submitter_entry = Optional(datetime)
+        Submitter_exit = Optional(datetime)
+
+        Pass_selection_entry = Optional(datetime)
+        Pass_selection_exit = Optional(datetime)
+
+        Knitter_entry = Optional(datetime)
+        Knitter_exit = Optional(datetime)
+
+        Job_execution_start = Optional(datetime)
+        Job_execution_end = Optional(datetime)
 
     class HamiltonianJob(database.Entity):
         _table_ = "hamiltonian_job"
@@ -297,8 +343,9 @@ def _define_database(create_tables: bool = False, **db_params):
 
 
 def open_database(create_tables: bool = False):
-    if os.getenv("QUANTUM_DB_TESTING") is not None and [os.getenv("USER_TESTING") == ""
-    or os.getenv("USER_TESTING") is None]:
+    if os.getenv("QUANTUM_DB_TESTING") is not None and [
+        os.getenv("USER_TESTING") == "" or os.getenv("USER_TESTING") is None
+    ]:
         return _define_database(
             create_tables=create_tables,
             provider="sqlite",
