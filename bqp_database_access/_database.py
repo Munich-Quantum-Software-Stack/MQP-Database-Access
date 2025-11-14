@@ -153,8 +153,8 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         timestamp_data = Optional("TimestampData", reverse="id")
 
     class TimestampData(database.Entity):
-        _table_ = "timestamp_data"
-        id = PrimaryKey(CircuitJob, reverse="timestamp_data")
+        _table_ = "TimestampData"
+        id = PrimaryKey(CircuitJob, reverse="TimestampData")
 
         api_entry = Required(datetime)
         api_exit = Required(datetime)
@@ -180,12 +180,12 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         pass_runner_entry = Optional(datetime)
         pass_runner_exit = Optional(datetime)
 
-        Passes_applied = Optional(
+        passes_applied = Optional(
             datetime
         )  # This is a dictionary listing entry and exit-times for passes
 
-        Transpiler_entry = Optional(datetime)
-        Transpiler_exit = Optional(datetime)
+        transpiler_entry = Optional(datetime)
+        transpiler_exit = Optional(datetime)
 
         submitter_entry = Optional(datetime)
         submitter_exit = Optional(datetime)
