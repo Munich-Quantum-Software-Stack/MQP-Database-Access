@@ -156,29 +156,29 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         _table_ = "timestamp_data"
         id = PrimaryKey(CircuitJob, reverse="timestamp_data")
 
-        API_entry = Required(datetime)
-        API_exit = Required(datetime)
+        api_entry = Required(datetime)
+        api_exit = Required(datetime)
 
-        QDB_entry = Optional(datetime)
-        QDB_exit = Optional(datetime)
+        qdb_entry = Optional(datetime)
+        qdb_exit = Optional(datetime)
 
-        QJR_entry = Optional(datetime)
-        QJR_exit = Optional(datetime)
+        qjr_entry = Optional(datetime)
+        qjr_exit = Optional(datetime)
 
-        ISV_JR_entry = Optional(datetime)
-        ISV_JR_exit = Optional(datetime)
+        isv_jr_entry = Optional(datetime)
+        isv_jr_exit = Optional(datetime)
 
-        Quantum_Daemon_JR_entry = Optional(datetime)
-        Quantum_Daemon_JR_exit = Optional(datetime)
+        quantum_daemon_jr_entry = Optional(datetime)
+        quantum_daemon_jr_exit = Optional(datetime)
 
-        Generator_entry = Optional(datetime)
-        Generator_exit = Optional(datetime)
+        generator_entry = Optional(datetime)
+        generator_exit = Optional(datetime)
 
-        Scheduler_entry = Optional(datetime)
-        Scheduler_exit = Optional(datetime)
+        scheduler_entry = Optional(datetime)
+        scheduler_exit = Optional(datetime)
 
-        Pass_runner_entry = Optional(datetime)
-        Pass_runner_exit = Optional(datetime)
+        pass_runner_entry = Optional(datetime)
+        pass_runner_exit = Optional(datetime)
 
         Passes_applied = Optional(
             datetime
@@ -187,17 +187,17 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         Transpiler_entry = Optional(datetime)
         Transpiler_exit = Optional(datetime)
 
-        Submitter_entry = Optional(datetime)
-        Submitter_exit = Optional(datetime)
+        submitter_entry = Optional(datetime)
+        submitter_exit = Optional(datetime)
 
-        Pass_selection_entry = Optional(datetime)
-        Pass_selection_exit = Optional(datetime)
+        pass_selection_entry = Optional(datetime)
+        pass_selection_exit = Optional(datetime)
 
-        Knitter_entry = Optional(datetime)
-        Knitter_exit = Optional(datetime)
+        knitter_entry = Optional(datetime)
+        knitter_exit = Optional(datetime)
 
-        Job_execution_start = Optional(datetime)
-        Job_execution_end = Optional(datetime)
+        job_execution_start = Optional(datetime)
+        job_execution_end = Optional(datetime)
 
     class HamiltonianJob(database.Entity):
         _table_ = "hamiltonian_job"
