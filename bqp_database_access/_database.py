@@ -150,11 +150,11 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
         queued = Required(bool, default=False)
 
-        timestamp_data = Optional("TimestampData", reverse="id")
+        timestamp_data = Optional("TimestampData", reverse="circuit_job")
 
     class TimestampData(database.Entity):
-        _table_ = "TimestampData"
-        id = PrimaryKey(CircuitJob, reverse="TimestampData")
+        _table_ = "timestamp_data"
+        circuit_job = Required(CircuitJob, reverse="timestamp_data")
 
         api_entry = Required(datetime)
         api_exit = Required(datetime)
@@ -334,7 +334,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 # pylint: enable=unused-variable
 
 
-def _define_database(create_tables: bool = False, **db_params):
+def _define_database(create_tables: bool = False, **db_params) -> Database:
     db = Database(**db_params)
 
     _define_entities(db)
@@ -344,7 +344,7 @@ def _define_database(create_tables: bool = False, **db_params):
     return db
 
 
-def open_database(create_tables: bool = False):
+def open_database(create_tables: bool = False) -> Database:
     if os.getenv("QUANTUM_DB_TESTING") is not None and [
         os.getenv("USER_TESTING") == "" or os.getenv("USER_TESTING") is None
     ]:
