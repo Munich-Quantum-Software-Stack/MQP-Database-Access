@@ -91,9 +91,16 @@ def update_timestamp_data_submitted(id: str) -> None:
 @db_session
 def fetch_timestamp_data_by_identity(
     id: str,
-) -> list["TimestampData"]:
+) -> list["TimestampData"] | None:
     quantum_db = open_database()
 
-    job = list(quantum_db.TimestampData.select(id=id))
-
+    try:
+        query = quantum_db.TimestampData.select(id=id)
+        job = list(query)
+    except Exception as e:
+        print("Job metrics cannot be found (or not specifed) for this job")
+        return None
+    if not job:
+        print(f"Job metrics cannot be found (or not specified) for this job")
+        return None
     return job

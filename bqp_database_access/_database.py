@@ -6,6 +6,7 @@ import os
 from datetime import datetime
 from pony.orm import Database, Optional, PrimaryKey, Required, Set  # type: ignore
 
+
 # if os.getenv("QUANTUM_DB_TESTING") is not None:
 #     db_config.set_test_env()
 
@@ -335,11 +336,15 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
 
 def _define_database(create_tables: bool = False, **db_params) -> Database:
+
     db = Database(**db_params)
 
     _define_entities(db)
 
-    db.generate_mapping(create_tables=create_tables)
+    try:
+        db.generate_mapping(create_tables=create_tables)
+    except Exception as e:
+        print(e)
 
     return db
 
