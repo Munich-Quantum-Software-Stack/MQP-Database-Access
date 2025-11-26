@@ -89,7 +89,7 @@ def update_timestamp_data_submitted(id: str) -> None:
 
 
 @db_session
-def fetch_timestamp_data_by_identity(
+def fetch_timestamp_data_by_job_id(
     id: str,
 ) -> list["TimestampData"] | None:
     quantum_db = open_database()
