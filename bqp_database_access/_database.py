@@ -154,6 +154,38 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         timestamp_data = Optional("TimestampData", reverse="circuit_job")
 
     class TimestampData(database.Entity):
+        """Table for storing job metrics.
+        For each metric, there are two corresponding columns in the table reffering to start and finist times as timestamps.
+        Coloumns:
+            api_entry: timestamp when the job entered the MQP API
+            api_exit: timestamp when the job exited the MQP API
+            qdb_entry: timestamp when the job entered the QuantumDB
+            qdb_exit: timestamp when the job exited the QuantumDB
+            qjr_entry: timestamp when the job entered the MQSS Quantum Job Runner
+            qjr_exit: timestamp when the job exited the MQSS Quantum Job Runner
+            isv_jr_entry: timestamp when the job entered the ISV Job Runner
+            isv_jr_exit: timestamp when the job exited the ISV Job Runner
+            quantum_daemon_jr_entry: timestamp when the job entered the Quantum Daemon Job Runner
+            quantum_daemon_jr_exit: timestamp when the job exited the Quantum Daemon Job Runner
+            generator_entry: timestamp when the job entered the circuit generator
+            generator_exit: timestamp when the job exited the circuit generator
+            scheduler_entry: timestamp when the job entered the scheduler
+            scheduler_exit: timestamp when the job exited the scheduler
+            pass_runner_entry: timestamp when the job entered the pass runner
+            pass_runner_exit: timestamp when the job exited the pass runner
+            passes_applied: dictionary listing entry and exit-times for each pass applied
+            transpiler_entry: timestamp when the job entered the transpiler
+            transpiler_exit: timestamp when the job exited the transpiler
+            submitter_entry: timestamp when the job entered the submitter
+            submitter_exit: timestamp when the job exited the submitter
+            pass_selection_entry: timestamp when the job entered the pass selection
+            pass_selection_exit: timestamp when the job exited the pass selection
+            knitter_entry: timestamp when the job entered the knitter
+            knitter_exit: timestamp when the job exited the knitter
+            job_execution_start: timestamp when the job started execution on the quantum hardware
+            job_execution_end: timestamp when the job finished execution on the quantum hardware
+        """
+
         _table_ = "timestamp_data"
         circuit_job = Required(CircuitJob, reverse="timestamp_data")
 
