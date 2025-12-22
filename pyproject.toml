@@ -3,7 +3,7 @@ name = "bqp-database-access"
 version = "0.3.24"
 description = ""
 authors = [{ name = "Martin Ruefenacht", email = "martin.ruefenacht@lrz.de" }]
-dependencies = ["pony>=0.7", "bcrypt>=4.0", "psycopg2-binary>=2.9.10"]
+dependencies = ["pony>=0.7", "bcrypt>=4.0", "psycopg2-binary>=2.9.10", "Werkzeug==3.1.4", "python-ldap-test>=0.3.1", "pytest>=9.0.2", "numpy", "eliot>=1.17.5", "cffi>=2.0.0"] 
 requires-python = ">=3.10,<3.12"
 readme = "README.md"
 license = { text = "MIT" }
@@ -15,6 +15,7 @@ dev = [
     "mypy>=1.14.1",
     "pylint>=3.3.8",
     "pre-commit>=4.1.0",
+    "pytest>=9.0.2",
 ]
 [build-system]
 requires = ["pdm-backend"]
@@ -52,9 +53,9 @@ target-version = ['py310']
 env = [
     "QUANTUM_DB_TESTING=TRUE",
     "QUANTUM_DB_FILENAME=test_db.sqlite",
-    "QUANTUM_DB_USER=",
-    "QUANTUM_DB_PASS=",
-    "QUANTUM_DB_HOST=",
+    "QUANTUM_DB_USER=postgres",
+    "QUANTUM_DB_PASS=example",
+    "QUANTUM_DB_HOST=qdb",
 ]
 pythonpath = ["."]
 
