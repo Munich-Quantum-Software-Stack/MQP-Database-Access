@@ -39,7 +39,7 @@ def __getattr__(name: str):
 
 
 def create_app():
-    from . import config, login, tokens, jobs, resources, feedbacks, request_access # Ege
+    from . import config, login, tokens, jobs, resources, feedbacks, request_access
     app = config.app
     try:
         app.register_blueprint(login.BLUEPRINT)

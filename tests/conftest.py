@@ -21,26 +21,6 @@ from ldap_test import LdapServer
 
 from bqp_database_access.database_population_functions import populate_test_database
 
-
-
-"""
-def delete_local_database() -> None:
-    db = open_database()
-    path = db.provider.pool.filename
-    db.disconnect()
-    os.remove(path)
-
-@fixture
-def empty_db():
-    db = open_database(create_tables=True)
-    breakpoint() # breakpoint
-    db.disconnect()
-
-    yield # test runs here
-
-    delete_local_database()
-"""
-
 @pytest.fixture(scope="module")
 def app():
     app = create_app()
@@ -180,7 +160,6 @@ def create_local_database():
 
     except TransactionError as error:
         pass
-
 
 
 def delete_local_database() -> None:
