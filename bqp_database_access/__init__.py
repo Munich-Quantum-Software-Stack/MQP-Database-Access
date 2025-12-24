@@ -2,15 +2,13 @@
 from eliot import add_destinations
 import os
 from . import db_config as config
-
-from . import jobs
+from . import jobs, users
 
 if os.getenv("QUANTUM_DB_TESTING") is None:
     from eliot.journald import JournaldDestination
 
 if os.getenv("QUANTUM_DB_TESTING") is None:
     add_destinations(JournaldDestination())
-
 
 
 def create_app():
