@@ -1,6 +1,6 @@
 from eliot import add_destinations
 import os
-from . import config
+from . import db_config as config # from . import config
 
 if os.getenv("QUANTUM_DB_TESTING") is None:
     from eliot.journald import JournaldDestination
