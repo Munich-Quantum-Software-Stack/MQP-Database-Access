@@ -25,15 +25,23 @@ def fetch_by_identity(identity: str) -> list["CircuitJob"]:  # type: ignore
 
 
 @db_session
-def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
-                             order: str, order_by: str, filter_query: str) -> \
-    dict[str, list["CircuitJob"] | int]:  # type: ignore
+def fetch_by_identity_pages(
+    identity: str,
+    page: int,
+    jobs_per_page: int,
+    order: str = "DESC",
+    order_by: str = "id",
+    filter_query: str = "",
+    ) -> dict[str, list["CircuitJob"] | int]:
     """
     fetch all Circuit jobs belonging to a user with particular identity and pagintate the
     results (instead of fetchign all db entries, only a certain range is fetched which is
     expected to reduce fetch time and ease query load) for the case where jobs have to be
     displayed on MQP website page
     """
+    """def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
+                             order: str, order_by: str, filter_query: str) -> \
+    dict[str, list["CircuitJob"] | int]:  # type: ignore"""
     start_list = page*jobs_per_page
     quantum_db = open_database()
     user = quantum_db.User.get(identity=identity)
