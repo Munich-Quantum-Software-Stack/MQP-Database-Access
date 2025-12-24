@@ -1,1 +1,32 @@
-from . import budgets, feedback, jobs, resources, status, tokens, users, db_config
+from eliot import add_destinations
+import os
+from . import config
+
+if os.getenv("QUANTUM_DB_TESTING") is None:
+    from eliot.journald import JournaldDestination
+
+
+from . import login
+from . import tokens
+from . import jobs
+from . import resources
+from . import feedbacks
+from . import request_access
+
+if os.getenv("QUANTUM_DB_TESTING") is None:
+    add_destinations(JournaldDestination())
+
+
+
+def create_app():
+    app = config.app
+    try:
+        app.register_blueprint(login.BLUEPRINT)
+        app.register_blueprint(tokens.BLUEPRINT)
+        app.register_blueprint(jobs.BLUEPRINT)
+        app.register_blueprint(resources.BLUEPRINT)
+        app.register_blueprint(feedbacks.BLUEPRINT)
+        app.register_blueprint(request_access.BLUEPRINT)
+    except:
+        pass
+    return app
