@@ -22,7 +22,7 @@ def delete_local_database() -> None:
     os.remove(path)
 
 
-@fixture
+@pytest.fixture
 def empty_db():
     db = open_database(create_tables=True)
     db.disconnect()
