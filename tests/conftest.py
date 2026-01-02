@@ -10,7 +10,6 @@ from pony.orm import select
 from datetime import datetime
 from http import HTTPStatus
 from werkzeug.datastructures import Headers
-from ldap_test import LdapServer
 
 from bqp_database_access._database import open_database
 
