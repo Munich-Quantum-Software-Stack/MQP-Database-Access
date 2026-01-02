@@ -42,57 +42,12 @@ def app():
 
     # other setup can go here
     create_local_database()
-    server = create_ldap_server()
 
     yield app
 
     # clean up / reset resources here
 
     delete_local_database()
-    server.stop()
-
-
-def create_ldap_server():
-    properties = {
-        "port": 8888,
-        "bind_dn": "cn=ldap_test_user,ou=QuantumComputing,ou=Kennungen,o=lrz-muenchen,c=de",
-        "password": "ldap_test_password",
-        "base": {
-            "objectclass": ["country"],
-            "dn": "c=de",
-            "attributes": {"o": "lrz-muenchen"},
-        },
-        "entries": [
-            {
-                "objectclass": ["organization"],
-                "dn": "o=lrz-muenchen,c=de",
-                "attributes": {"o": "lrz-muenchen"},
-            },
-            {
-                "objectclass": ["organizationalunit"],
-                "dn": "ou=Kennungen,o=lrz-muenchen,c=de",
-                "attributes": {"ou": "Kennungen"},
-            },
-            {
-                "objectclass": ["organizationalunit"],
-                "dn": "ou=Intranet,ou=Kennungen,o=lrz-muenchen,c=de",
-                "attributes": {"ou": "Intranet"},
-            },
-            {
-                "objectclass": ["organizationalunit"],
-                "dn": "ou=QuantumComputing,ou=Kennungen,o=lrz-muenchen,c=de",
-                "attributes": {"ou": "QuantumComputing"},
-            },
-            {
-                "objectclass": ["user"],
-                "dn": "cn=ldap_test_user,ou=QuantumComputing,ou=Kennungen,o=lrz-muenchen,c=de",
-                "attributes": {"cn": "ldap_test_user"},
-            },
-        ],
-    }
-    server = LdapServer(properties, java_delay=0.5)
-    server.start()
-    return server
 
 def create_local_database():
     db = open_database(create_tables=True)
