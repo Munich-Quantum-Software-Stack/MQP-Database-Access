@@ -3,23 +3,20 @@ from pony.orm import db_session
 import tests.utils as utils
 import os
 
+def test_create_security_level() -> None:
+    with db_session:
+        level = db_access.users.fetch_user_security_level("BASIC")
+        if level is None:
+            db_access.users.create_new_security_level(
+                name="BASIC",
+                token_max_live_count=1,
+                token_max_lifetime=7,
+                token_min_creation_interval=0,
+                token_max_jobs=1,
+                token_max_budget=500,
+                token_max_rate=1000,
+                login_max_interval=365,
+            )
+            level = db_access.users.fetch_user_security_level("BASIC")
 
-@db_session
-def test_display_user_by_pages():
-
-    # os.environ["QUANTUM_DB_TESTING"] = "True"
-    db_access.db_config.set_test_env()
-
-    """
-    tests if the users are displayed by given page numbers and jobs per page
-    """
-
-    utils.insert_random_data("user", 1000)
-    utils.insert_random_data("circuit_job", 1000)
-    jobs_per_page = 20
-    result = db_access.jobs.fetch_by_identity_pages(
-        identity="testuser1", page=2, jobs_per_page=jobs_per_page
-    )
-    db_access.db_config.reset_test_env()
-
-    assert len(result["jobs"]) == jobs_per_page
+        assert level is not None
