@@ -14,8 +14,23 @@ then, to initialize pyproject.toml from the project root (where pyproject.toml i
 pdm init
 ```
 
+## Database configuration for running tests in Docker
+
+When running the tests inside a Docker container, you must export the following environment variables inside that container (i.e. in the same shell where you run pdm run pytest).
+
+These variables configure the connection to the Postgres service on the Docker network.
+
+```
+export QUANTUM_DB_HOST=quantum_db   # DB service/container name on the Docker network
+export QUANTUM_DB_PORT=5432
+export QUANTUM_DB_USER=postgres
+export QUANTUM_DB_PASSWORD=example
+export QUANTUM_DB_NAME=postgres
+```
+
 Lastly, change the directory of file to /bqp-database-access#.
 ```
 pdm run pytest
 ```
+
 
