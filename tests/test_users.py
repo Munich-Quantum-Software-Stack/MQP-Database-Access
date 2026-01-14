@@ -22,7 +22,7 @@ def test_create_security_level(empty_db) -> None:
         assert db_access.users.fetch_user_security_level("BASIC") is not None
 """
 
-def test_create_security_level() -> None:
+def test_create_security_level(empty_db) -> None:
     with db_session:
         if db_access.users.fetch_user_security_level("BASIC") is None:
             db_access.users.create_new_security_level(
