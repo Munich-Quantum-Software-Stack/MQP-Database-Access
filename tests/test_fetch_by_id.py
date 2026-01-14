@@ -45,4 +45,4 @@ def test_display_user_by_pages():
         )
     db_access.db_config.reset_test_env()
 
-    assert len(result["jobs"]) <= jobs_per_page
+    assert len(result["jobs"]) == jobs_per_page
