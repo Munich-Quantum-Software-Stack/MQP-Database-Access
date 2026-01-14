@@ -16,18 +16,21 @@ from bqp_database_access._database import open_database
 
 def delete_local_database() -> None:
     db = open_database()
-    path = db.provider.pool.filename
-    db.disconnect()
-    os.remove(path)
 
+    filename = getattr(db.provider.pool, "filename", None)
+    if not filename:
+        db.disconnect()
+        return
+    
+    db.disconnect()
+    os.remove(filename)
 
 @pytest.fixture
 def empty_db():
     db = open_database(create_tables=True)
-    db.disconnect()
-
     yield
-
+    db.disconnect()
+    
     delete_local_database()
 
 @pytest.fixture(scope="module")
@@ -109,13 +112,6 @@ def create_local_database():
 
     except TransactionError as error:
         pass
-
-
-def delete_local_database() -> None:
-    db = open_database()
-    path = db.provider.pool.filename
-    db.disconnect()
-    os.remove(path)
 
 
 @pytest.fixture()
