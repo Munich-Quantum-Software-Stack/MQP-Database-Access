@@ -30,7 +30,7 @@ def empty_db():
     db = open_database(create_tables=True)
     yield
     db.disconnect()
-    
+
     delete_local_database()
 
 @pytest.fixture(scope="module")
@@ -76,7 +76,6 @@ def create_local_database():
                 "mqp_edu_test_user", "test_password", "BASIC", "mqp_edu_test@lrz.de", "LRZ", "QUANTUM"
             )
 
-            ### This code is to make the test_fetch_all_jobs pass by inserting dummies into the db
             quantum_db = open_database()
             quantum_db.insert("budget", name="temp_budget", note=' ', owner="test_user", credits=1000)
 
