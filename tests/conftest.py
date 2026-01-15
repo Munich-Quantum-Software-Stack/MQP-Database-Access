@@ -28,7 +28,7 @@ def delete_local_database() -> None:
 @pytest.fixture
 def empty_db():
     db = open_database(create_tables=True)
-    yield
+    yield db
     db.disconnect()
 
     delete_local_database()
