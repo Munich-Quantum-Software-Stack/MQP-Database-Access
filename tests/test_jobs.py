@@ -38,7 +38,7 @@ def test_fetch_by_identity(empty_db):
             user = quantum_db.User(
                 identity=identity,
                 security_level=level,
-                email=identity,
+                email="test@lrz.de",
                 affiliation="LRZ",
                 association="LDAP",
             )
@@ -113,7 +113,7 @@ def test_fetch_by_identity_pages(empty_db):
         user = quantum_db.User(
             identity=identity,
             security_level=level,
-            email=identity,
+            email="test@lrz.de",
             affiliation="LRZ",
             association="LDAP",
         )
@@ -227,14 +227,14 @@ def test_fetch_result_by_job_id_and_identity(empty_db):
         user_a = quantum_db.User(
             identity=identity_a,
             security_level=level,
-            email=identity_a,
+            email="test_a@lrz.de",
             affiliation="LRZ",
             association="LDAP",
         )
         user_b = quantum_db.User(
             identity=identity_b,
             security_level=level,
-            email=identity_b,
+            email="test_b@lrz.de",
             affiliation="LRZ",
             association="LDAP",
         )
@@ -306,7 +306,7 @@ def test_create_job_creates_job(empty_db, monkeypatch):
         user = quantum_db.User(
             identity=identity,
             security_level=level,
-            email=identity,
+            email="test@lrz.de",
             affiliation="LRZ",
             association="LDAP",
         )
@@ -331,8 +331,8 @@ def test_create_job_creates_job(empty_db, monkeypatch):
             shots=10,
             circuit="OPENQASM 2.0; // test",
             owner=identity,
-            budget=budget.name,
-            target_spec=ts.name,
+            budget=budget,
+            target_spec=ts,
             circuit_format="qasm",
             no_modify=True,
             queued=True,
@@ -356,9 +356,123 @@ def test_create_job_creates_job(empty_db, monkeypatch):
     assert job.timestamp_submitted is not None
 
 
-def test_is_within_active_job_limit():
-    # is_within_active_job_limit
-    return None
+def test_is_within_active_job_limit(empty_db):
+    """
+    Tests whether `is_within_active_job_limit` correctly enforces the maximum
+    number of active (WAITING) jobs per user and target specification.
+
+    Verifies that:
+    * WAITING jobs are counted
+    * non-WAITING jobs are ignored
+    * jobs of other users are ignored
+    * jobs with other target specifications are ignored
+    * reaching the limit returns False
+    """
+    quantum_db = empty_db
+    identity = "test_userA"
+    MAX_ACTIVE_JOBS_PER_USER_PER_RESOURCE = 2
+
+    with db_session:
+        level = quantum_db.UserSecurityLevel(
+            name="BASIC",
+            token_max_live_count=1,
+            token_max_lifetime=30,
+            token_min_creation_interval=1,
+            token_max_jobs=100,
+            token_max_budget=100,
+            token_max_rate=1,
+            login_max_interval=365,
+        )
+
+        user = quantum_db.User(
+            identity=identity,
+            security_level=level,
+            email="test@lrz.de",
+            affiliation="LRZ",
+            association="LDAP",
+        )
+
+        budget = quantum_db.Budget(
+            name="budget-test",
+            owner=user,
+            credits=100,
+        )
+
+        ts_a = quantum_db.TargetSpecification(
+            name="ts-a",
+            specification_type="test",
+        )
+        ts_b = quantum_db.TargetSpecification(
+            name="ts-b",
+            specification_type="test",
+        )
+
+        jobs = []
+        for _ in range(MAX_ACTIVE_JOBS_PER_USER_PER_RESOURCE - 1):
+            jobs.append(
+                quantum_db.CircuitJob(
+                    status="WAITING",
+                    shots=1,
+                    circuit="OPENQASM 2.0",
+                    circuit_format="qasm",
+                    owner=user,
+                    budget=budget,
+                    target_specification=ts_a,
+                )
+            )
+
+        quantum_db.CircuitJob(
+            status="COMPLETED",
+            shots=1,
+            circuit="OPENQASM 2.0",
+            circuit_format="qasm",
+            owner=user,
+            budget=budget,
+            target_specification=ts_a,
+        )
+
+        quantum_db.CircuitJob(
+            status="WAITING",
+            shots=1,
+            circuit="OPENQASM 2.0",
+            circuit_format="qasm",
+            owner=user,
+            budget=budget,
+            target_specification=ts_b,
+        )
+
+        other_user = quantum_db.User(
+            identity="other_user",
+            security_level=level,
+            email="other@lrz.de",
+            affiliation="LRZ",
+            association="LDAP",
+        )
+        quantum_db.CircuitJob(
+            status="WAITING",
+            shots=1,
+            circuit="OPENQASM 2.0",
+            circuit_format="qasm",
+            owner=other_user,
+            budget=budget,
+            target_specification=ts_a,
+        )
+
+        assert is_within_active_job_limit(quantum_db, jobs[0]) is True
+
+        last_job = quantum_db.CircuitJob(
+            status="WAITING",
+            shots=1,
+            circuit="OPENQASM 2.0",
+            circuit_format="qasm",
+            owner=user,
+            budget=budget,
+            target_specification=ts_a,
+        )
+
+        assert quantum_db.CircuitJob.select(owner=user, status="WAITING", target_specification=ts_a).count() == MAX_ACTIVE_JOBS_PER_USER_PER_RESOURCE
+
+        assert is_within_active_job_limit(quantum_db, last_job) is False
 
 
 def test_filter_queued_if_offline_and_fetch():
