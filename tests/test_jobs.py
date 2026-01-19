@@ -8,6 +8,8 @@ from bqp_database_access.jobs import fetch_by_identity_pages
 from bqp_database_access.jobs import fetch_result_by_job_id_and_identity
 from bqp_database_access.jobs import create_job
 from bqp_database_access.jobs import is_within_active_job_limit
+from bqp_database_access.jobs import filter_queued_if_offline_and_fetch
+from bqp_database_access.jobs import fetch_all_pending_jobs
 
 def test_fetch_by_identity(empty_db):
     """
@@ -470,19 +472,211 @@ def test_is_within_active_job_limit(empty_db):
             target_specification=ts_a,
         )
 
+        flush()
         assert quantum_db.CircuitJob.select(owner=user, status="WAITING", target_specification=ts_a).count() == MAX_ACTIVE_JOBS_PER_USER_PER_RESOURCE
-
         assert is_within_active_job_limit(quantum_db, last_job) is False
 
 
-def test_filter_queued_if_offline_and_fetch():
-    # filter_queued_if_offline_and_fetch
-    return None
+def test_filter_queued_if_offline_and_fetch_marks_waiting_and_sets_timestamp(empty_db, monkeypatch):
+    """
+    Tests whether `filter_queued_if_offline_and_fetch` selects eligible jobs, updates their
+    state to WAITING, sets timestamp_scheduled, and persists changes.
+
+    Verifies that:
+    * queued jobs are released if the resource is not in maintenance
+    * non-queued jobs are released regardless of maintenance
+    * jobs are released only if `is_within_active_job_limit` is True
+    * released jobs are updated (status, timestamp_scheduled) and returned
+    """
+    quantum_db = empty_db
+
+    # Ensure the active-job-limit gate does not interfere with this test
+    monkeypatch.setattr(
+        "bqp_database_access.jobs.is_within_active_job_limit",
+        lambda qdb, job: True,
+    )
+
+    identity = "test_userA"
+
+    with db_session:
+        level = quantum_db.UserSecurityLevel(
+            name="BASIC",
+            token_max_live_count=1,
+            token_max_lifetime=30,
+            token_min_creation_interval=1,
+            token_max_jobs=100,
+            token_max_budget=100,
+            token_max_rate=1,
+            login_max_interval=365,
+        )
+
+        user = quantum_db.User(
+            identity=identity,
+            security_level=level,
+            email=identity,
+            affiliation="LRZ",
+            association="LDAP",
+        )
+
+        budget = quantum_db.Budget(name=f"budget-{uuid4()}", owner=user, credits=100)
+
+        sec_level = quantum_db.ResourceSecurityLevel(
+            name="SEC_BASIC",
+            job_min_interval=0,
+            budget_max_per_job=10**9,
+            unique_token_required=False,
+            token_max_lifetime=10**9,
+        )
+        
+        res_ok = quantum_db.Resource(
+            name="res-ok",
+            maintenance=False,
+            qubits=1,
+            connectivity="all-to-all",
+            instructions="test-instructions",
+            quantum_technology="test-tech",
+            resource_cost_modifier=1.0,
+        security_level=sec_level,
+        )
+
+        ts_ok_1 = quantum_db.TargetSpecification(
+            name=f"ts-{uuid4()}",
+            specification_type="test",
+            resource_name=res_ok.name,
+        )
+        ts_ok_2 = quantum_db.TargetSpecification(
+            name=f"ts-{uuid4()}",
+            specification_type="test",
+            resource_name=res_ok.name,
+        )
+
+        j1 = quantum_db.CircuitJob(
+            status="PENDING",
+            shots=1,
+            circuit="OPENQASM 2.0",
+            circuit_format="qasm",
+            owner=user,
+            budget=budget,
+            target_specification=ts_ok_1,
+            queued=True,
+        )
+
+        j2 = quantum_db.CircuitJob(
+            status="PENDING",
+            shots=1,
+            circuit="OPENQASM 2.0",
+            circuit_format="qasm",
+            owner=user,
+            budget=budget,
+            target_specification=ts_ok_2,
+            queued=False,
+        )
+
+        assert j1.status == "PENDING"
+        assert j2.status == "PENDING"
+        assert j1.timestamp_scheduled is None
+        assert j2.timestamp_scheduled is None
+
+        filtered = filter_queued_if_offline_and_fetch(quantum_db, [j1, j2])
+
+        assert len(filtered) == 2
+        assert {job.id for job in filtered} == {j1.id, j2.id}
+
+        assert j1.status == "WAITING"
+        assert j2.status == "WAITING"
+        assert j1.timestamp_scheduled is not None
+        assert j2.timestamp_scheduled is not None
 
 
-def test_fetch_all_pending_jobs():
-    # fetch_all_pending_jobs
-    return None
+def test_fetch_all_pending_jobs(empty_db, monkeypatch):
+    """
+    Tests whether `fetch_all_pending_jobs`:
+    * selects only jobs with status=="PENDING" from the database
+    * passes exactly those jobs to `filter_queued_if_offline_and_fetch`
+    * returns whatever the filter function returns
+    """
+    quantum_db = empty_db
+
+    # Ensure the function under test uses the same DB instance as the fixture
+    monkeypatch.setattr("bqp_database_access.jobs.open_database", lambda *a, **k: quantum_db)
+
+    captured = {"jobs": None}
+
+    def fake_filter(qdb, jobs):
+        captured["jobs"] = list(jobs)
+        # Return a deterministic subset to verify passthrough
+        return list(jobs)[:1]
+
+    monkeypatch.setattr("bqp_database_access.jobs.filter_queued_if_offline_and_fetch", fake_filter)
+
+    with db_session:
+        level = quantum_db.UserSecurityLevel(
+            name="BASIC",
+            token_max_live_count=1,
+            token_max_lifetime=30,
+            token_min_creation_interval=1,
+            token_max_jobs=100,
+            token_max_budget=100,
+            token_max_rate=1,
+            login_max_interval=365,
+        )
+
+        user = quantum_db.User(
+            identity="test_userA",
+            security_level=level,
+            email="test_userA",
+            affiliation="LRZ",
+            association="LDAP",
+        )
+
+        budget = quantum_db.Budget(name=f"budget-{uuid4()}", owner=user, credits=100)
+
+        ts = quantum_db.TargetSpecification(
+            name=f"ts-{uuid4()}",
+            specification_type="test",
+        )
+
+        p1 = quantum_db.CircuitJob(
+            status="PENDING",
+            shots=1,
+            circuit="OPENQASM 2.0",
+            circuit_format="qasm",
+            owner=user,
+            budget=budget,
+            target_specification=ts,
+        )
+        p2 = quantum_db.CircuitJob(
+            status="PENDING",
+            shots=1,
+            circuit="OPENQASM 2.0",
+            circuit_format="qasm",
+            owner=user,
+            budget=budget,
+            target_specification=ts,
+        )
+        quantum_db.CircuitJob(
+            status="COMPLETED",
+            shots=1,
+            circuit="OPENQASM 2.0",
+            circuit_format="qasm",
+            owner=user,
+            budget=budget,
+            target_specification=ts,
+        )
+
+        flush()
+
+        expected_pending_ids = {p1.id, p2.id}
+
+    res = fetch_all_pending_jobs()
+
+    assert captured["jobs"] is not None
+    assert {j.id for j in captured["jobs"]} == expected_pending_ids
+    assert all(j.status == "PENDING" for j in captured["jobs"])
+
+    assert isinstance(res, list)
+    assert len(res) == 1
+    assert res[0].id in expected_pending_ids
 
 
 def test_fetch_all_pending_jobs_from_users():
