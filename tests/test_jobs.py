@@ -11,6 +11,7 @@ from bqp_database_access.jobs import is_within_active_job_limit
 from bqp_database_access.jobs import filter_queued_if_offline_and_fetch
 from bqp_database_access.jobs import fetch_all_pending_jobs
 
+
 def test_fetch_by_identity(empty_db):
     """
     Tests whether `fetch_by_identity` returns all and only the jobs belonging to a given user.
@@ -153,11 +154,11 @@ def test_fetch_by_identity_pages(empty_db):
         order_by="id",
         filter_query="",
     )
-    jobs0 = list(res0["jobs"])
+    jobs1 = list(res0["jobs"])
     assert res0["totaljob_nr"] == 5
-    assert len(jobs0) == 2
-    assert [j.id for j in jobs0] == seeded_ids_asc[:2]
-    assert all(j.owner.identity == identity for j in jobs0)
+    assert len(jobs1) == 2
+    assert [j.id for j in jobs1] == seeded_ids_asc[:2]
+    assert all(j.owner.identity == identity for j in jobs1)
 
     res1 = fetch_by_identity_pages(
         identity=identity,
@@ -167,11 +168,11 @@ def test_fetch_by_identity_pages(empty_db):
         order_by="id",
         filter_query="",
     )
-    jobs1 = list(res1["jobs"])
+    jobs2 = list(res1["jobs"])
     assert res1["totaljob_nr"] == 5
-    assert len(jobs1) == 2
-    assert [j.id for j in jobs1] == seeded_ids_asc[2:4]
-    assert all(j.owner.identity == identity for j in jobs1)
+    assert len(jobs2) == 2
+    assert [j.id for j in jobs2] == seeded_ids_asc[2:4]
+    assert all(j.owner.identity == identity for j in jobs2)
 
     res_pending = fetch_by_identity_pages(
         identity=identity,
@@ -490,7 +491,6 @@ def test_filter_queued_if_offline_and_fetch_marks_waiting_and_sets_timestamp(emp
     """
     quantum_db = empty_db
 
-    # Ensure the active-job-limit gate does not interfere with this test
     monkeypatch.setattr(
         "bqp_database_access.jobs.is_within_active_job_limit",
         lambda qdb, job: True,
@@ -597,14 +597,12 @@ def test_fetch_all_pending_jobs(empty_db, monkeypatch):
     """
     quantum_db = empty_db
 
-    # Ensure the function under test uses the same DB instance as the fixture
     monkeypatch.setattr("bqp_database_access.jobs.open_database", lambda *a, **k: quantum_db)
 
     captured = {"jobs": None}
-
+    
     def fake_filter(qdb, jobs):
         captured["jobs"] = list(jobs)
-        # Return a deterministic subset to verify passthrough
         return list(jobs)[:1]
 
     monkeypatch.setattr("bqp_database_access.jobs.filter_queued_if_offline_and_fetch", fake_filter)
@@ -635,7 +633,7 @@ def test_fetch_all_pending_jobs(empty_db, monkeypatch):
             name=f"ts-{uuid4()}",
             specification_type="test",
         )
-
+        
         p1 = quantum_db.CircuitJob(
             status="PENDING",
             shots=1,
@@ -667,7 +665,7 @@ def test_fetch_all_pending_jobs(empty_db, monkeypatch):
         flush()
 
         expected_pending_ids = {p1.id, p2.id}
-
+    
     res = fetch_all_pending_jobs()
 
     assert captured["jobs"] is not None
