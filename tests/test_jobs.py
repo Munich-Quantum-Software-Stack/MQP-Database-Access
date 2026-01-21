@@ -447,4 +447,3 @@ def test_update_hybrid_job():
 def test_cancel_job():
     # cancel_job
     return None
-
