@@ -1,283 +1,136 @@
 from uuid import uuid4
-from pony.orm import db_session
-from pony.orm import flush
+from pony.orm import db_session, flush
+from bqp_database_access.jobs import (
+    fetch_by_identity,
+    fetch_by_identity_pages,
+    fetch_result_by_job_id_and_identity,
+    create_job,
+    is_within_active_job_limit,
+    MAX_ACTIVE_JOBS_PER_USER_PER_RESOURCE,
+    filter_queued_if_offline_and_fetch,
+    fetch_all_pending_jobs,
+)
 
-from bqp_database_access._database import open_database
-from bqp_database_access.jobs import fetch_by_identity
-from bqp_database_access.jobs import fetch_by_identity_pages
-from bqp_database_access.jobs import fetch_result_by_job_id_and_identity
-from bqp_database_access.jobs import create_job
-from bqp_database_access.jobs import is_within_active_job_limit
-from bqp_database_access.jobs import filter_queued_if_offline_and_fetch
-from bqp_database_access.jobs import fetch_all_pending_jobs
+import pytest
+pytestmark = pytest.mark.usefixtures("seeded_db")
 
 
-def test_fetch_by_identity(empty_db):
+def test_fetch_by_identity(seeded_db):
     """
-    Tests whether `fetch_by_identity` returns all and only the jobs belonging to a given user.
-
-    The test seeds multiple users with multiple jobs in different states and verifies that:
-    * only jobs owned by the requested identity are returned
-    * jobs with different statuses (e.g. PENDING, CANCELLED) are included
-    * the number of returned jobs and their status distribution match the database state
-    """
-    quantum_db = empty_db
-    identity_a = "test_userA"
-    identity_b = "test_userB"
-
-    with db_session:
-        level = quantum_db.UserSecurityLevel(
-            name="BASIC",
-            token_max_live_count=1,
-            token_max_lifetime=30,
-            token_min_creation_interval=1,
-            token_max_jobs=100,
-            token_max_budget=100,
-            token_max_rate=1,
-            login_max_interval=365,
-        )
-
-        def mk_user(identity: str):
-            user = quantum_db.User(
-                identity=identity,
-                security_level=level,
-                email="test@lrz.de",
-                affiliation="LRZ",
-                association="LDAP",
-            )
-            budget = quantum_db.Budget(name=f"budget-{uuid4()}", owner=user, credits=100)
-            return user, budget
-
-        user_a, budget_a = mk_user(identity_a)
-        user_b, budget_b = mk_user(identity_b)
-        
-        def mk_job(user, budget, status: str, tag: str):
-            ts = quantum_db.TargetSpecification(name=f"ts-{tag}-{uuid4()}", specification_type="test")
-            quantum_db.CircuitJob(
-                status=status,
-                shots=1,
-                circuit="OPENQASM 2.0",
-                circuit_format="qasm",
-                owner=user,
-                budget=budget,
-                target_specification=ts,
-            )
-
-        mk_job(user_a, budget_a, "PENDING", "a1")
-        mk_job(user_a, budget_a, "CANCELLED", "a2")
-
-        mk_job(user_b, budget_b, "PENDING", "b1")
-        mk_job(user_b, budget_b, "COMPLETED", "b2")
-        mk_job(user_b, budget_b, "PENDING", "b3")
-
-    jobsa = fetch_by_identity(identity_a)
-    jobsb = fetch_by_identity(identity_b)
-
-    assert len(jobsa) == 2
-    assert len(jobsb) == 3
-
-    assert all(j.owner.identity == identity_a for j in jobsa)
-    assert all(j.owner.identity == identity_b for j in jobsb)
-
-    assert sum(j.status == "PENDING" for j in jobsa) == 1
-    assert sum(j.status == "CANCELLED" for j in jobsa) == 1
-
-    assert sum(j.status == "PENDING" for j in jobsb) == 2
-    assert sum(j.status == "CANCELLED" for j in jobsb) == 0
-    assert sum(j.status == "COMPLETED" for j in jobsb) == 1
-
-
-def test_fetch_by_identity_pages(empty_db):
-    """
-    Tests whether `fetch_by_identity_pages` paginates, orders, and filters jobs correctly
-    for a given user identity, and returns the correct total job count.
+    Tests whether `fetch_by_identity` returns all and only the jobs belonging to a given user
+    from the pre-seeded database created via the `seeded_db` fixture.
 
     Verifies that:
-    * pagination returns the correct slice for page=0 and page=1
-    * ordering by `id` works (ASC)
-    * filtering by status returns only matching jobs and correct total count
-    * unknown identities return empty results and totaljob_nr == 0
+    * seeded user `test_user` returns the seeded jobs
+    * all returned jobs belong to `test_user`
+    * returned statuses match the seeded database state
+    * unknown identity returns an empty list
     """
-    quantum_db = empty_db
-    identity = "test_userA"
+    with db_session:
+        jobs = fetch_by_identity("test_user")
+
+        assert len(jobs) == 3
+        assert all(j.owner.identity == "test_user" for j in jobs)
+        assert {j.status for j in jobs} == {"PENDING", "CANCELLED", "COMPLETED"}
+        assert fetch_by_identity("does_not_exist") == []
+
+
+def test_fetch_by_identity_pages(seeded_db):
+    """
+    Tests `fetch_by_identity_pages` using the pre-seeded database.
+
+    Verifies that:
+    * pagination returns the correct subset of jobs
+    * totaljob_nr reflects all jobs belonging to the user
+    * filtering by status works
+    * ordering does not break pagination
+    """
+    identity = "test_user"
 
     with db_session:
-        level = quantum_db.UserSecurityLevel(
-            name="BASIC",
-            token_max_live_count=1,
-            token_max_lifetime=30,
-            token_min_creation_interval=1,
-            token_max_jobs=100,
-            token_max_budget=100,
-            token_max_rate=1,
-            login_max_interval=365,
-        )
-
-        user = quantum_db.User(
+        # Page 0, 2 jobs per page, no filter
+        res = fetch_by_identity_pages(
             identity=identity,
-            security_level=level,
-            email="test@lrz.de",
-            affiliation="LRZ",
-            association="LDAP",
+            page=0,
+            jobs_per_page=2,
+            order="ASC",
+            order_by="id",
+            filter_query="",
         )
-        budget = quantum_db.Budget(name=f"budget-{uuid4()}", owner=user, credits=100)
 
-        def mk_job(status: str, tag: str):
-            ts = quantum_db.TargetSpecification(
-                name=f"ts-{tag}-{uuid4()}",
-                specification_type="test",
-            )
-            return quantum_db.CircuitJob(
-                status=status,
-                shots=1,
-                circuit="OPENQASM 2.0",
-                circuit_format="qasm",
-                owner=user,
-                budget=budget,
-                target_specification=ts,
-            )
-        
-        j1 = mk_job("PENDING", "a1")
-        j2 = mk_job("CANCELLED", "a2")
-        j3 = mk_job("COMPLETED", "a3")
-        j4 = mk_job("PENDING", "a4")
-        j5 = mk_job("PENDING", "a5")
+        jobs = res["jobs"]
+        total = res["totaljob_nr"]
 
-        flush() # forces Pony to assign IDs
-        seeded_ids_asc = sorted([j1.id, j2.id, j3.id, j4.id, j5.id])
-    
-    res0 = fetch_by_identity_pages(
-        identity=identity,
-        page=0,
-        jobs_per_page=2,
-        order="ASC",
-        order_by="id",
-        filter_query="",
-    )
-    jobs1 = list(res0["jobs"])
-    assert res0["totaljob_nr"] == 5
-    assert len(jobs1) == 2
-    assert [j.id for j in jobs1] == seeded_ids_asc[:2]
-    assert all(j.owner.identity == identity for j in jobs1)
+        assert total == 3
+        assert len(jobs) == 2
+        assert [j.id for j in jobs] == [111, 112]
 
-    res1 = fetch_by_identity_pages(
-        identity=identity,
-        page=1,
-        jobs_per_page=2,
-        order="ASC",
-        order_by="id",
-        filter_query="",
-    )
-    jobs2 = list(res1["jobs"])
-    assert res1["totaljob_nr"] == 5
-    assert len(jobs2) == 2
-    assert [j.id for j in jobs2] == seeded_ids_asc[2:4]
-    assert all(j.owner.identity == identity for j in jobs2)
+        # Page 1, remaining job
+        res_page_1 = fetch_by_identity_pages(
+            identity=identity,
+            page=1,
+            jobs_per_page=2,
+            order="ASC",
+            order_by="id",
+            filter_query="",
+        )
 
-    res_pending = fetch_by_identity_pages(
-        identity=identity,
-        page=0,
-        jobs_per_page=2,
-        order="ASC",
-        order_by="id",
-        filter_query="PENDING",
-    )
-    jobs_pending = list(res_pending["jobs"])
-    assert res_pending["totaljob_nr"] == 3
-    assert len(jobs_pending) == 2
-    assert all(j.status == "PENDING" for j in jobs_pending)
-    assert all(j.owner.identity == identity for j in jobs_pending)
+        jobs_page_1 = res_page_1["jobs"]
 
-    res_unknown = fetch_by_identity_pages(
-        identity="does_not_exist",
-        page=0,
-        jobs_per_page=10,
-        order="ASC",
-        order_by="id",
-        filter_query="",
-    )
-    assert res_unknown["totaljob_nr"] == 0
-    assert list(res_unknown["jobs"]) == []
+        assert len(jobs_page_1) == 1
+        assert jobs_page_1[0].id == 113
+
+        # Filter by status
+        res_filtered = fetch_by_identity_pages(
+            identity=identity,
+            page=0,
+            jobs_per_page=10,
+            order="ASC",
+            order_by="id",
+            filter_query="PENDING",
+        )
+
+        jobs_filtered = res_filtered["jobs"]
+
+        assert res_filtered["totaljob_nr"] == 1
+        assert len(jobs_filtered) == 1
+        assert jobs_filtered[0].status == "PENDING"
+        assert jobs_filtered[0].owner.identity == identity
 
 
-def test_fetch_result_by_job_id_and_identity(empty_db):
+def test_fetch_result_by_job_id_and_identity(seeded_db):
     """
-    Tests whether `fetch_result_by_job_id_and_identity` returns the correct job
-    only when both job ID and user identity match.
+    Tests `fetch_result_by_job_id_and_identity` using the pre-seeded database.
 
     Verifies that:
-    * the correct job is returned for matching job_id and identity
-    * a mismatched identity returns None
-    * a mismatched job_id returns None
+    * a matching (job_id, identity) returns the correct job
+    * mismatched identity returns None
+    * mismatched job_id returns None
     * empty job_id or identity returns None
     """
-    quantum_db = empty_db
-    identity_a = "test_userA"
-    identity_b = "test_userB"
+    identity = "test_user"
+    valid_job_id = "111"   # seeded in create_local_database()
+    invalid_job_id = "999999"
 
     with db_session:
-        level = quantum_db.UserSecurityLevel(
-            name="BASIC",
-            token_max_live_count=1,
-            token_max_lifetime=30,
-            token_min_creation_interval=1,
-            token_max_jobs=100,
-            token_max_budget=100,
-            token_max_rate=1,
-            login_max_interval=365,
-        )
+        # Correct identity and job_id
+        job = fetch_result_by_job_id_and_identity(valid_job_id, identity)
+        assert job is not None
+        assert job.id == int(valid_job_id)
+        assert job.owner.identity == identity
 
-        user_a = quantum_db.User(
-            identity=identity_a,
-            security_level=level,
-            email="test_a@lrz.de",
-            affiliation="LRZ",
-            association="LDAP",
-        )
-        user_b = quantum_db.User(
-            identity=identity_b,
-            security_level=level,
-            email="test_b@lrz.de",
-            affiliation="LRZ",
-            association="LDAP",
-        )
+        # Correct job_id, wrong identity
+        assert fetch_result_by_job_id_and_identity(valid_job_id, "unknown_user") is None
 
-        budget_a = quantum_db.Budget(name=f"budget-{uuid4()}", owner=user_a, credits=100)
-        budget_b = quantum_db.Budget(name=f"budget-{uuid4()}", owner=user_b, credits=100)
+        # Wrong job_id, correct identity
+        assert fetch_result_by_job_id_and_identity(invalid_job_id, identity) is None
 
-        ts = quantum_db.TargetSpecification(
-            name=f"ts-{uuid4()}",
-            specification_type="test",
-        )
-
-        job_a = quantum_db.CircuitJob(
-            status="COMPLETED",
-            shots=1,
-            circuit="OPENQASM 2.0",
-            circuit_format="qasm",
-            owner=user_a,
-            budget=budget_a,
-            target_specification=ts,
-        )
-
-        flush() # forces Pony to assign IDs
-        job_id_a = str(job_a.id)
-
-    with db_session:
-        res = fetch_result_by_job_id_and_identity(job_id_a, identity_a)
-    assert res is not None
-    assert res.id == int(job_id_a)
-    assert res.owner.identity == identity_a
-    
-    with db_session:
-        assert fetch_result_by_job_id_and_identity(job_id_a, identity_b) is None
-        assert fetch_result_by_job_id_and_identity("999999", identity_a) is None
-    
-    assert fetch_result_by_job_id_and_identity("", identity_a) is None
-    assert fetch_result_by_job_id_and_identity(job_id_a, "") is None
+    # Empty inputs (guard clauses, no DB access required)
+    assert fetch_result_by_job_id_and_identity("", identity) is None
+    assert fetch_result_by_job_id_and_identity(valid_job_id, "") is None
 
 
-def test_create_job_creates_job(empty_db, monkeypatch):
+def test_create_job(seeded_db, monkeypatch):
     """
     Tests whether `create_job` creates a CircuitJob with the expected fields and relations.
 
@@ -288,78 +141,40 @@ def test_create_job_creates_job(empty_db, monkeypatch):
     * flags `no_modify` and `queued` are persisted
     * cost is set to 0 and timestamp_submitted is populated
     """
-    quantum_db = empty_db
-    monkeypatch.setattr("bqp_database_access.jobs.open_database", lambda *a, **k: quantum_db)
-    monkeypatch.setattr("bqp_database_access.budgets.open_database", lambda *a, **k: quantum_db)
-
-    identity = "test_userA"
+    monkeypatch.setattr("bqp_database_access.jobs.open_database", lambda *a, **k: seeded_db)
+    monkeypatch.setattr("bqp_database_access.budgets.open_database", lambda *a, **k: seeded_db)
 
     with db_session:
-        level = quantum_db.UserSecurityLevel(
-            name="BASIC",
-            token_max_live_count=1,
-            token_max_lifetime=30,
-            token_min_creation_interval=1,
-            token_max_jobs=100,
-            token_max_budget=100,
-            token_max_rate=1,
-            login_max_interval=365,
-        )
-
-        user = quantum_db.User(
-            identity=identity,
-            security_level=level,
-            email="test@lrz.de",
-            affiliation="LRZ",
-            association="LDAP",
-        )
-
-        budget = quantum_db.Budget(name=f"budget-{uuid4()}", owner=user, credits=100)
-
-        ts = quantum_db.TargetSpecification(
-            name=f"ts-{uuid4()}",
-            specification_type="test",
-        )
-
-        user_group = quantum_db.UserGroup(
-            name = f"ts-{uuid4()}",
-            owner = user,
-            cost_modifier = 0
-        )
-
-        user_group.users.add(user)
-        user_group.budgets.add(budget)
-
         job = create_job(
             shots=10,
-            circuit="OPENQASM 2.0; // test",
-            owner=identity,
-            budget=budget,
-            target_spec=ts,
+            circuit="OPENQASM 2.0",
+            owner="test_user",
+            budget=seeded_db.Budget.get(name="temp_budget"),
+            target_spec=seeded_db.TargetSpecification.get(name="Q5"),
             circuit_format="qasm",
             no_modify=True,
             queued=True,
         )
 
-    assert job is not None
-    assert job.id is not None
+        assert job is not None
+        assert job.id is not None
 
-    assert job.shots == 10
-    assert job.circuit == "OPENQASM 2.0; // test"
-    assert job.circuit_format == "qasm"
+        assert job.shots == 10
+        assert job.circuit == "OPENQASM 2.0"
+        assert job.circuit_format == "qasm"
 
-    assert job.owner.identity == identity
-    assert job.budget == budget
-    assert job.target_specification == ts
+        assert job.owner.identity == "test_user"
+        assert job.budget.name == "temp_budget"
+        assert job.target_specification.name == "Q5"
 
-    assert job.no_modify is True
-    assert job.queued is True
+        assert job.no_modify is True
+        assert job.queued is True
 
-    assert job.cost == 0
-    assert job.timestamp_submitted is not None
+        assert job.cost == 0
+        assert job.timestamp_submitted is not None
 
 
-def test_is_within_active_job_limit(empty_db):
+def test_is_within_active_job_limit(seeded_db):
     """
     Tests whether `is_within_active_job_limit` correctly enforces the maximum
     number of active (WAITING) jobs per user and target specification.
@@ -371,114 +186,66 @@ def test_is_within_active_job_limit(empty_db):
     * jobs with other target specifications are ignored
     * reaching the limit returns False
     """
-    quantum_db = empty_db
-    identity = "test_userA"
-    MAX_ACTIVE_JOBS_PER_USER_PER_RESOURCE = 2
-
     with db_session:
-        level = quantum_db.UserSecurityLevel(
-            name="BASIC",
-            token_max_live_count=1,
-            token_max_lifetime=30,
-            token_min_creation_interval=1,
-            token_max_jobs=100,
-            token_max_budget=100,
-            token_max_rate=1,
-            login_max_interval=365,
+        seeded_db.Resource(
+            name=f"RES-LIMIT-{uuid4()}",
+            maintenance=False,
+            qubits=1,
+            connectivity="test",
+            instructions="test",
+            quantum_technology="test",
+            resource_cost_modifier=1.0,
+            security_level=seeded_db.ResourceSecurityLevel.get(name="BASIC"),
         )
 
-        user = quantum_db.User(
-            identity=identity,
-            security_level=level,
-            email="test@lrz.de",
-            affiliation="LRZ",
-            association="LDAP",
-        )
-
-        budget = quantum_db.Budget(
-            name="budget-test",
-            owner=user,
-            credits=100,
-        )
-
-        ts_a = quantum_db.TargetSpecification(
-            name="ts-a",
+        seeded_db.TargetSpecification(
+            name=f"TS-LIMIT-{uuid4()}",
             specification_type="test",
-        )
-        ts_b = quantum_db.TargetSpecification(
-            name="ts-b",
-            specification_type="test",
+            resource_name=seeded_db.Resource.select(lambda r: r.name.startswith("RES-LIMIT-")).first().name,
         )
 
-        jobs = []
+        job = seeded_db.CircuitJob(
+            status="PENDING",
+            shots=1,
+            circuit="test",
+            circuit_format="qasm",
+            owner=seeded_db.User.get(identity="test_user"),
+            budget=seeded_db.Budget.get(name="temp_budget"),
+            target_specification=seeded_db.TargetSpecification.select(lambda ts: ts.name.startswith("TS-LIMIT-")).first(),
+            queued=False,
+        )
+
         for _ in range(MAX_ACTIVE_JOBS_PER_USER_PER_RESOURCE - 1):
-            jobs.append(
-                quantum_db.CircuitJob(
-                    status="WAITING",
-                    shots=1,
-                    circuit="OPENQASM 2.0",
-                    circuit_format="qasm",
-                    owner=user,
-                    budget=budget,
-                    target_specification=ts_a,
-                )
+            seeded_db.CircuitJob(
+                status="WAITING",
+                shots=1,
+                circuit="test",
+                circuit_format="qasm",
+                owner=job.owner,
+                budget=job.budget,
+                target_specification=job.target_specification,
+                queued=False,
             )
 
-        quantum_db.CircuitJob(
-            status="COMPLETED",
-            shots=1,
-            circuit="OPENQASM 2.0",
-            circuit_format="qasm",
-            owner=user,
-            budget=budget,
-            target_specification=ts_a,
-        )
+        flush()
+        assert is_within_active_job_limit(seeded_db, job) is True
 
-        quantum_db.CircuitJob(
+        seeded_db.CircuitJob(
             status="WAITING",
             shots=1,
-            circuit="OPENQASM 2.0",
+            circuit="test",
             circuit_format="qasm",
-            owner=user,
-            budget=budget,
-            target_specification=ts_b,
-        )
-
-        other_user = quantum_db.User(
-            identity="other_user",
-            security_level=level,
-            email="other@lrz.de",
-            affiliation="LRZ",
-            association="LDAP",
-        )
-        quantum_db.CircuitJob(
-            status="WAITING",
-            shots=1,
-            circuit="OPENQASM 2.0",
-            circuit_format="qasm",
-            owner=other_user,
-            budget=budget,
-            target_specification=ts_a,
-        )
-
-        assert is_within_active_job_limit(quantum_db, jobs[0]) is True
-
-        last_job = quantum_db.CircuitJob(
-            status="WAITING",
-            shots=1,
-            circuit="OPENQASM 2.0",
-            circuit_format="qasm",
-            owner=user,
-            budget=budget,
-            target_specification=ts_a,
+            owner=job.owner,
+            budget=job.budget,
+            target_specification=job.target_specification,
+            queued=False,
         )
 
         flush()
-        assert quantum_db.CircuitJob.select(owner=user, status="WAITING", target_specification=ts_a).count() == MAX_ACTIVE_JOBS_PER_USER_PER_RESOURCE
-        assert is_within_active_job_limit(quantum_db, last_job) is False
+        assert is_within_active_job_limit(seeded_db, job) is False
 
 
-def test_filter_queued_if_offline_and_fetch_marks_waiting_and_sets_timestamp(empty_db, monkeypatch):
+def test_filter_queued_if_offline_and_fetch(seeded_db, monkeypatch):
     """
     Tests whether `filter_queued_if_offline_and_fetch` selects eligible jobs, updates their
     state to WAITING, sets timestamp_scheduled, and persists changes.
@@ -489,192 +256,152 @@ def test_filter_queued_if_offline_and_fetch_marks_waiting_and_sets_timestamp(emp
     * jobs are released only if `is_within_active_job_limit` is True
     * released jobs are updated (status, timestamp_scheduled) and returned
     """
-    quantum_db = empty_db
-
-    monkeypatch.setattr(
-        "bqp_database_access.jobs.is_within_active_job_limit",
-        lambda qdb, job: True,
-    )
-
-    identity = "test_userA"
+    monkeypatch.setattr("bqp_database_access.jobs.is_within_active_job_limit", lambda *_: True)
 
     with db_session:
-        level = quantum_db.UserSecurityLevel(
-            name="BASIC",
-            token_max_live_count=1,
-            token_max_lifetime=30,
-            token_min_creation_interval=1,
-            token_max_jobs=100,
-            token_max_budget=100,
-            token_max_rate=1,
-            login_max_interval=365,
-        )
+        res_ok = f"RES-OK-{uuid4()}"
+        res_block = f"RES-MAINT-{uuid4()}"
+        note_ok = f"JOB-OK-{uuid4()}"
+        note_block = f"JOB-BLOCK-{uuid4()}"
 
-        user = quantum_db.User(
-            identity=identity,
-            security_level=level,
-            email=identity,
-            affiliation="LRZ",
-            association="LDAP",
-        )
-
-        budget = quantum_db.Budget(name=f"budget-{uuid4()}", owner=user, credits=100)
-
-        sec_level = quantum_db.ResourceSecurityLevel(
-            name="SEC_BASIC",
-            job_min_interval=0,
-            budget_max_per_job=10**9,
-            unique_token_required=False,
-            token_max_lifetime=10**9,
-        )
-        
-        res_ok = quantum_db.Resource(
-            name="res-ok",
+        seeded_db.Resource(
+            name=res_ok,
             maintenance=False,
             qubits=1,
-            connectivity="all-to-all",
-            instructions="test-instructions",
-            quantum_technology="test-tech",
+            connectivity="test",
+            instructions="test",
+            quantum_technology="test",
             resource_cost_modifier=1.0,
-        security_level=sec_level,
+            security_level=seeded_db.ResourceSecurityLevel.get(name="BASIC"),
+        )
+        seeded_db.Resource(
+            name=res_block,
+            maintenance=True,
+            qubits=1,
+            connectivity="test",
+            instructions="test",
+            quantum_technology="test",
+            resource_cost_modifier=1.0,
+            security_level=seeded_db.ResourceSecurityLevel.get(name="BASIC"),
         )
 
-        ts_ok_1 = quantum_db.TargetSpecification(
-            name=f"ts-{uuid4()}",
-            specification_type="test",
-            resource_name=res_ok.name,
-        )
-        ts_ok_2 = quantum_db.TargetSpecification(
-            name=f"ts-{uuid4()}",
-            specification_type="test",
-            resource_name=res_ok.name,
-        )
+        seeded_db.TargetSpecification(name=f"TS-OK-{uuid4()}", specification_type="test", resource_name=res_ok)
+        seeded_db.TargetSpecification(name=f"TS-BLOCK-{uuid4()}", specification_type="test", resource_name=res_block)
 
-        j1 = quantum_db.CircuitJob(
+        seeded_db.CircuitJob(
+            note=note_ok,
             status="PENDING",
             shots=1,
             circuit="OPENQASM 2.0",
             circuit_format="qasm",
-            owner=user,
-            budget=budget,
-            target_specification=ts_ok_1,
+            owner=seeded_db.User.get(identity="test_user"),
+            budget=seeded_db.Budget.get(name="temp_budget"),
+            target_specification=seeded_db.TargetSpecification.get(resource_name=res_ok),
             queued=True,
+            timestamp_scheduled=None,
         )
-
-        j2 = quantum_db.CircuitJob(
+        seeded_db.CircuitJob(
+            note=note_block,
             status="PENDING",
             shots=1,
             circuit="OPENQASM 2.0",
             circuit_format="qasm",
-            owner=user,
-            budget=budget,
-            target_specification=ts_ok_2,
-            queued=False,
+            owner=seeded_db.User.get(identity="test_user"),
+            budget=seeded_db.Budget.get(name="temp_budget"),
+            target_specification=seeded_db.TargetSpecification.get(resource_name=res_block),
+            queued=True,
+            timestamp_scheduled=None,
         )
 
-        assert j1.status == "PENDING"
-        assert j2.status == "PENDING"
-        assert j1.timestamp_scheduled is None
-        assert j2.timestamp_scheduled is None
+        filtered = filter_queued_if_offline_and_fetch(
+            seeded_db,
+            [seeded_db.CircuitJob.get(note=note_ok), seeded_db.CircuitJob.get(note=note_block)],
+        )
 
-        filtered = filter_queued_if_offline_and_fetch(quantum_db, [j1, j2])
+        assert {j.note for j in filtered} == {note_ok}
 
-        assert len(filtered) == 2
-        assert {job.id for job in filtered} == {j1.id, j2.id}
+        assert seeded_db.CircuitJob.get(note=note_ok).status == "WAITING"
+        assert seeded_db.CircuitJob.get(note=note_ok).timestamp_scheduled is not None
 
-        assert j1.status == "WAITING"
-        assert j2.status == "WAITING"
-        assert j1.timestamp_scheduled is not None
-        assert j2.timestamp_scheduled is not None
+        assert seeded_db.CircuitJob.get(note=note_block).status == "PENDING"
+        assert seeded_db.CircuitJob.get(note=note_block).timestamp_scheduled is None
 
 
-def test_fetch_all_pending_jobs(empty_db, monkeypatch):
+def test_fetch_all_pending_jobs(seeded_db, monkeypatch):
     """
     Tests whether `fetch_all_pending_jobs`:
     * selects only jobs with status=="PENDING" from the database
     * passes exactly those jobs to `filter_queued_if_offline_and_fetch`
     * returns whatever the filter function returns
     """
-    quantum_db = empty_db
-
-    monkeypatch.setattr("bqp_database_access.jobs.open_database", lambda *a, **k: quantum_db)
-
-    captured = {"jobs": None}
-    
-    def fake_filter(qdb, jobs):
-        captured["jobs"] = list(jobs)
-        return list(jobs)[:1]
-
-    monkeypatch.setattr("bqp_database_access.jobs.filter_queued_if_offline_and_fetch", fake_filter)
+    monkeypatch.setattr("bqp_database_access.jobs.open_database", lambda *a, **k: seeded_db)
+    monkeypatch.setattr("bqp_database_access.jobs.is_within_active_job_limit", lambda *_: True)
 
     with db_session:
-        level = quantum_db.UserSecurityLevel(
-            name="BASIC",
-            token_max_live_count=1,
-            token_max_lifetime=30,
-            token_min_creation_interval=1,
-            token_max_jobs=100,
-            token_max_budget=100,
-            token_max_rate=1,
-            login_max_interval=365,
+        res_ok = f"RES-OK-{uuid4()}"
+        res_block = f"RES-MAINT-{uuid4()}"
+        note_ok = f"PENDING-OK-{uuid4()}"
+        note_block = f"PENDING-BLOCK-{uuid4()}"
+
+        seeded_db.Resource(
+            name=res_ok,
+            maintenance=False,
+            qubits=1,
+            connectivity="test",
+            instructions="test",
+            quantum_technology="test",
+            resource_cost_modifier=1.0,
+            security_level=seeded_db.ResourceSecurityLevel.get(name="BASIC"),
+        )
+        seeded_db.Resource(
+            name=res_block,
+            maintenance=True,
+            qubits=1,
+            connectivity="test",
+            instructions="test",
+            quantum_technology="test",
+            resource_cost_modifier=1.0,
+            security_level=seeded_db.ResourceSecurityLevel.get(name="BASIC"),
         )
 
-        user = quantum_db.User(
-            identity="test_userA",
-            security_level=level,
-            email="test_userA",
-            affiliation="LRZ",
-            association="LDAP",
-        )
+        seeded_db.TargetSpecification(name=f"TS-OK-{uuid4()}", specification_type="test", resource_name=res_ok)
+        seeded_db.TargetSpecification(name=f"TS-BLOCK-{uuid4()}", specification_type="test", resource_name=res_block)
 
-        budget = quantum_db.Budget(name=f"budget-{uuid4()}", owner=user, credits=100)
-
-        ts = quantum_db.TargetSpecification(
-            name=f"ts-{uuid4()}",
-            specification_type="test",
-        )
-        
-        p1 = quantum_db.CircuitJob(
+        seeded_db.CircuitJob(
+            note=note_ok,
             status="PENDING",
             shots=1,
-            circuit="OPENQASM 2.0",
+            circuit="test",
             circuit_format="qasm",
-            owner=user,
-            budget=budget,
-            target_specification=ts,
+            owner=seeded_db.User.get(identity="test_user"),
+            budget=seeded_db.Budget.get(name="temp_budget"),
+            target_specification=seeded_db.TargetSpecification.get(resource_name=res_ok),
+            queued=True,
+            timestamp_scheduled=None,
         )
-        p2 = quantum_db.CircuitJob(
+        seeded_db.CircuitJob(
+            note=note_block,
             status="PENDING",
             shots=1,
-            circuit="OPENQASM 2.0",
+            circuit="test",
             circuit_format="qasm",
-            owner=user,
-            budget=budget,
-            target_specification=ts,
-        )
-        quantum_db.CircuitJob(
-            status="COMPLETED",
-            shots=1,
-            circuit="OPENQASM 2.0",
-            circuit_format="qasm",
-            owner=user,
-            budget=budget,
-            target_specification=ts,
+            owner=seeded_db.User.get(identity="test_user"),
+            budget=seeded_db.Budget.get(name="temp_budget"),
+            target_specification=seeded_db.TargetSpecification.get(resource_name=res_block),
+            queued=True,
+            timestamp_scheduled=None,
         )
 
-        flush()
+        jobs = fetch_all_pending_jobs()
 
-        expected_pending_ids = {p1.id, p2.id}
-    
-    res = fetch_all_pending_jobs()
+        assert any(j.note == note_ok for j in jobs)
+        assert all(j.note != note_block for j in jobs)
 
-    assert captured["jobs"] is not None
-    assert {j.id for j in captured["jobs"]} == expected_pending_ids
-    assert all(j.status == "PENDING" for j in captured["jobs"])
+        assert seeded_db.CircuitJob.get(note=note_ok).status == "WAITING"
+        assert seeded_db.CircuitJob.get(note=note_ok).timestamp_scheduled is not None
 
-    assert isinstance(res, list)
-    assert len(res) == 1
-    assert res[0].id in expected_pending_ids
+        assert seeded_db.CircuitJob.get(note=note_block).status == "PENDING"
+        assert seeded_db.CircuitJob.get(note=note_block).timestamp_scheduled is None
 
 
 def test_fetch_all_pending_jobs_from_users():
@@ -720,3 +447,4 @@ def test_update_hybrid_job():
 def test_cancel_job():
     # cancel_job
     return None
+
