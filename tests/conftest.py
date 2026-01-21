@@ -7,49 +7,26 @@ from pony.orm import db_session
 from pony.orm import count
 from pony.orm import TransactionError
 from pony.orm import select
-from datetime import datetime
-from http import HTTPStatus
 from werkzeug.datastructures import Headers
+from pathlib import Path
 
-from bqp_database_access._database import open_database
+def _set_test_env(db_filename: str) -> None:
+    """
+    Configure environment variables so open_database() always uses SQLite
+    for tests and never attempts to connect to Postgres (Docker or otherwise).
+    """
 
+    os.environ["QUANTUM_DB_TESTING"] = "1"
+    os.environ["USER_TESTING"] = ""
 
-def delete_local_database() -> None:
-    db = open_database()
+    os.environ["QUANTUM_DB_FILENAME"] = db_filename
 
-    filename = getattr(db.provider.pool, "filename", None)
-    if not filename:
-        db.disconnect()
-        return
-    
-    db.disconnect()
-    os.remove(filename)
+    os.environ.pop("QUANTUM_DB_HOST", None)
+    os.environ.pop("QUANTUM_DB_PORT", None)
+    os.environ.pop("QUANTUM_DB_USER", None)
+    os.environ.pop("QUANTUM_DB_PASSWORD", None)
+    os.environ.pop("QUANTUM_DB_NAME", None)
 
-@pytest.fixture
-def empty_db():
-    db = open_database(create_tables=True)
-    yield db
-    db.disconnect()
-
-    delete_local_database()
-
-@pytest.fixture(scope="module")
-def app():
-    app = create_app()
-    app.config.update(
-        {
-            "TESTING": True,
-        }
-    )
-
-    # other setup can go here
-    create_local_database()
-
-    yield app
-
-    # clean up / reset resources here
-
-    delete_local_database()
 
 def create_local_database():
     db = open_database(create_tables=True)
@@ -78,6 +55,19 @@ def create_local_database():
 
             quantum_db = open_database()
             quantum_db.insert("budget", name="temp_budget", note=' ', owner="test_user", credits=1000)
+
+            user = quantum_db.User.get(identity="test_user")
+            budget = quantum_db.Budget.get(name="temp_budget")
+            group = quantum_db.UserGroup.get(name="TEST_USER_GROUP")
+            if group is None:
+                group = quantum_db.UserGroup(
+                    name="TEST_USER_GROUP",
+                    note="Group granting test_user access to temp_budget (seeded for tests)",
+                    owner=user,
+                    cost_modifier=1.0,
+                )
+            user.user_groups.add(group)
+            budget.user_groups.add(group)
 
             quantum_db.insert("resource_security_level", name="BASIC", note=' ', job_min_interval=10, budget_max_per_job=10, unique_token_required=False, token_max_lifetime=10)
 
@@ -113,52 +103,31 @@ def create_local_database():
         pass
 
 
-@pytest.fixture()
-def client(app):
-    return app.test_client()
+def delete_local_database() -> None:
+    db = open_database()
 
-
-@pytest.fixture()
-def inactive_client(app):
-    return app.test_client()
+    filename = getattr(db.provider.pool, "filename", None)
+    if not filename:
+        db.disconnect()
+        return
+    
+    db.disconnect()
+    os.remove(filename)
 
 
 @pytest.fixture(scope="module")
-def active_client(app):
-    client = app.test_client()
+def seeded_db():
+    create_local_database()
+    db = open_database()
+    yield db
+    db.disconnect()
+    delete_local_database()
 
-    user_data = {"identity": "test_user", "secret": "test_password"}
-    login_response = client.post("/login", json=user_data)
 
-    assert (
-        login_response.status_code == HTTPStatus.OK
-        and login_response.json["access_token"] is not None
-    )
+@pytest.fixture
+def empty_db():
+    db = open_database(create_tables=True)
+    yield db
+    db.disconnect()
 
-    client.headers = Headers()
-    client.headers.add("Content-Type", "application/json")
-    client.headers.add("Authorization", "Bearer " + login_response.json["access_token"])
-
-    return client
-
-@pytest.fixture(scope="module")
-def active_client_mqp_edu(app):
-    client = app.test_client()
-
-    user_data = {"identity": "mqp_edu_test_user","secret": "test_password"}
-    login_response = client.post("/login", json=user_data)
-
-    assert (
-        login_response.status_code == HTTPStatus.OK
-        and login_response.json["access_token"] is not None
-    )
-
-    client.headers = Headers()
-    client.headers.add("Content-Type", "application/json")
-    client.headers.add("Authorization", "Bearer " + login_response.json["access_token"])
-
-    return client
-
-@pytest.fixture()
-def runner(app):
-    return app.test_cli_runner()
+    delete_local_database()
