@@ -57,7 +57,6 @@ def test_fetch_by_identity_pages(seeded_db):
     identity = "test_user"
 
     with db_session:
-        # Page 0, 2 jobs per page, no filter
         res = fetch_by_identity_pages(
             identity=identity,
             page=0,
@@ -74,7 +73,6 @@ def test_fetch_by_identity_pages(seeded_db):
         assert len(jobs) == 2
         assert [j.id for j in jobs] == [111, 112]
 
-        # Page 1, remaining job
         res_page_1 = fetch_by_identity_pages(
             identity=identity,
             page=1,
@@ -89,7 +87,6 @@ def test_fetch_by_identity_pages(seeded_db):
         assert len(jobs_page_1) == 1
         assert jobs_page_1[0].id == 113
 
-        # Filter by status
         res_filtered = fetch_by_identity_pages(
             identity=identity,
             page=0,
@@ -787,12 +784,10 @@ def test_cancel_job_sets_pending_when_queued_and_recent_offline_note(seeded_db):
     note = "resource offline"
 
     with db_session:
-        # Pick any existing CircuitJob
         job = qdb.CircuitJob.select().order_by(qdb.CircuitJob.id).first()
         assert job is not None
         job_id = job.id
 
-        # Normalize to satisfy the special-case condition
         job.queued = True
         job.status = "WAITING"
         job.note = ""
@@ -801,10 +796,8 @@ def test_cancel_job_sets_pending_when_queued_and_recent_offline_note(seeded_db):
 
         flush()
 
-    # Act
     cancel_job(job_id=job_id, note=note)
 
-    # Assert
     with db_session:
         refreshed = qdb.CircuitJob.get(id=job_id)
         assert refreshed is not None
@@ -836,10 +829,8 @@ def test_cancel_job_sets_cancelled_in_default_case(seeded_db):
 
         flush()
 
-    # Act
     cancel_job(job_id=job_id, note=note)
 
-    # Assert
     with db_session:
         refreshed = qdb.CircuitJob.get(id=job_id)
         assert refreshed is not None
