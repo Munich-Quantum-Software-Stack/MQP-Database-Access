@@ -50,13 +50,6 @@ max-positional-arguments = 10
 target-version = ['py310']
 
 [tool.pytest.ini_options]
-env = [
-    "QUANTUM_DB_TESTING=TRUE",
-    "QUANTUM_DB_FILENAME=test_db.sqlite",
-    "QUANTUM_DB_USER=",
-    "QUANTUM_DB_PASS=",
-    "QUANTUM_DB_HOST=",
-]
 pythonpath = ["."]
 
 
