@@ -16,6 +16,12 @@ pdm init
 
 ## Database configuration for running tests in Docker
 
+Inside the docker environment, run
+
+```
+pdm run install
+```
+
 When running the tests inside a Docker container, you must export the following environment variables inside that container (i.e. in the same shell where you run pdm run pytest).
 
 These variables configure the connection to the Postgres service on the Docker network.
@@ -28,7 +34,7 @@ export QUANTUM_DB_PASSWORD=example
 export QUANTUM_DB_NAME=postgres
 ```
 
-Lastly, change the directory of file to /bqp-database-access#.
+Lastly, change the directory of file to /bqp-database-access#, and run:
 ```
 pdm run pytest
 ```
