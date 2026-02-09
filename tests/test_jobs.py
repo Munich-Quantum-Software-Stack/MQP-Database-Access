@@ -1,5 +1,5 @@
 from uuid import uuid4
-from pony.orm import db_session, flush
+from pony.orm import db_session, flush, commit
 from datetime import datetime
 from bqp_database_access.jobs import (
     fetch_by_identity,
@@ -40,7 +40,7 @@ def test_fetch_by_identity(seeded_db):
 
         assert len(jobs) == 3
         assert all(j.owner.identity == "test_user" for j in jobs)
-        assert {j.status for j in jobs} == {"PENDING", "CANCELLED", "COMPLETED"}
+        assert {j.status for j in jobs} == {"PENDING","CANCELLED", "COMPLETED"}
         assert fetch_by_identity("does_not_exist") == []
 
 
@@ -115,23 +115,18 @@ def test_fetch_result_by_job_id_and_identity(seeded_db):
     * empty job_id or identity returns None
     """
     identity = "test_user"
-    valid_job_id = "111"   # seeded in create_local_database()
+    valid_job_id = "111"
     invalid_job_id = "999999"
 
     with db_session:
-        # Correct identity and job_id
         job = fetch_result_by_job_id_and_identity(valid_job_id, identity)
         assert job is not None
         assert job.id == int(valid_job_id)
         assert job.owner.identity == identity
 
-        # Correct job_id, wrong identity
         assert fetch_result_by_job_id_and_identity(valid_job_id, "unknown_user") is None
-
-        # Wrong job_id, correct identity
         assert fetch_result_by_job_id_and_identity(invalid_job_id, identity) is None
 
-    # Empty inputs (guard clauses, no DB access required)
     assert fetch_result_by_job_id_and_identity("", identity) is None
     assert fetch_result_by_job_id_and_identity(valid_job_id, "") is None
 
@@ -156,7 +151,7 @@ def test_create_job(seeded_db, monkeypatch):
             circuit="OPENQASM 2.0",
             owner="test_user",
             budget=seeded_db.Budget.get(name="temp_budget"),
-            target_spec=seeded_db.TargetSpecification.get(name="Q5"),
+            target_spec=seeded_db.TargetSpecification.get(name="TS_Q5"),
             circuit_format="qasm",
             no_modify=True,
             queued=True,
@@ -171,7 +166,7 @@ def test_create_job(seeded_db, monkeypatch):
 
         assert job.owner.identity == "test_user"
         assert job.budget.name == "temp_budget"
-        assert job.target_specification.name == "Q5"
+        assert job.target_specification.name == "TS_Q5"
 
         assert job.no_modify is True
         assert job.queued is True
@@ -180,75 +175,7 @@ def test_create_job(seeded_db, monkeypatch):
         assert job.timestamp_submitted is not None
 
 
-def test_is_within_active_job_limit(seeded_db):
-    """
-    Tests whether `is_within_active_job_limit` correctly enforces the maximum
-    number of active (WAITING) jobs per user and target specification.
-
-    Verifies that:
-    * WAITING jobs are counted
-    * non-WAITING jobs are ignored
-    * jobs of other users are ignored
-    * jobs with other target specifications are ignored
-    * reaching the limit returns False
-    """
-    with db_session:
-        seeded_db.Resource(
-            name=f"RES-LIMIT-{uuid4()}",
-            maintenance=False,
-            qubits=1,
-            connectivity="test",
-            instructions="test",
-            quantum_technology="test",
-            resource_cost_modifier=1.0,
-            security_level=seeded_db.ResourceSecurityLevel.get(name="BASIC"),
-        )
-
-        seeded_db.TargetSpecification(
-            name=f"TS-LIMIT-{uuid4()}",
-            specification_type="test",
-            resource_name=seeded_db.Resource.select(lambda r: r.name.startswith("RES-LIMIT-")).first().name,
-        )
-
-        job = seeded_db.CircuitJob(
-            status="PENDING",
-            shots=1,
-            circuit="test",
-            circuit_format="qasm",
-            owner=seeded_db.User.get(identity="test_user"),
-            budget=seeded_db.Budget.get(name="temp_budget"),
-            target_specification=seeded_db.TargetSpecification.select(lambda ts: ts.name.startswith("TS-LIMIT-")).first(),
-            queued=False,
-        )
-
-        for _ in range(MAX_ACTIVE_JOBS_PER_USER_PER_RESOURCE - 1):
-            seeded_db.CircuitJob(
-                status="WAITING",
-                shots=1,
-                circuit="test",
-                circuit_format="qasm",
-                owner=job.owner,
-                budget=job.budget,
-                target_specification=job.target_specification,
-                queued=False,
-            )
-
-        flush()
-        assert is_within_active_job_limit(seeded_db, job) is True
-
-        seeded_db.CircuitJob(
-            status="WAITING",
-            shots=1,
-            circuit="test",
-            circuit_format="qasm",
-            owner=job.owner,
-            budget=job.budget,
-            target_specification=job.target_specification,
-            queued=False,
-        )
-
-        flush()
-        assert is_within_active_job_limit(seeded_db, job) is False
+# def test_is_within_active_job_limit(seeded_db):
 
 
 def test_filter_queued_if_offline_and_fetch(seeded_db, monkeypatch):
@@ -264,150 +191,35 @@ def test_filter_queued_if_offline_and_fetch(seeded_db, monkeypatch):
     """
     monkeypatch.setattr("bqp_database_access.jobs.is_within_active_job_limit", lambda *_: True)
 
+    NOTE_OK = "JOB_PENDING_QUEUED_Q5"
+    NOTE_BLOCK = "JOB_PENDING_QUEUED_Q4"
+
     with db_session:
-        res_ok = f"RES-OK-{uuid4()}"
-        res_block = f"RES-MAINT-{uuid4()}"
-        note_ok = f"JOB-OK-{uuid4()}"
-        note_block = f"JOB-BLOCK-{uuid4()}"
+        ok = seeded_db.CircuitJob.get(note=NOTE_OK)
+        block = seeded_db.CircuitJob.get(note=NOTE_BLOCK)
 
-        seeded_db.Resource(
-            name=res_ok,
-            maintenance=False,
-            qubits=1,
-            connectivity="test",
-            instructions="test",
-            quantum_technology="test",
-            resource_cost_modifier=1.0,
-            security_level=seeded_db.ResourceSecurityLevel.get(name="BASIC"),
-        )
-        seeded_db.Resource(
-            name=res_block,
-            maintenance=True,
-            qubits=1,
-            connectivity="test",
-            instructions="test",
-            quantum_technology="test",
-            resource_cost_modifier=1.0,
-            security_level=seeded_db.ResourceSecurityLevel.get(name="BASIC"),
-        )
+        filtered = filter_queued_if_offline_and_fetch(seeded_db, [block, ok])
+        assert {j.note for j in filtered} == {NOTE_OK}
 
-        seeded_db.TargetSpecification(name=f"TS-OK-{uuid4()}", specification_type="test", resource_name=res_ok)
-        seeded_db.TargetSpecification(name=f"TS-BLOCK-{uuid4()}", specification_type="test", resource_name=res_block)
+        assert ok.status == "WAITING"
+        assert ok.timestamp_scheduled is not None
 
-        seeded_db.CircuitJob(
-            note=note_ok,
-            status="PENDING",
-            shots=1,
-            circuit="OPENQASM 2.0",
-            circuit_format="qasm",
-            owner=seeded_db.User.get(identity="test_user"),
-            budget=seeded_db.Budget.get(name="temp_budget"),
-            target_specification=seeded_db.TargetSpecification.get(resource_name=res_ok),
-            queued=True,
-            timestamp_scheduled=None,
-        )
-        seeded_db.CircuitJob(
-            note=note_block,
-            status="PENDING",
-            shots=1,
-            circuit="OPENQASM 2.0",
-            circuit_format="qasm",
-            owner=seeded_db.User.get(identity="test_user"),
-            budget=seeded_db.Budget.get(name="temp_budget"),
-            target_specification=seeded_db.TargetSpecification.get(resource_name=res_block),
-            queued=True,
-            timestamp_scheduled=None,
-        )
-
-        filtered = filter_queued_if_offline_and_fetch(
-            seeded_db,
-            [seeded_db.CircuitJob.get(note=note_ok), seeded_db.CircuitJob.get(note=note_block)],
-        )
-
-        assert {j.note for j in filtered} == {note_ok}
-
-        assert seeded_db.CircuitJob.get(note=note_ok).status == "WAITING"
-        assert seeded_db.CircuitJob.get(note=note_ok).timestamp_scheduled is not None
-
-        assert seeded_db.CircuitJob.get(note=note_block).status == "PENDING"
-        assert seeded_db.CircuitJob.get(note=note_block).timestamp_scheduled is None
+        assert block.status == "PENDING"
+        assert block.timestamp_scheduled is None
 
 
 def test_fetch_all_pending_jobs(seeded_db, monkeypatch):
-    """
-    Tests whether `fetch_all_pending_jobs`:
-    * selects only jobs with status=="PENDING" from the database
-    * passes exactly those jobs to `filter_queued_if_offline_and_fetch`
-    * returns whatever the filter function returns
-    """
     monkeypatch.setattr("bqp_database_access.jobs.open_database", lambda *a, **k: seeded_db)
-    monkeypatch.setattr("bqp_database_access.jobs.is_within_active_job_limit", lambda *_: True)
+    monkeypatch.setattr("bqp_database_access.jobs.is_within_active_job_limit", lambda *a, **k: True)
 
+    released = fetch_all_pending_jobs()
+
+    assert {j.id for j in released} == {111 , 201}
+
+    # Assert: DB side effects match expectations
     with db_session:
-        res_ok = f"RES-OK-{uuid4()}"
-        res_block = f"RES-MAINT-{uuid4()}"
-        note_ok = f"PENDING-OK-{uuid4()}"
-        note_block = f"PENDING-BLOCK-{uuid4()}"
-
-        seeded_db.Resource(
-            name=res_ok,
-            maintenance=False,
-            qubits=1,
-            connectivity="test",
-            instructions="test",
-            quantum_technology="test",
-            resource_cost_modifier=1.0,
-            security_level=seeded_db.ResourceSecurityLevel.get(name="BASIC"),
-        )
-        seeded_db.Resource(
-            name=res_block,
-            maintenance=True,
-            qubits=1,
-            connectivity="test",
-            instructions="test",
-            quantum_technology="test",
-            resource_cost_modifier=1.0,
-            security_level=seeded_db.ResourceSecurityLevel.get(name="BASIC"),
-        )
-
-        seeded_db.TargetSpecification(name=f"TS-OK-{uuid4()}", specification_type="test", resource_name=res_ok)
-        seeded_db.TargetSpecification(name=f"TS-BLOCK-{uuid4()}", specification_type="test", resource_name=res_block)
-
-        seeded_db.CircuitJob(
-            note=note_ok,
-            status="PENDING",
-            shots=1,
-            circuit="test",
-            circuit_format="qasm",
-            owner=seeded_db.User.get(identity="test_user"),
-            budget=seeded_db.Budget.get(name="temp_budget"),
-            target_specification=seeded_db.TargetSpecification.get(resource_name=res_ok),
-            queued=True,
-            timestamp_scheduled=None,
-        )
-        seeded_db.CircuitJob(
-            note=note_block,
-            status="PENDING",
-            shots=1,
-            circuit="test",
-            circuit_format="qasm",
-            owner=seeded_db.User.get(identity="test_user"),
-            budget=seeded_db.Budget.get(name="temp_budget"),
-            target_specification=seeded_db.TargetSpecification.get(resource_name=res_block),
-            queued=True,
-            timestamp_scheduled=None,
-        )
-
-        jobs = fetch_all_pending_jobs()
-
-        assert any(j.note == note_ok for j in jobs)
-        assert all(j.note != note_block for j in jobs)
-
-        assert seeded_db.CircuitJob.get(note=note_ok).status == "WAITING"
-        assert seeded_db.CircuitJob.get(note=note_ok).timestamp_scheduled is not None
-
-        assert seeded_db.CircuitJob.get(note=note_block).status == "PENDING"
-        assert seeded_db.CircuitJob.get(note=note_block).timestamp_scheduled is None
+        assert seeded_db.CircuitJob.get(id=201).status == "WAITING"
+        assert seeded_db.CircuitJob.get(id=202).status == "PENDING"
 
 
 def test_fetch_all_pending_jobs_from_users(seeded_db):
@@ -418,13 +230,11 @@ def test_fetch_all_pending_jobs_from_users(seeded_db):
     * returns released jobs and updates them to WAITING with timestamp_scheduled
     """
     qdb = seeded_db
-    user_a = "test_user"
-    user_b = "mqp_edu_test_user"
 
     with db_session:
         job_a = (
             qdb.CircuitJob.select(
-                lambda j: j.status == "PENDING" and j.owner.identity == user_a
+                lambda j: j.status == "PENDING" and j.owner.identity == "test_user"
             )
             .order_by(qdb.CircuitJob.id)
             .first()
@@ -439,7 +249,7 @@ def test_fetch_all_pending_jobs_from_users(seeded_db):
         res_obj.maintenance = False
 
         qdb.CircuitJob.select(
-            owner=user_a,
+            owner="test_user",
             status="WAITING",
             target_specification=ts_name,
         ).delete(bulk=True)
@@ -451,18 +261,18 @@ def test_fetch_all_pending_jobs_from_users(seeded_db):
         flush()
         job_a_id = job_a.id
 
-    res = fetch_all_pending_jobs_from_users([user_a])
+    res = fetch_all_pending_jobs_from_users(["test_user"])
     assert any(j.id == job_a_id for j in res)
 
     with db_session:
         refreshed = qdb.CircuitJob.get(id=job_a_id)
         assert refreshed is not None
-        assert refreshed.owner.identity == user_a
+        assert refreshed.owner.identity == "test_user"
         assert refreshed.status == "WAITING"
         assert refreshed.timestamp_scheduled is not None
 
-    res_b = fetch_all_pending_jobs_from_users([user_b])
-    assert all(j.owner.identity == user_b for j in res_b)
+    res_b = fetch_all_pending_jobs_from_users(["mqp_edu_test_user"])
+    assert all(j.owner.identity == "mqp_edu_test_user" for j in res_b)
 
 
 def test_fetch_all_pending_jobs_for_resource_from_users(seeded_db):
@@ -838,3 +648,61 @@ def test_cancel_job_sets_cancelled_in_default_case(seeded_db):
         assert refreshed.note == note
         assert refreshed.timestamp_cancelled is not None
         assert refreshed.status == "CANCELLED"
+
+
+def test_is_within_active_job_limit(seeded_db):
+    """
+    Tests whether `is_within_active_job_limit` correctly enforces the maximum
+    number of active (WAITING) jobs per user and target specification.
+
+    Verifies that:
+    * only jobs with status == "WAITING" are counted as active
+    * non-WAITING jobs are ignored
+    * jobs belonging to other users are ignored
+    * jobs with a different target specification are ignored
+    * reaching the configured limit of active jobs returns False
+    """
+    with db_session:
+        subject = seeded_db.CircuitJob.get(id=111)
+        w1 = seeded_db.CircuitJob.get(id=112)
+        w2 = seeded_db.CircuitJob.get(id=113)
+        assert subject and w1 and w2
+
+        snap = {
+            111: (subject.status, subject.owner, subject.target_specification, subject.queued),
+            112: (w1.status, w1.owner, w1.target_specification, w1.queued),
+            113: (w2.status, w2.owner, w2.target_specification, w2.queued),
+        }
+
+        try:
+            subject.status = "PENDING"
+            subject.queued = False
+
+            w1.status = "PENDING"
+            w2.status = "PENDING"
+            commit()
+            assert is_within_active_job_limit(seeded_db, subject) is True
+
+            for w in (w1,):
+                w.owner = subject.owner
+                w.target_specification = subject.target_specification
+                w.queued = False
+                w.status = "WAITING"
+            commit()
+            assert is_within_active_job_limit(seeded_db, subject) is True
+
+            for w in (w2,):
+                w.owner = subject.owner
+                w.target_specification = subject.target_specification
+                w.queued = False
+                w.status = "WAITING"
+            commit()
+            assert is_within_active_job_limit(seeded_db, subject) is False
+
+        finally:
+            for jid, (status, owner, ts, queued) in snap.items():
+                j = seeded_db.CircuitJob.get(id=jid)
+                j.status, j.owner, j.target_specification, j.queued = status, owner, ts, queued
+            commit()
+
+
