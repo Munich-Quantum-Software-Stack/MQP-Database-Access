@@ -175,9 +175,6 @@ def test_create_job(seeded_db, monkeypatch):
         assert job.timestamp_submitted is not None
 
 
-# def test_is_within_active_job_limit(seeded_db):
-
-
 def test_filter_queued_if_offline_and_fetch(seeded_db, monkeypatch):
     """
     Tests whether `filter_queued_if_offline_and_fetch` selects eligible jobs, updates their
@@ -704,5 +701,4 @@ def test_is_within_active_job_limit(seeded_db):
                 j = seeded_db.CircuitJob.get(id=jid)
                 j.status, j.owner, j.target_specification, j.queued = status, owner, ts, queued
             commit()
-
 
