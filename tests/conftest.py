@@ -11,23 +11,6 @@ from werkzeug.datastructures import Headers
 from pathlib import Path
 import datetime; now = datetime.datetime.now()
 
-def _set_test_env(db_filename: str) -> None:
-    """
-    Configure environment variables so open_database() always uses SQLite
-    for tests and never attempts to connect to Postgres (Docker or otherwise).
-    """
-
-    os.environ["QUANTUM_DB_TESTING"] = "1"
-    os.environ["USER_TESTING"] = ""
-
-    os.environ["QUANTUM_DB_FILENAME"] = db_filename
-
-    os.environ.pop("QUANTUM_DB_HOST", None)
-    os.environ.pop("QUANTUM_DB_PORT", None)
-    os.environ.pop("QUANTUM_DB_USER", None)
-    os.environ.pop("QUANTUM_DB_PASSWORD", None)
-    os.environ.pop("QUANTUM_DB_NAME", None)
-
 
 def create_local_database():
     db = open_database(create_tables=True)
@@ -39,7 +22,6 @@ def create_local_database():
 
     try:
         with db_session:
-            # creates a security level
             database_access.users.create_new_security_level(
                 "BASIC",
                 token_max_live_count=1,
@@ -51,7 +33,6 @@ def create_local_database():
                 login_max_interval=365,
             )
 
-            # creates two users "test_user" and "mqp_edu_test_user"
             database_access.users.create_new_user_with_secret(
                 "test_user", "test_password", "BASIC", "test@lrz.de", "LRZ", "QUANTUM"
             )
@@ -64,7 +45,6 @@ def create_local_database():
                 "mqp_edu_test_user", "test_password", "BASIC", "mqp_edu_test@lrz.de", "LRZ", "QUANTUM"
             )
 
-            # inserts a budget
             quantum_db = open_database()
             quantum_db.insert("budget", name="temp_budget", note=' ', owner="test_user", credits=1000)
 
@@ -84,7 +64,6 @@ def create_local_database():
             budget.user_groups.add(group)
 
             quantum_db.insert("resource_security_level", name="BASIC", note=' ', job_min_interval=10, budget_max_per_job=10, unique_token_required=False, token_max_lifetime=10)
-
             
             quantum_db.insert("resource", name="Q5", note=" ", maintenance=False, qubits=5, connectivity=" ", instructions=" ", quantum_technology=" ", num_queued_jobs=1, resource_cost_modifier=1, security_level="BASIC")
             quantum_db.insert("resource", name="Q4", note=" ", maintenance=True, qubits=5, connectivity=" ", instructions=" ", quantum_technology=" ", num_queued_jobs=1, resource_cost_modifier=1, security_level="BASIC")
@@ -182,7 +161,3 @@ def empty_db(tmp_path, monkeypatch):
     db = open_database(create_tables=True)
     yield db
     db.disconnect()
-
-
-
-
