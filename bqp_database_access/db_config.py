@@ -9,7 +9,7 @@ def set_test_env():
     the database connection for testing purposes.
     """
 
-    os.environ["QUANTUM_DB_HOST"] = "localhost"
+    os.environ["QUANTUM_DB_HOST"] = "quantum_db"
     os.environ["QUANTUM_DB_PASS"] = "example"
     os.environ["QUANTUM_DB_USER"] = "postgres"
     os.environ["QUANTUM_DS_HOST"] = "ldaps:localhost"
