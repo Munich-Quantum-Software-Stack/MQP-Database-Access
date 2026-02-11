@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/debian
 {
-    "name": "DashboardBE",
+    "name": "DatabaseAccess",
     // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
     "image": "dockerhub.quantum.lrz.de/python-gcc-jre:3.11_12.1_17.0.14",
     "forwardPorts": [5000],
