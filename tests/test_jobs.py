@@ -647,7 +647,7 @@ def test_cancel_job_sets_cancelled_in_default_case(seeded_db):
         assert refreshed.status == "CANCELLED"
 
 
-def test_is_within_active_job_limit(seeded_db):
+def test_is_within_active_job_limit(active_job_limit_db):
     """
     Tests whether `is_within_active_job_limit` correctly enforces the maximum
     number of active (WAITING) jobs per user and target specification.
@@ -660,45 +660,15 @@ def test_is_within_active_job_limit(seeded_db):
     * reaching the configured limit of active jobs returns False
     """
     with db_session:
-        subject = seeded_db.CircuitJob.get(id=111)
-        w1 = seeded_db.CircuitJob.get(id=112)
-        w2 = seeded_db.CircuitJob.get(id=113)
-        assert subject and w1 and w2
+        qdb = active_job_limit_db
+        subject = qdb.CircuitJob.get(id=901)
+        w2 = qdb.CircuitJob.get(id=903)
 
-        snap = {
-            111: (subject.status, subject.owner, subject.target_specification, subject.queued),
-            112: (w1.status, w1.owner, w1.target_specification, w1.queued),
-            113: (w2.status, w2.owner, w2.target_specification, w2.queued),
-        }
+        assert subject is not None
+        assert w2 is not None
 
-        try:
-            subject.status = "PENDING"
-            subject.queued = False
+        assert is_within_active_job_limit(qdb, subject) is False
 
-            w1.status = "PENDING"
-            w2.status = "PENDING"
-            commit()
-            assert is_within_active_job_limit(seeded_db, subject) is True
-
-            for w in (w1,):
-                w.owner = subject.owner
-                w.target_specification = subject.target_specification
-                w.queued = False
-                w.status = "WAITING"
-            commit()
-            assert is_within_active_job_limit(seeded_db, subject) is True
-
-            for w in (w2,):
-                w.owner = subject.owner
-                w.target_specification = subject.target_specification
-                w.queued = False
-                w.status = "WAITING"
-            commit()
-            assert is_within_active_job_limit(seeded_db, subject) is False
-
-        finally:
-            for jid, (status, owner, ts, queued) in snap.items():
-                j = seeded_db.CircuitJob.get(id=jid)
-                j.status, j.owner, j.target_specification, j.queued = status, owner, ts, queued
-            commit()
-
+        w2.status = "PENDING"
+        commit()
+        assert is_within_active_job_limit(qdb, subject) is True

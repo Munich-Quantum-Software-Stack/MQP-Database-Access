@@ -143,6 +143,153 @@ def create_local_database():
     except TransactionError as error:
         pass
 
+@pytest.fixture(scope="function")
+def active_job_limit_db(seeded_db):
+    """Seed dedicated jobs used by `test_is_within_active_job_limit`.
+
+    Creates one subject job plus two WAITING jobs on the same
+    (owner, target_specification), and several noise jobs that must not be
+    counted by `is_within_active_job_limit`.
+    """
+    with db_session:
+        now_local = datetime.datetime.now()
+        budget = seeded_db.Budget.get(name="temp_budget")
+        target_q5 = seeded_db.TargetSpecification.get(name="TS_Q5")
+        target_q4 = seeded_db.TargetSpecification.get(name="TS_Q4")
+
+        assert budget is not None
+        assert target_q5 is not None
+        assert target_q4 is not None
+
+        seeded_db.CircuitJob(
+            id=901,
+            note="fixture_subject",
+            status="PENDING",
+            shots=32,
+            circuit="OPENQASM 2.0;",
+            circuit_format="qasm",
+            no_modify=False,
+            timestamp_submitted=now_local,
+            timestamp_scheduled=None,
+            timestamp_completed=None,
+            cost=0,
+            result="",
+            owner="test_user",
+            budget=budget,
+            executed_resource="Q5",
+            target_specification=target_q5,
+            executed_circuit="",
+            queued=False,
+        )
+
+        seeded_db.CircuitJob(
+            id=902,
+            note="fixture_waiting_1",
+            status="WAITING",
+            shots=32,
+            circuit="OPENQASM 2.0;",
+            circuit_format="qasm",
+            no_modify=False,
+            timestamp_submitted=now_local,
+            timestamp_scheduled=now_local,
+            timestamp_completed=None,
+            cost=0,
+            result="",
+            owner="test_user",
+            budget=budget,
+            executed_resource="Q5",
+            target_specification=target_q5,
+            executed_circuit="",
+            queued=False,
+        )
+
+        seeded_db.CircuitJob(
+            id=903,
+            note="fixture_waiting_2",
+            status="WAITING",
+            shots=32,
+            circuit="OPENQASM 2.0;",
+            circuit_format="qasm",
+            no_modify=False,
+            timestamp_submitted=now_local,
+            timestamp_scheduled=now_local,
+            timestamp_completed=None,
+            cost=0,
+            result="",
+            owner="test_user",
+            budget=budget,
+            executed_resource="Q5",
+            target_specification=target_q5,
+            executed_circuit="",
+            queued=False,
+        )
+
+        # Noise jobs that must be ignored by the active-job-limit check
+        seeded_db.CircuitJob(
+            id=904,
+            note="fixture_noise_other_user",
+            status="WAITING",
+            shots=32,
+            circuit="OPENQASM 2.0;",
+            circuit_format="qasm",
+            no_modify=False,
+            timestamp_submitted=now_local,
+            timestamp_scheduled=now_local,
+            timestamp_completed=None,
+            cost=0,
+            result="",
+            owner="test_user2",
+            budget=budget,
+            executed_resource="Q5",
+            target_specification=target_q5,
+            executed_circuit="",
+            queued=False,
+        )
+
+        seeded_db.CircuitJob(
+            id=905,
+            note="fixture_noise_other_target",
+            status="WAITING",
+            shots=32,
+            circuit="OPENQASM 2.0;",
+            circuit_format="qasm",
+            no_modify=False,
+            timestamp_submitted=now_local,
+            timestamp_scheduled=now_local,
+            timestamp_completed=None,
+            cost=0,
+            result="",
+            owner="test_user",
+            budget=budget,
+            executed_resource="Q4",
+            target_specification=target_q4,
+            executed_circuit="",
+            queued=False,
+        )
+
+        seeded_db.CircuitJob(
+            id=906,
+            note="fixture_noise_non_waiting",
+            status="COMPLETED",
+            shots=32,
+            circuit="OPENQASM 2.0;",
+            circuit_format="qasm",
+            no_modify=False,
+            timestamp_submitted=now_local,
+            timestamp_scheduled=now_local,
+            timestamp_completed=now_local,
+            cost=0,
+            result="{}",
+            owner="test_user",
+            budget=budget,
+            executed_resource="Q5",
+            target_specification=target_q5,
+            executed_circuit="",
+            queued=False,
+        )
+
+    yield seeded_db
+
 
 @pytest.fixture(scope="function")
 def seeded_db(tmp_path, monkeypatch):
