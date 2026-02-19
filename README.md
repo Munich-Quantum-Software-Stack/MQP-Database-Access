@@ -1,42 +1,64 @@
-# Documentation
+# MQP-Database-Access Development & Test Setup
 
-## Unit testing with pytest
+This repository can be used in two ways:
 
-Tests are implemented using pytest and can be run via PDM.
+1. **Integrated MQP stack setup (recommended for most contributors)** using the
+   `MQSS-Hackathon` repository.
+2. **Repository-only work** for code changes that do not require running the full
+   containerized environment.
 
-In order for the unit-tests to run, get inside the docker environment quantum_db via:
+## Do I need to clone `MQSS-Hackathon` first?
+
+**If you want to run the DB container and follow the official MQP dev workflow,
+yes.** Clone `MQSS-Hackathon` first, then clone this repository inside it as a
+sibling of the other MQP repositories.
+
+Expected structure:
+
+```text
+<parent>
+├── MQSS-Hackathon
+├── MQP-API
+├── MQP-Database-Access
+└── Quantum-Job-Runner
 ```
-docker exec -it <CONTAINER-ID> /bin/bash # you can find the ID from docker ps
+
+> In some setups, `MQSS-Hackathon` also provides helper files/folders (for
+> example, `put_these_inside_DB_Repo`) that must be copied into
+> `MQP-Database-Access` before running the DB container.
+
+## Integrated setup (via `MQSS-Hackathon`)
+
+From the parent folder (where `docker-compose-db.yml` is located), run:
+
+```bash
+docker compose -f docker-compose-db.yml build qdb
+docker compose -f docker-compose-db.yml up -d qdb
+docker ps
 ```
 
-then, to initialize pyproject.toml from the project root (where pyproject.toml is located)
-```
-pdm init
+Enter the running DB container:
+
+```bash
+docker exec -it <CONTAINER-ID> /bin/bash
 ```
 
-## Database configuration for running tests in Docker
+Inside the container:
 
-Inside the docker environment, run
-
+```bash
+chmod +x /bqp-database-access/initialize_db.sh
+/bqp-database-access/initialize_db.sh
 ```
+
+Then run tests from the database-access repo:
+
+```bash
 pdm run install
-```
-
-When running the tests inside a Docker container, you must export the following environment variables inside that container (i.e. in the same shell where you run pdm run pytest).
-
-These variables configure the connection to the Postgres service on the Docker network.
-
-```
-export QUANTUM_DB_HOST=quantum_db   # DB service/container name on the Docker network
-export QUANTUM_DB_PORT=5432
-export QUANTUM_DB_USER=postgres
-export QUANTUM_DB_PASSWORD=example
-export QUANTUM_DB_NAME=postgres
-```
-
-Lastly, change the directory of file to /bqp-database-access#, and run:
-```
 pdm run pytest
 ```
 
+## Notes on test environment variables
 
+Test DB environment variables are configured automatically in
+`tests/conftest.py` for pytest. You do not need to manually export
+`QUANTUM_DB_*` when running tests through the documented flow.

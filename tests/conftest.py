@@ -1,6 +1,6 @@
 import pytest
 import os
-from bqp_database_access.db_config import set_test_env
+#from bqp_database_access.db_config import set_test_env
 from bqp_database_access import create_app
 from bqp_database_access._database import open_database
 import bqp_database_access as database_access
@@ -12,7 +12,18 @@ from werkzeug.datastructures import Headers
 from pathlib import Path
 import datetime; now = datetime.datetime.now()
 
-set_test_env()
+
+os.environ.update(
+    {
+        "QUANTUM_DB_HOST": "quantum_db",
+        "QUANTUM_DB_PORT": "5432",
+        "QUANTUM_DB_USER": "postgres",
+        "QUANTUM_DB_PASS": "example",
+        "QUANTUM_DB_PASSWORD": "example",
+        "QUANTUM_DB_NAME": "postgres",
+    }
+)
+
 
 def create_local_database():
     db = open_database(create_tables=True)
