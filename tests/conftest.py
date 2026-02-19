@@ -19,7 +19,6 @@ os.environ.update(
         "QUANTUM_DB_PORT": "5432",
         "QUANTUM_DB_USER": "postgres",
         "QUANTUM_DB_PASS": "example",
-        "QUANTUM_DB_PASSWORD": "example",
         "QUANTUM_DB_NAME": "postgres",
     }
 )
