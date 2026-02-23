@@ -23,13 +23,19 @@ Inside the docker environment, one needs to change the directory to the project 
 cd bqp-database-access/
 ```
 
+There is also a virtual environment `bqp-database-access-3.11`, to activate it run:
+
+```bash
+source .venv/bin/activate
+```
+
 Lastly, install the necessary dependencies using:
 
 ```bash
 pdm install
 ```
 
-and finally, we are ready to run pytest:
+and finally, it is ready to run pytest:
 
 ```bash
 pdm run pytest
