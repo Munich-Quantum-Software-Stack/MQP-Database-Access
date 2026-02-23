@@ -1,5 +1,6 @@
 import pytest
 import os
+from bqp_database_access.db_config import set_test_env
 from bqp_database_access._database import open_database
 import bqp_database_access as database_access
 from pony.orm import db_session
@@ -8,18 +9,28 @@ from pony.orm import TransactionError
 from pony.orm import select
 from werkzeug.datastructures import Headers
 from pathlib import Path
+
 import datetime; now = datetime.datetime.now()
 
 
-os.environ.update(
-    {
-        "QUANTUM_DB_HOST": "quantum_db",
-        "QUANTUM_DB_PORT": "5432",
-        "QUANTUM_DB_USER": "postgres",
-        "QUANTUM_DB_PASS": "example",
-        "QUANTUM_DB_NAME": "postgres",
-    }
-)
+def _test_db_path() -> Path:
+    return Path(os.getenv("QUANTUM_DB_FILENAME", "test_db.sqlite")).resolve()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def configured_test_environment():
+    """Ensure pytest uses sqlite test settings and cleans up test db file."""
+
+    set_test_env()
+    db_path = _test_db_path()
+
+    if db_path.exists():
+        db_path.unlink()
+
+    yield
+
+    if db_path.exists():
+        db_path.unlink()
 
 
 def create_local_database():
