@@ -1,23 +1,26 @@
 import os
 
 
-def set_test_env():
-    """
-    Set all environment variables required for the test environment.
-
-    This function sets the necessary environment variables to configure
-    the database connection for testing purposes.
-    """
-    os.environ["QUANTUM_DB_HOST"] = "localhost"
-    os.environ["QUANTUM_DB_PASS"] = "example"
-    os.environ["QUANTUM_DB_USER"] = "postgres"
-    os.environ["QUANTUM_DS_HOST"] = "ldaps:localhost"
-    os.environ["USER_TESTING"] = "true"
+DEFAULT_TEST_ENV = {
+    "QUANTUM_DB_TESTING": "TRUE",
+    "QUANTUM_DB_FILENAME": "test_db.sqlite",
+    "QUANTUM_DB_USER": "postgres",
+    "QUANTUM_DB_PASS": "example",
+    "QUANTUM_DB_HOST": "localhost:5432",
+    "QUANTUM_DS_HOST": "ldaps:localhost",
+    "USER_TESTING": "",
+}
 
 
-def reset_test_env():
-    os.environ["QUANTUM_DB_TESTING"] = "TRUE"
-    os.environ["QUANTUM_DB_USER"] = ""
-    os.environ["QUANTUM_DB_PASS"] = ""
-    os.environ["QUANTUM_DB_HOST"] = ""
-    os.environ["USER_TESTING"] = ""
+def set_test_env() -> None:
+    """Set environment variables required for test execution."""
+
+    for key, value in DEFAULT_TEST_ENV.items():
+        os.environ[key] = value
+
+
+def reset_test_env() -> None:
+    """Unset test-specific environment variables."""
+
+    for key in DEFAULT_TEST_ENV:
+        os.environ.pop(key, None)

@@ -2,7 +2,7 @@
 name = "bqp-database-access"
 version = "0.3.24"
 description = ""
-authors = [{ name = "Martin Ruefenacht", email = "martin.ruefenacht@lrz.de" }]
+authors = [{ name = "Tobias Bauer", email = "Tobias.Bauer@lrz.de" }, { name = "Ege Özmeral", email = "Nazim.Oezmeral@lrz.de" }]
 dependencies = ["pony>=0.7.19", "bcrypt>=4.0", "psycopg2-binary>=2.9.10", "numpy>=2.2.6", "eliot>=1.17.5", "cffi>=2.0.0", "werkzeug>=3.1.4", "fixture>=1.5.11"]
 requires-python = ">=3.10,<3.12"
 readme = "README.md"
@@ -50,6 +50,13 @@ max-positional-arguments = 10
 target-version = ['py310']
 
 [tool.pytest.ini_options]
+env = [
+    "QUANTUM_DB_TESTING=TRUE",
+    "QUANTUM_DB_FILENAME=test_db.sqlite",
+    "QUANTUM_DB_USER=postgres",
+    "QUANTUM_DB_PASS=example",
+    "QUANTUM_DB_HOST=localhost:5432"
+]
 pythonpath = ["."]
 
 
