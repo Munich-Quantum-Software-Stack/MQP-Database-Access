@@ -1,7 +1,5 @@
 import pytest
 import os
-#from bqp_database_access.db_config import set_test_env
-from bqp_database_access import create_app
 from bqp_database_access._database import open_database
 import bqp_database_access as database_access
 from pony.orm import db_session
