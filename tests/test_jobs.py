@@ -647,7 +647,7 @@ def test_cancel_job_sets_cancelled_in_default_case(seeded_db):
         assert refreshed.status == "CANCELLED"
 
 
-def test_is_within_active_job_limit(active_job_limit_db):
+def test_is_within_active_job_limit(seeded_db):
     """
     Tests whether `is_within_active_job_limit` correctly enforces the maximum
     number of active (WAITING) jobs per user and target specification.
@@ -660,15 +660,29 @@ def test_is_within_active_job_limit(active_job_limit_db):
     * reaching the configured limit of active jobs returns False
     """
     with db_session:
-        qdb = active_job_limit_db
-        subject = qdb.CircuitJob.get(id=901)
-        w2 = qdb.CircuitJob.get(id=903)
+        subject = seeded_db.CircuitJob.get(id=111)
+        w1 = seeded_db.CircuitJob.get(id=112)
+        w2 = seeded_db.CircuitJob.get(id=113)
+        assert subject and w1 and w2
 
-        assert subject is not None
-        assert w2 is not None
+        subject.status = "PENDING"
+        subject.queued = False
 
-        assert is_within_active_job_limit(qdb, subject) is False
-
+        w1.status = "PENDING"
         w2.status = "PENDING"
         commit()
-        assert is_within_active_job_limit(qdb, subject) is True
+        assert is_within_active_job_limit(seeded_db, subject) is True
+
+        w1.owner = subject.owner
+        w1.target_specification = subject.target_specification
+        w1.queued = False
+        w1.status = "WAITING"
+        commit()
+        assert is_within_active_job_limit(seeded_db, subject) is True
+
+        w2.owner = subject.owner
+        w2.target_specification = subject.target_specification
+        w2.queued = False
+        w2.status = "WAITING"
+        commit()
+        assert is_within_active_job_limit(seeded_db, subject) is False

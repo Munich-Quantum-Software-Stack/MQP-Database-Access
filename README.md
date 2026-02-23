@@ -5,6 +5,7 @@
 Tests are implemented using `pytest` and are intended to run in a lightweight local test setup.
 
 ### Run unit tests
+
 The tests are executed inside the docker environment called `quantum_db`. One can see its container-id using
 
 ```bash
@@ -21,12 +22,6 @@ Inside the docker environment, one needs to change the directory to the project 
 
 ```bash
 cd bqp-database-access/
-```
-
-There is also a virtual environment `bqp-database-access-3.11`, to activate it run:
-
-```bash
-source .venv/bin/activate
 ```
 
 Lastly, install the necessary dependencies using:
