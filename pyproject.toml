@@ -16,6 +16,7 @@ dev = [
     "pylint>=3.3.8",
     "pre-commit>=4.1.0",
     "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
 ]
 [build-system]
 requires = ["pdm-backend"]
@@ -58,10 +59,28 @@ env = [
     "QUANTUM_DB_HOST=localhost:5432"
 ]
 pythonpath = ["."]
+addopts = [
+    "--cov=bqp_database_access",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+]
 
 
 [dependency-groups]
 test = [
     "pytest>=7.4.2",
+    "pytest-cov>=6.2.1",
     "pytest-env>=1.0.1"
 ]
+
+
+[tool.coverage.run]
+source = ["bqp_database_access"]
+omit = [
+    "bqp_database_access/_*.py",
+    "bqp_database_access/__*.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
