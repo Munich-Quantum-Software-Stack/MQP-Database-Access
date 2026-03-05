@@ -268,8 +268,8 @@ def test_fetch_all_pending_jobs_from_users(seeded_db):
         assert refreshed.status == "WAITING"
         assert refreshed.timestamp_scheduled is not None
 
-    res_b = fetch_all_pending_jobs_from_users(["mqp_edu_test_user"])
-    assert all(j.owner.identity == "mqp_edu_test_user" for j in res_b)
+    res_b = fetch_all_pending_jobs_from_users(["portal_test_user"])
+    assert all(j.owner.identity == "portal_test_user" for j in res_b)
 
 
 def test_fetch_all_pending_jobs_for_resource_from_users(seeded_db):
@@ -282,7 +282,7 @@ def test_fetch_all_pending_jobs_for_resource_from_users(seeded_db):
     """
     qdb = seeded_db
     user_a = "test_user"
-    user_b = "mqp_edu_test_user"
+    user_b = "portal_test_user"
     resource = "TEST_QPU_1"
 
     with db_session:
