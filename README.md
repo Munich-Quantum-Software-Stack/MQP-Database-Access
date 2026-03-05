@@ -37,3 +37,18 @@ pdm run pytest
 ```
 
 That's all that is required for unit tests.
+
+### Test coverage with pytest-cov
+
+`pytest-cov` is configured in `pyproject.toml` and automatically runs whenever you execute `pytest`.
+
+Coverage is restricted to the `bqp_database_access` package and excludes files starting with `_` (for example `_database.py` and `__init__.py`).
+
+Run:
+```
+pdm run pytest
+```
+
+You will get:
+- a terminal coverage summary with missing lines
+- a `coverage.xml` report file for CI integrations
