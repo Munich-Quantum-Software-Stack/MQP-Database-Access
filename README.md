@@ -52,3 +52,19 @@ pdm run pytest
 You will get:
 - a terminal coverage summary with missing lines
 - a `coverage.xml` report file for CI integrations
+
+### Coverage snapshot
+
+The current total coverage is **49%** (`461` statements, `235` missed), and `coverage.xml` is generated.
+
+Current module-level coverage:
+
+- `budgets.py`: 88%
+- `db_config.py`: 100%
+- `feedback.py`: 50%
+- `jobs.py`: 75%
+- `resources.py`: 28%
+- `status.py`: 38%
+- `timeslots.py`: 0%
+- `tokens.py`: 38%
+- `users.py`: 59%
