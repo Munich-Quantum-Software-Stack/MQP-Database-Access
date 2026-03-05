@@ -151,7 +151,7 @@ def test_create_job(seeded_db, monkeypatch):
             circuit="OPENQASM 2.0",
             owner="test_user",
             budget=seeded_db.Budget.get(name="temp_budget"),
-            target_spec=seeded_db.TargetSpecification.get(name="TS_Q5"),
+            target_spec=seeded_db.TargetSpecification.get(name="TS_TEST_QPU_1"),
             circuit_format="qasm",
             no_modify=True,
             queued=True,
@@ -166,7 +166,7 @@ def test_create_job(seeded_db, monkeypatch):
 
         assert job.owner.identity == "test_user"
         assert job.budget.name == "temp_budget"
-        assert job.target_specification.name == "TS_Q5"
+        assert job.target_specification.name == "TS_TEST_QPU_1"
 
         assert job.no_modify is True
         assert job.queued is True
@@ -188,8 +188,8 @@ def test_filter_queued_if_offline_and_fetch(seeded_db, monkeypatch):
     """
     monkeypatch.setattr("bqp_database_access.jobs.is_within_active_job_limit", lambda *_: True)
 
-    NOTE_OK = "JOB_PENDING_QUEUED_Q5"
-    NOTE_BLOCK = "JOB_PENDING_QUEUED_Q4"
+    NOTE_OK = "JOB_PENDING_QUEUED_TEST_QPU_1"
+    NOTE_BLOCK = "JOB_PENDING_QUEUED_TEST_QPU_2"
 
     with db_session:
         ok = seeded_db.CircuitJob.get(note=NOTE_OK)
@@ -283,7 +283,7 @@ def test_fetch_all_pending_jobs_for_resource_from_users(seeded_db):
     qdb = seeded_db
     user_a = "test_user"
     user_b = "mqp_edu_test_user"
-    resource = "Q5"
+    resource = "TEST_QPU_1"
 
     with db_session:
         user = qdb.User.get(identity=user_a)
@@ -347,7 +347,7 @@ def test_fetch_all_pending_jobs_for_resource_not_from_users(seeded_db):
       `filter_queued_if_offline_and_fetch` and marks them WAITING.
     """
     qdb = seeded_db
-    resource = "Q5"
+    resource = "TEST_QPU_1"
     excluded_user = "test_user"
 
     with db_session:
@@ -396,7 +396,7 @@ def test_fetch_all_pending_jobs_except_for_resources(seeded_db):
     * returns eligible jobs released by `filter_queued_if_offline_and_fetch`
     """
     qdb = seeded_db
-    excluded_resource = "Q5"
+    excluded_resource = "TEST_QPU_1"
 
     with db_session:
         res_obj = qdb.Resource.get(name=excluded_resource)
@@ -449,7 +449,7 @@ def test_fetch_all_pending_jobs_except_for_resource_not_from_users(seeded_db):
     * then pass through `filter_queued_if_offline_and_fetch`
     """
     qdb = seeded_db
-    resource = "Q5"
+    resource = "TEST_QPU_1"
     allowed_user = "test_user"
 
     with db_session:
@@ -538,7 +538,7 @@ def test_complete_job_with_result(seeded_db):
     * timestamp_completed is set
     """
     qdb = seeded_db
-    resource_name = "Q5"
+    resource_name = "TEST_QPU_1"
     result_payload = '{"00": 512, "11": 512}'
     executed_circuit = "OPENQASM 2.0; // executed"
     note = "job completed successfully"
