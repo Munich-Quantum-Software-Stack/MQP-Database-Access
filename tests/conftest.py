@@ -60,16 +60,16 @@ def create_local_database():
             )
 
             database_access.users.create_new_user_with_secret(
-                "test_user", "test_password", "BASIC", "test@lrz.de", "LRZ", "QUANTUM"
+                "test_user", "test_password", "BASIC", "test@test.mail", "LRZ", "QUANTUM"
             )
             database_access.users.create_new_user_with_secret(
-                "test_user2", "test_password", "BASIC", "test@lrz.de", "LRZ", "QUANTUM"
+                "test_user2", "test_password", "BASIC", "test@test.mail", "LRZ", "QUANTUM"
             )
             database_access.users.create_new_user_with_secret(
                 "mqp_edu_test_user",
                 "test_password",
                 "BASIC",
-                "mqp_edu_test@lrz.de",
+                "mqp_edu_test@test.mail",
                 "LRZ",
                 "QUANTUM",
             )
@@ -106,7 +106,7 @@ def create_local_database():
 
             quantum_db.insert(
                 "resource",
-                name="Q5",
+                name="TEST_QPU_1",
                 note=" ",
                 maintenance=False,
                 qubits=5,
@@ -119,7 +119,7 @@ def create_local_database():
             )
             quantum_db.insert(
                 "resource",
-                name="Q4",
+                name="TEST_QPU_2",
                 note=" ",
                 maintenance=True,
                 qubits=5,
@@ -133,27 +133,27 @@ def create_local_database():
 
             quantum_db.insert(
                 "target_specification",
-                name="TS_Q5",
+                name="TS_TEST_QPU_1",
                 note=" ",
                 specification_type=" ",
                 minimum_qubits="1",
                 quantum_technology=" ",
-                resource_name="Q5",
+                resource_name="TEST_QPU_1",
             )
             quantum_db.insert(
                 "target_specification",
-                name="TS_Q4",
+                name="TS_TEST_QPU_2",
                 note=" ",
                 specification_type=" ",
                 minimum_qubits="1",
                 quantum_technology=" ",
-                resource_name="Q4",
+                resource_name="TEST_QPU_2",
             )
 
             quantum_db.insert(
                 "circuit_job",
                 id=201,
-                note="JOB_PENDING_QUEUED_Q5",
+                note="JOB_PENDING_QUEUED_TEST_QPU_1",
                 status="PENDING",
                 shots=1,
                 circuit="OPENQASM 2.0;",
@@ -166,15 +166,15 @@ def create_local_database():
                 result='{"10": 76, "11": 425, "01": 91, "00": 408}',
                 owner="test_user2",
                 budget="temp_budget",
-                executed_resource="Q5",
-                target_specification="TS_Q5",
+                executed_resource="TEST_QPU_1",
+                target_specification="TS_TEST_QPU_1",
                 executed_circuit="OPENQASM 2.0;",
                 queued=True,
             )
             quantum_db.insert(
                 "circuit_job",
                 id=202,
-                note="JOB_PENDING_QUEUED_Q4",
+                note="JOB_PENDING_QUEUED_TEST_QPU_2",
                 status="PENDING",
                 shots=1,
                 circuit="OPENQASM 2.0;",
@@ -187,8 +187,8 @@ def create_local_database():
                 result='{"10": 76, "11": 425, "01": 91, "00": 408}',
                 owner="test_user2",
                 budget="temp_budget",
-                executed_resource="Q4",
-                target_specification="TS_Q4",
+                executed_resource="TEST_QPU_2",
+                target_specification="TS_TEST_QPU_2",
                 executed_circuit="OPENQASM 2.0;",
                 queued=True,
             )
@@ -204,13 +204,13 @@ def create_local_database():
                 no_modify=True,
                 timestamp_submitted=NOW,
                 timestamp_scheduled=None,
-                timestamp_completed=" 2024-07-17 11:17:32.397618",
+                timestamp_completed="2024-07-17 11:17:32.397618",
                 cost=0,
                 result='{"10": 76, "11": 425, "01": 91, "00": 408}',
                 owner="test_user",
                 budget="temp_budget",
-                executed_resource="Q5",
-                target_specification="TS_Q5",
+                executed_resource="TEST_QPU_1",
+                target_specification="TS_TEST_QPU_1",
                 executed_circuit="OPENQASM 2.0;",
                 queued=False,
             )
@@ -224,14 +224,14 @@ def create_local_database():
                 circuit_format="qasm",
                 no_modify=True,
                 timestamp_submitted="2024-07-17 11:17:32.397618",
-                timestamp_scheduled=" 2024-07-17 11:17:32.397618",
-                timestamp_completed=" 2024-07-17 11:17:32.397618",
+                timestamp_scheduled="2024-07-17 11:17:32.397618",
+                timestamp_completed="2024-07-17 11:17:32.397618",
                 cost=0,
                 result='{"10": 76, "11": 425, "01": 91, "00": 408}',
                 owner="test_user",
                 budget="temp_budget",
-                executed_resource="Q5",
-                target_specification="TS_Q5",
+                executed_resource="TEST_QPU_1",
+                target_specification="TS_TEST_QPU_1",
                 executed_circuit="OPENQASM 2.0;",
                 queued=True,
             )
@@ -245,14 +245,14 @@ def create_local_database():
                 circuit_format="qasm",
                 no_modify=True,
                 timestamp_submitted="2024-07-17 11:17:32.397618",
-                timestamp_scheduled=" 2024-07-17 11:17:32.397618",
-                timestamp_completed=" 2024-07-17 11:17:32.397618",
+                timestamp_scheduled="2024-07-17 11:17:32.397618",
+                timestamp_completed="2024-07-17 11:17:32.397618",
                 cost=0,
                 result='{"10": 76, "11": 425, "01": 91, "00": 408}',
                 owner="test_user",
                 budget="temp_budget",
-                executed_resource="Q5",
-                target_specification="TS_Q5",
+                executed_resource="TEST_QPU_1",
+                target_specification="TS_TEST_QPU_1",
                 executed_circuit="OPENQASM 2.0;",
                 queued=True,
             )
@@ -271,7 +271,7 @@ def create_local_database():
                 "user",
                 identity="blocked_test_user",
                 note=" ",
-                email="test@lrz.de",
+                email="test@test.mail",
                 affiliation="LRZ",
                 association="LDAP",
                 security_level="BASIC",
@@ -286,13 +286,13 @@ def create_local_database():
                 "ldap_test_user",
                 "test_password",
                 "BASIC",
-                "test@lrz.de",
+                "test@test.mail",
                 "LRZ",
                 "LDAP",
             )
 
             database_access.users.create_new_ldap_user(
-                "ldap_test_user", "BASIC", "ldaptest@lrz.de", "LRZ", "LDAP"
+                "ldap_test_user", "BASIC", "ldap_test@test.mail", "LRZ", "LDAP"
             )
 
     except TransactionError:
