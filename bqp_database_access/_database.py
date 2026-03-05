@@ -214,7 +214,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         pass_runner_exit = Optional(datetime)
 
         passes_applied = Optional(
-            datetime
+            str
         )  # This is a dictionary listing entry and exit-times for passes
 
         transpiler_entry = Optional(datetime)
