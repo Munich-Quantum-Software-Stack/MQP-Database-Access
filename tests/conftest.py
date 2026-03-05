@@ -60,17 +60,17 @@ def create_local_database():
             )
 
             database_access.users.create_new_user_with_secret(
-                "test_user", "test_password", "BASIC", "test@test.mail", "LRZ", "QUANTUM"
+                "test_user", "test_password", "BASIC", "test@test.mail", "TEST_HPC_CENTER", "QUANTUM"
             )
             database_access.users.create_new_user_with_secret(
-                "test_user2", "test_password", "BASIC", "test@test.mail", "LRZ", "QUANTUM"
+                "test_user2", "test_password", "BASIC", "test@test.mail", "TEST_HPC_CENTER", "QUANTUM"
             )
             database_access.users.create_new_user_with_secret(
-                "mqp_edu_test_user",
+                "portal_test_user",
                 "test_password",
                 "BASIC",
-                "mqp_edu_test@test.mail",
-                "LRZ",
+                "portal_test@test.mail",
+                "TEST_HPC_CENTER",
                 "QUANTUM",
             )
 
@@ -258,13 +258,13 @@ def create_local_database():
             )
 
             quantum_db.UserGroup(
-                name="MQP_EDU",
-                note="MQP_EDU group for testing purposes",
-                owner="mqp_edu_test_user",
+                name="TEST_PORTAL",
+                note="TEST_PORTAL group for testing purposes",
+                owner="portal_test_user",
                 cost_modifier=1,
             )
             quantum_db.insert(
-                "users_in_user_groups", user="mqp_edu_test_user", usergroup="MQP_EDU"
+                "users_in_user_groups", user="portal_test_user", usergroup="TEST_PORTAL"
             )
 
             quantum_db.insert(
@@ -272,7 +272,7 @@ def create_local_database():
                 identity="blocked_test_user",
                 note=" ",
                 email="test@test.mail",
-                affiliation="LRZ",
+                affiliation="TEST_HPC_CENTER",
                 association="LDAP",
                 security_level="BASIC",
                 blocked=True,
@@ -287,12 +287,12 @@ def create_local_database():
                 "test_password",
                 "BASIC",
                 "test@test.mail",
-                "LRZ",
+                "TEST_HPC_CENTER",
                 "LDAP",
             )
 
             database_access.users.create_new_ldap_user(
-                "ldap_test_user", "BASIC", "ldap_test@test.mail", "LRZ", "LDAP"
+                "ldap_test_user", "BASIC", "ldap_test@test.mail", "TEST_HPC_CENTER", "LDAP"
             )
 
     except TransactionError:
