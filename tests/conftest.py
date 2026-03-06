@@ -258,13 +258,13 @@ def create_local_database():
             )
 
             quantum_db.UserGroup(
-                name="TEST_PORTAL",
-                note="TEST_PORTAL group for testing purposes",
+                name="MQP_EDU",
+                note="MQP_EDU group for testing purposes",
                 owner="portal_test_user",
                 cost_modifier=1,
             )
             quantum_db.insert(
-                "users_in_user_groups", user="portal_test_user", usergroup="TEST_PORTAL"
+                "users_in_user_groups", user="portal_test_user", usergroup="MQP_EDU"
             )
 
             quantum_db.insert(
