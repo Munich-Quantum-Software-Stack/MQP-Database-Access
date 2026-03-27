@@ -1,0 +1,27 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/debian
+{
+    "name": "DatabaseAccess",
+    // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+    "image": "dockerhub.quantum.lrz.de/python-gcc-jre:3.11_12.1_17.0.14",
+    "forwardPorts": [5000],
+    "customizations": {
+        // Configure properties specific to VS Code.
+        "vscode": {
+            // Add the IDs of extensions you want installed when the container is created.
+            "extensions": [
+                "ms-vscode.cpptools-themes",
+                "ms-vscode.cpptools",
+                "twxs.cmake",
+                "ms-vscode.cpptools-extension-pack",
+                "streetsidesoftware.code-spell-checker",
+                "cschlosser.doxdocgen",
+                "ms-vscode.makefile-tools",
+                "ms-python.python",
+                "esbenp.prettier-vscode",
+                "redhat.vscode-yaml",
+                "ms-vscode.live-server"
+            ]
+        }
+    }
+}

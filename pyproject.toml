@@ -1,9 +1,9 @@
 [project]
 name = "bqp-database-access"
-version = "0.3.24"
+version = "0.3.27"
 description = ""
-authors = [{ name = "Martin Ruefenacht", email = "martin.ruefenacht@lrz.de" }]
-dependencies = ["pony>=0.7", "bcrypt>=4.0", "psycopg2-binary>=2.9.10"]
+authors = [{ name = "Martin Ruefenacht", email = "martin.ruefenacht@lrz.de" }, { name = "Tobias Bauer", email = "Tobias.Bauer@lrz.de" }, { name = "Ege Özmeral", email = "Nazim.Oezmeral@lrz.de" }]
+dependencies = ["pony>=0.7.19", "bcrypt>=4.0", "psycopg2-binary>=2.9.10", "numpy>=2.2.6", "eliot>=1.17.5", "cffi>=2.0.0", "werkzeug>=3.1.4", "fixture>=1.5.11"]
 requires-python = ">=3.10,<3.12"
 readme = "README.md"
 license = { text = "MIT" }
@@ -15,6 +15,8 @@ dev = [
     "mypy>=1.14.1",
     "pylint>=3.3.8",
     "pre-commit>=4.1.0",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
 ]
 [build-system]
 requires = ["pdm-backend"]
@@ -52,15 +54,33 @@ target-version = ['py310']
 env = [
     "QUANTUM_DB_TESTING=TRUE",
     "QUANTUM_DB_FILENAME=test_db.sqlite",
-    "QUANTUM_DB_USER=",
-    "QUANTUM_DB_PASS=",
-    "QUANTUM_DB_HOST=",
+    "QUANTUM_DB_USER=postgres",
+    "QUANTUM_DB_PASS=example",
+    "QUANTUM_DB_HOST=localhost:5432"
 ]
 pythonpath = ["."]
+addopts = [
+    "--cov=bqp_database_access",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+]
 
 
 [dependency-groups]
 test = [
     "pytest>=7.4.2",
+    "pytest-cov>=6.2.1",
     "pytest-env>=1.0.1"
 ]
+
+
+[tool.coverage.run]
+source = ["bqp_database_access"]
+omit = [
+    "bqp_database_access/_*.py",
+    "bqp_database_access/__*.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
