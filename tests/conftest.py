@@ -73,7 +73,9 @@ def create_local_database():
                 "TEST_HPC_CENTER",
                 "QUANTUM",
             )
-
+            database_access.users.create_new_user_with_secret(
+                "test_eqe_user", "test_password", "BASIC", "test@test.mail", "TEST_HPC_CENTER", "QUANTUM"
+            )
             quantum_db = open_database()
             quantum_db.insert(
                 "budget", name="temp_budget", note=" ", owner="test_user", credits=1000
@@ -81,8 +83,10 @@ def create_local_database():
 
             user = quantum_db.User.get(identity="test_user")
             user2 = quantum_db.User.get(identity="test_user2")
+            eqe_user = quantum_db.User.get(identity="test_eqe_user")
             budget = quantum_db.Budget.get(name="temp_budget")
             group = quantum_db.UserGroup.get(name="TEST_USER_GROUP")
+            eqe_group = quantum_db.UserGroup.get(name="EQE")
             if group is None:
                 group = quantum_db.UserGroup(
                     name="TEST_USER_GROUP",
@@ -90,10 +94,17 @@ def create_local_database():
                     owner=user,
                     cost_modifier=1.0,
                 )
+            if eqe_group is None:
+                eqe_group = quantum_db.UserGroup(
+                    name="EQE",
+                    note="Group granting eqe_user access to temp_budget (seeded for tests)",
+                    owner=user,
+                    cost_modifier=1.0,
+                )
             user.user_groups.add(group)
             user2.user_groups.add(group)
             budget.user_groups.add(group)
-
+            eqe_user.user_groups.add(eqe_group)
             quantum_db.insert(
                 "resource_security_level",
                 name="BASIC",
