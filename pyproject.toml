@@ -1,8 +1,13 @@
 [project]
 name = "bqp-database-access"
-version = "0.3.27"
+version = "0.3.28"
 description = ""
-authors = [{ name = "Martin Ruefenacht", email = "martin.ruefenacht@lrz.de" }, { name = "Tobias Bauer", email = "Tobias.Bauer@lrz.de" }, { name = "Ege Özmeral", email = "Nazim.Oezmeral@lrz.de" }]
+authors = [
+    { name = "Martin Ruefenacht", email = "martin.ruefenacht@lrz.de" }, 
+    { name = "Tobias Bauer", email = "Tobias.Bauer@lrz.de" }, 
+    { name = "Ege Özmeral", email = "Nazim.Oezmeral@lrz.de" },
+    { name = "Trang Huynh", email = "Trang.Huynh@lrz.de" }
+    ]
 dependencies = ["pony>=0.7.19", "bcrypt>=4.0", "psycopg2-binary>=2.9.10", "numpy>=2.2.6", "eliot>=1.17.5", "cffi>=2.0.0", "werkzeug>=3.1.4", "fixture>=1.5.11"]
 requires-python = ">=3.10,<3.12"
 readme = "README.md"
