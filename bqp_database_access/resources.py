@@ -102,7 +102,8 @@ def fetch_resource_names_restricted_to_identity(identity: str) -> list[str]:
         restricted_resource_names.append("Q5")
         restricted_resource_names.append("Q20")
         restricted_resource_names.append("QExa20")
-    elif "EQE" in _user_group_names:
+    
+    if "EQE" not in _user_group_names:
         # block access to EQE1 device
         restricted_resource_names.append("EQE1")
 
