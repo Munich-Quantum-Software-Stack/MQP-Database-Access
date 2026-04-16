@@ -1,6 +1,6 @@
 [project]
 name = "bqp-database-access"
-version = "0.3.28"
+version = "0.3.29"
 description = ""
 authors = [
     { name = "Martin Ruefenacht", email = "martin.ruefenacht@lrz.de" }, 
