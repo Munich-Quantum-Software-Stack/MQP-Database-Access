@@ -23,6 +23,7 @@ def fetch_current_announcements() -> tuple["Announcement"]:  # type: ignore
 
 
 def get_random_pointers(count: int) -> list["Pointer"]:  # type: ignore
+    """Return a weighted random selection of currently active pointers."""
 
     quantum_db = open_database()
 

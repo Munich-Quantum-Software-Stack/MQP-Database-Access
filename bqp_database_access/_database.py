@@ -14,6 +14,7 @@ from pony.orm import Database, Optional, PrimaryKey, Required, Set  # type: igno
 # pylint: disable=too-many-locals
 def _define_entities(database: Database):  # pylint: disable=too-many-statements
     class User(database.Entity):
+        """User account and profile entity."""
         _table_ = "user"
 
         identity = PrimaryKey(str, auto=False)
@@ -49,6 +50,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         time_slots = Set("TimeSlots", table="users_in_time_slots")
 
     class UserSecurityLevel(database.Entity):
+        """User security policy limits entity."""
         _table_ = "user_security_level"
 
         name = PrimaryKey(str, auto=False)
@@ -65,6 +67,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         login_max_interval = Required(int)
 
     class SuperUserLevel(database.Entity):
+        """Superuser permission set entity."""
         _table_ = "super_user_level"
 
         name = PrimaryKey(str, auto=False)
@@ -82,6 +85,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         permission_budget_split = Required(bool)
 
     class UserGroup(database.Entity):
+        """User grouping and shared budget entity."""
         _table_ = "user_group"
 
         name = PrimaryKey(str, auto=False)
@@ -94,6 +98,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         cost_modifier = Required(float)
 
     class Token(database.Entity):
+        """Authentication token entity."""
         _table_ = "token"
 
         token_hash = PrimaryKey(str, auto=False)
@@ -116,12 +121,14 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         token_usage = Set("TokenUsage")
 
     class TokenUsage(database.Entity):
+        """Mapping of token use to circuit jobs."""
         _table_ = "token_usage"
 
         job = Required("CircuitJob")
         token = Required("Token")
 
     class CircuitJob(database.Entity):
+        """Circuit execution job entity."""
         _table_ = "circuit_job"
 
         id = PrimaryKey(int, auto=True)
@@ -152,6 +159,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         queued = Required(bool, default=False)
 
     class HamiltonianJob(database.Entity):
+        """Hamiltonian execution job entity."""
         _table_ = "hamiltonian_job"
 
         id = PrimaryKey(int, auto=True)
@@ -173,6 +181,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         target_specification = Required("TargetSpecification")
 
     class Budget(database.Entity):
+        """Budget allocation entity."""
         _table_ = "budget"
 
         name = PrimaryKey(str, auto=False)
@@ -187,6 +196,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         hamiltonian_jobs = Set("HamiltonianJob")
 
     class TargetSpecification(database.Entity):
+        """Execution target specification entity."""
         _table_ = "target_specification"
 
         name = PrimaryKey(str, auto=False)
@@ -202,6 +212,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         hamiltonian_jobs = Set("HamiltonianJob")
 
     class Resource(database.Entity):
+        """Quantum resource entity."""
         _table_ = "resource"
 
         name = PrimaryKey(str, auto=False)
@@ -227,6 +238,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         time_slots = Set("TimeSlots")
 
     class ResourceSecurityLevel(database.Entity):
+        """Resource security policy limits entity."""
         _table_ = "resource_security_level"
 
         name = PrimaryKey(str, auto=False)
@@ -240,6 +252,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         resources = Set("Resource")
 
     class Announcement(database.Entity):
+        """Administrative announcement entity."""
         _table_ = "admin_announcements"
 
         id = PrimaryKey(int, auto=True)
@@ -250,6 +263,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         color = Optional(str, default="status_A1")
 
     class Pointer(database.Entity):
+        """Homepage pointer/banner entity."""
         _table_ = "pane_pointers"
 
         id = PrimaryKey(int, auto=True)
@@ -261,6 +275,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         color = Optional(str, default="status_B1")
 
     class Feedback(database.Entity):
+        """User feedback submission entity."""
         _table_ = "feedback"
 
         id = PrimaryKey(int, auto=True)
@@ -271,6 +286,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         note = Required(str)
 
     class TimeSlots(database.Entity):
+        """Resource availability time slot entity."""
         _table_ = "time_slots"
 
         id = PrimaryKey(int, auto=True)
@@ -297,6 +313,7 @@ def _define_database(create_tables: bool = False, **db_params):
 
 
 def open_database(create_tables: bool = False):
+    """Create and return a database connection configured from environment variables."""
     if os.getenv("QUANTUM_DB_TESTING") is not None and [os.getenv("USER_TESTING") == ""
     or os.getenv("USER_TESTING") is None]:
         return _define_database(
