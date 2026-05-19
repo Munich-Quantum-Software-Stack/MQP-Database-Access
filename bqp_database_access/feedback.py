@@ -8,6 +8,7 @@ from ._database import open_database
 def create_feedback_for_identity(
     owner: str, rating: int, category: str, note: str
 ) -> None:
+    """Create a feedback record for a user identity."""
 
     quantum_db = open_database()
 
