@@ -64,7 +64,10 @@ env = [
     "QUANTUM_DB_FILENAME=test_db.sqlite",
     "QUANTUM_DB_USER=postgres",
     "QUANTUM_DB_PASS=example",
-    "QUANTUM_DB_HOST=localhost:5432"
+    "QUANTUM_DB_HOST=localhost:5432",
+  
+    "QUANTUM_DB_PEPPER=test-pepper",
+    "QUANTUM_DB_TOKEN_PEPPER=test-token-pepper",
 ]
 pythonpath = ["."]
 addopts = [
