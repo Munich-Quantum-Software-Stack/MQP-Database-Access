@@ -1,54 +1,143 @@
-# Documentation
+# MQP-Database-Access (Unfinished)
 
-## Unit testing with pytest
+`MQP-Database-Access` is the database access component of the Munich Quantum Portal (MQP) Dashboard and part of the Munich Quantum Software Stack (MQSS).
 
-Tests are implemented using `pytest` and are intended to run in a lightweight local test setup.
+This repository provides a Python package (`bqp_database_access`) for working with MQP data models and database operations. It is a database access library (not a Flask backend service).
 
-### Run unit tests
+## Features
 
-The tests are executed inside the docker environment called `quantum_db`. One can see its container-id using
+- Database schema and entity definitions built with Pony ORM.
+- Data-access modules for users, budgets, jobs, tokens, resources, time slots, feedback, and status handling.
+- Support for test/local SQLite and PostgreSQL-backed operation.
+- Utility scripts for CSV import/export and SQL-based time-slot inserts.
+- Automated tests with `pytest` and coverage reporting via `pytest-cov`.
 
-```bash
-docker ps
+## Tech stack
+
+- Python (>=3.10, <3.12)
+- [PDM](https://pdm-project.org/) for dependency and environment management
+- Pony ORM
+- PostgreSQL / SQLite
+- pytest + pytest-cov
+- Developer tooling: black, isort, mypy, pylint, pre-commit
+
+## Repository structure
+
+```text
+bqp_database_access/      # Main package
+tests/                    # Pytest test suite
+scripts/                  # CSV import/export and SQL helper scripts
+pyproject.toml            # Project/dependency/test/tool configuration
+.gitlab-ci.yml            # Current GitLab CI lint/type-check pipeline
+README.md                 # Project documentation
 ```
 
-and then run:
+## Installation (PDM)
 
-```bash
-docker exec -it [CONTAINER ID] /bin/bash
-```
-
-Inside the docker environment, one needs to change the directory to the project root (where `pyproject.toml` is located) using:
-
-```bash
-cd bqp-database-access/
-```
-
-Lastly, install the necessary dependencies using:
+From the repository root:
 
 ```bash
 pdm install
 ```
 
-and finally, it is ready to run pytest:
+For development dependencies explicitly:
+
+```bash
+pdm install -G dev
+```
+
+## Environment variables
+
+The package and tests rely on environment variables for database configuration and security-related values.
+
+Important variables:
+
+- `QUANTUM_DB_TESTING`
+- `QUANTUM_DB_FILENAME`
+- `QUANTUM_DB_USER`
+- `QUANTUM_DB_PASS`
+- `QUANTUM_DB_HOST`
+- `QUANTUM_DB_PEPPER`
+- `QUANTUM_DB_TOKEN_PEPPER`
+
+Current test defaults are configured in `pyproject.toml` via `pytest-env` (for example `QUANTUM_DB_TESTING=TRUE` and `QUANTUM_DB_FILENAME=test_db.sqlite`).
+
+> Note: `.env.example` is not currently present in this repository. Add one before public release to document required runtime variables.
+
+## Usage
+
+Install dependencies and run Python code against the package modules, for example:
+
+```python
+import bqp_database_access as db_access
+
+# access functional modules
+# db_access.users
+# db_access.jobs
+# db_access.resources
+```
+
+The package also exposes `create_app()` only as a compatibility symbol for integrations; this repository itself is focused on database access logic.
+
+## Testing
+
+Run tests from the project root:
 
 ```bash
 pdm run pytest
 ```
 
-That's all that is required for unit tests.
+## Coverage
 
-### Test coverage with pytest-cov
+Coverage is already configured in `pyproject.toml` and enabled in `pytest` addopts.
 
-`pytest-cov` is configured in `pyproject.toml` and automatically runs whenever you execute `pytest`.
+Running:
 
-Coverage is restricted to the `bqp_database_access` package and excludes files starting with `_` (for example `_database.py` and `__init__.py`).
-
-Run:
-```
+```bash
 pdm run pytest
 ```
 
-You will get:
-- a terminal coverage summary with missing lines
-- a `coverage.xml` report file for CI integrations
+produces:
+
+- terminal coverage output (`term-missing`)
+- `coverage.xml`
+
+Coverage is scoped to `bqp_database_access` and omits underscore-prefixed/internal modules configured under `[tool.coverage.run]`.
+
+## Utility scripts
+
+Available helper scripts:
+
+- `scripts/import_from_csv.py` – imports CSV files into PostgreSQL tables.
+- `scripts/export_to_csv.py` – exports PostgreSQL tables to CSV files.
+- `scripts/insert_time_slot.sql` – SQL helper for time-slot data insertion.
+
+These scripts currently contain environment-specific paths and connection defaults; review and adapt them for your deployment setup before use.
+
+## Security notes
+
+- Never commit real database credentials, peppers, or token-pepper values.
+- Keep secrets in local environment configuration (for example a local `.env` file that is gitignored).
+- Treat `QUANTUM_DB_PEPPER` and `QUANTUM_DB_TOKEN_PEPPER` as sensitive cryptographic secrets.
+- Ensure production secrets differ from development/testing values.
+
+## Development workflow
+
+Common local workflow:
+
+1. Install dependencies with `pdm install -G dev`.
+2. Run tests: `pdm run pytest`.
+3. Run type checks and linting used in CI:
+   - `pdm run mypy bqp_database_access/`
+   - `pdm run pylint bqp_database_access/`
+
+Current CI configuration is present in `.gitlab-ci.yml` and runs mypy + pylint.
+
+## Public-release TODO
+
+Before public release, add or verify the following repository-level documents:
+
+- `LICENSE` (currently missing in repository root)
+- `CONTRIBUTING.md` (currently missing)
+- `CODE_OF_CONDUCT.md` (currently missing)
+- `.env.example` (currently missing, recommended)
