@@ -26,14 +26,19 @@ def fetch_by_identity(identity: str) -> list["CircuitJob"]:  # type: ignore
 
 
 @db_session
-def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
-                             order: str, order_by: str, filter_query: str) -> \
-    dict[str, list["CircuitJob"] | int]:  # type: ignore
-    """
-    fetch all Circuit jobs belonging to a user with particular identity and pagintate the
-    results (instead of fetchign all db entries, only a certain range is fetched which is
-    expected to reduce fetch time and ease query load) for the case where jobs have to be
-    displayed on MQP website page
+def fetch_by_identity_pages(
+    identity: str,
+    page: int,
+    jobs_per_page: int,
+    order: str,
+    order_by: str,
+    filter_query: str,
+    ) -> dict[str, list["CircuitJob"] | int]:  # type: ignore
+    """Fetch paginated circuit jobs belonging to a user identity.
+
+    Only the requested page of jobs is fetched, instead of all database
+    entries. This reduces query load when jobs are displayed on the MQP
+    website.
     """
     start_list = page*jobs_per_page
     quantum_db = open_database()
@@ -44,11 +49,16 @@ def fetch_by_identity_pages(identity: str, page: int, jobs_per_page: int,
     query = f"SELECT * FROM circuit_job WHERE owner = '{identity}'"
 
     if filter_query:
-        n_total = quantum_db.select(f"SELECT COUNT(*) FROM circuit_job WHERE owner = '{identity}' AND status = '{filter_query}'")[0]
+        n_total = quantum_db.select(
+            "SELECT COUNT(*) FROM circuit_job "
+            f"WHERE owner = '{identity}' AND status = '{filter_query}'"
+        )[0]
         query += f"AND status = '{filter_query}'"
     else:
-        n_total = quantum_db.select(f"SELECT COUNT(*) FROM circuit_job WHERE OWNER = '{identity}'")[0]
-    
+        n_total = quantum_db.select(
+        "SELECT COUNT(*) FROM circuit_job "
+        f"WHERE owner = '{identity}'"
+        )[0]
     if order_by:
         query+=f" ORDER BY {order_by}"
 
