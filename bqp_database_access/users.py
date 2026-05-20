@@ -10,22 +10,18 @@ from ._database import open_database
 
 class IdentityError(Exception):
     """Base exception for identity-related failures."""
-    pass
 
 
 class UnknownIdentityError(IdentityError):
     """Raised when an identity is not present in the database."""
-    pass
 
 
 class BlockedIdentityError(IdentityError):
     """Raised when an identity is blocked from access."""
-    pass
 
 
 class IncorrectSecretError(IdentityError):
     """Raised when a provided secret does not authenticate."""
-    pass
 
 
 def create_new_user_with_secret(

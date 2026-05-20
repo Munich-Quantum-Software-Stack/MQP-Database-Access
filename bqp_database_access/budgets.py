@@ -3,13 +3,9 @@
 from ._database import open_database
 
 
-def create_new_budget(name: str, owner: str, credits: int):  # pylint: disable=W0622
+def create_new_budget(name: str, owner: str, credit_amount: int):
     """Create a new budget entry."""
-    
     raise NotImplementedError
-    # quantum_db = open_database()
-    # budget = quantum_db.Budget(name=name, owner=owner, credits=credits)
-    # quantum_db.commit()
 
 
 def fetch_budgets_of_identity(identity: str) -> set["Budget", ...]:  # type: ignore

@@ -112,6 +112,7 @@ pdm.lock
 #   in version control.
 #   https://pdm.fming.dev/#use-with-ide
 .pdm.toml
+.pdm-build
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
 __pypackages__/
@@ -126,6 +127,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+.venv-ci
 env/
 venv/
 ENV/
