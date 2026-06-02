@@ -23,7 +23,6 @@ from ._database import open_database
 
 def create_new_budget(name: str, owner: str, credit_amount: int):
     """Create a new budget entry."""
-    
     raise NotImplementedError
 
 

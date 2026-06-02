@@ -119,7 +119,6 @@ def create_new_security_level(
 
 def fetch_user_security_level(name: str):
     """Fetch a user security level by name."""
-    
     quantum_db = open_database()
 
     return quantum_db.UserSecurityLevel.get(name=name)

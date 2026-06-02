@@ -330,7 +330,7 @@ def _define_database(create_tables: bool = False, **db_params):
 
 def open_database(create_tables: bool = False):
     """Create and return a database connection configured from environment variables."""
-    
+
     if os.getenv("QUANTUM_DB_TESTING") is not None and [os.getenv("USER_TESTING") == ""
     or os.getenv("USER_TESTING") is None]:
         return _define_database(

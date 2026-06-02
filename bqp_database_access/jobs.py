@@ -465,7 +465,6 @@ def cancel_job(job_id: int, note: str) -> None:
 @db_session
 def cancel_hamiltonian_job(job_id: int, note: str) -> None:
     """Cancel a Hamiltonian job and record cancellation metadata."""
-    
     quantum_db = open_database()
 
     job = quantum_db.HamiltonianJob.get(id=job_id)

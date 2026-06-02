@@ -96,7 +96,7 @@ def get_user_list_in_time_slot_for_resource(resource_name, time_instance):
 @db_session
 def get_resource_list_in_time_slot(time_instance):
     """Get the list of resources in a time slot."""
-    
+
     time_instance = datetime.fromisoformat(time_instance)
     quantum_db = open_database()
 
