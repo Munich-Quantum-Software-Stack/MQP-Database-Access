@@ -33,6 +33,7 @@ MAX_ACTIVE_JOBS_PER_USER_PER_RESOURCE = 2
 @db_session
 def fetch_by_identity(identity: str) -> list["CircuitJob"]:  # type: ignore
     """Return all circuit jobs owned by the given identity."""
+
     quantum_db = open_database()
 
     user = quantum_db.User.get(identity=identity)
@@ -58,7 +59,8 @@ def fetch_by_identity_pages(
     entries. This reduces query load when jobs are displayed on the MQP
     website.
     """
-    start_list = page*jobs_per_page
+
+    start_list = page * jobs_per_page
     quantum_db = open_database()
     user = quantum_db.User.get(identity=identity)
     table = quantum_db.CircuitJob
@@ -90,6 +92,7 @@ def fetch_by_identity_pages(
 @db_session
 def fetch_hamiltonian_job_by_identity(identity: str) -> list["HamiltonianJob"]:  # type: ignore
     """Return all Hamiltonian jobs owned by the given identity."""
+
     quantum_db = open_database()
 
     user = quantum_db.User.get(identity=identity)
@@ -103,6 +106,7 @@ def fetch_hamiltonian_job_by_identity(identity: str) -> list["HamiltonianJob"]: 
 @db_session
 def fetch_hamiltonian_job_by_task_id(task_id: int) -> list["HamiltonianJob"]:  # type: ignore
     """Return Hamiltonian jobs matching the provided task ID."""
+
     quantum_db = open_database()
 
     return list(quantum_db.HamiltonianJob.select(id=task_id))
@@ -135,6 +139,7 @@ def create_job(
     queued: bool = False,
 ) -> "CircuitJob":  # type: ignore
     """Create and persist a new circuit job."""
+
     quantum_db = open_database()
 
     # TODO calculate cost when it is decided
@@ -171,6 +176,7 @@ def create_hamiltonian_job(
     target_spec: str,
 ) -> "HamiltonianJob":  # type: ignore
     """Create and persist a new Hamiltonian job."""
+
     quantum_db = open_database()
 
     _cost = 0
@@ -196,6 +202,7 @@ def create_hamiltonian_job(
 
 def is_within_active_job_limit(qdb, job: "CircuitJob") -> bool:  # type: ignore
     """Count the number of active jobs for a given user."""
+
     return (
         qdb.CircuitJob.select(
             owner=job.owner.identity,
@@ -210,6 +217,7 @@ def filter_queued_if_offline_and_fetch(
     qdb, jobs: list["CircuitJob"]  # type: ignore
 ) -> list["CircuitJob"]:  # type: ignore
     """Return pending jobs that are eligible to move into waiting state."""
+
     filtered_jobs = []
     for job in jobs:
         if (
@@ -231,6 +239,7 @@ def filter_queued_if_offline_and_fetch(
 @db_session
 def fetch_all_pending_jobs() -> list["CircuitJob"]:  # type: ignore
     """Return all pending circuit jobs that can be scheduled."""
+
     quantum_db = open_database()
 
     jobs = list(quantum_db.CircuitJob.select(status="PENDING"))
@@ -243,6 +252,7 @@ def fetch_all_pending_jobs_from_users(
     userids: list[str],
 ) -> list["CircuitJob"]:  # type: ignore
     """Return schedulable pending jobs owned by the provided users."""
+
     quantum_db = open_database()
 
     jobs = list(
@@ -259,6 +269,7 @@ def fetch_all_pending_jobs_for_resource_from_users(
     resource: str, userids: list[str]
 ) -> list["CircuitJob"]:  # type: ignore
     """Return schedulable pending jobs for a resource from selected users."""
+
     quantum_db = open_database()
 
     jobs = list(
@@ -276,6 +287,7 @@ def fetch_all_pending_jobs_for_resource_not_from_users(
     resource: str, userids: list[str]
 ) -> list["CircuitJob"]:  # type: ignore
     """Return schedulable pending jobs for a resource excluding selected users."""
+
     quantum_db = open_database()
 
     jobs = list(
@@ -293,6 +305,7 @@ def fetch_all_pending_jobs_except_for_resources(
     resources: list[str],
 ) -> list["CircuitJob"]:  # type: ignore
     """Return schedulable pending jobs excluding the listed resources."""
+
     quantum_db = open_database()
 
     jobs = list(
@@ -309,6 +322,7 @@ def fetch_all_pending_jobs_except_for_resource_not_from_users(
     resource: str, userids: list[str]
 ) -> list["CircuitJob"]:  # type: ignore
     """Return schedulable pending jobs, except a resource for non-listed users."""
+
     quantum_db = open_database()
 
     jobs = list(
@@ -329,6 +343,7 @@ def fetch_all_pending_jobs_except_for_resource_not_from_users(
 @db_session
 def fetch_all_pending_hamiltonian_jobs() -> list["HamiltonianJob"]:  # type: ignore
     """Return pending Hamiltonian jobs after marking them as waiting."""
+
     quantum_db = open_database()
 
     jobs = list(quantum_db.HamiltonianJob.select(status="PENDING"))
@@ -343,6 +358,7 @@ def fetch_all_pending_hamiltonian_jobs() -> list["HamiltonianJob"]:  # type: ign
 @db_session
 def fetch_all_waiting_jobs() -> list["CircuitJob"]: # type: ignore
     """Return all circuit jobs currently in waiting state."""
+
     quantum_db = open_database()
 
     return list(quantum_db.CircuitJob.select(status="WAITING"))
@@ -351,6 +367,7 @@ def fetch_all_waiting_jobs() -> list["CircuitJob"]: # type: ignore
 @db_session
 def fetch_all_waiting_hamiltonian_jobs() -> list["HamiltonianJob"]: # type: ignore
     """Return all Hamiltonian jobs currently in waiting state."""
+
     quantum_db = open_database()
 
     return list(quantum_db.HamiltonianJob.select(status="WAITING"))
@@ -365,6 +382,7 @@ def complete_job_with_result(
     note: str = "",
 ) -> None:
     """Mark a circuit job as completed and store its execution result fields."""
+
     quantum_db = open_database()
 
     job = quantum_db.CircuitJob.get(id=job_id)
@@ -402,6 +420,7 @@ def complete_hamiltonian_job_with_result(
     note: str = "",
 ) -> None:
     """Mark a Hamiltonian job as completed and store its result fields."""
+
     quantum_db = open_database()
 
     job = quantum_db.HamiltonianJob.get(id=job_id)
@@ -418,6 +437,7 @@ def complete_hamiltonian_job_with_result(
 @db_session
 def cancel_job(job_id: int, note: str) -> None:
     """Cancel a circuit job, or requeue it when offline retry conditions match."""
+
     quantum_db = open_database()
 
     job = quantum_db.CircuitJob.get(id=job_id)
@@ -445,6 +465,7 @@ def cancel_job(job_id: int, note: str) -> None:
 @db_session
 def cancel_hamiltonian_job(job_id: int, note: str) -> None:
     """Cancel a Hamiltonian job and record cancellation metadata."""
+    
     quantum_db = open_database()
 
     job = quantum_db.HamiltonianJob.get(id=job_id)

@@ -29,6 +29,7 @@ from ._database import open_database
 def check_user_now_in_time_slot_for_resource(userid, resource_name, time_instance):
     """Check if the user is one of the users or user is part of a user_group
     that is in a time slot for the resource."""
+
     time_instance = datetime.fromisoformat(time_instance)
 
     quantum_db = open_database()
@@ -64,6 +65,7 @@ def check_user_now_in_time_slot_for_resource(userid, resource_name, time_instanc
 @db_session
 def get_user_list_in_time_slot_for_resource(resource_name, time_instance):
     """Get the list of users and user_groups in a time slot for the resource."""
+
     time_instance = datetime.fromisoformat(time_instance)
     quantum_db = open_database()
 
@@ -94,6 +96,7 @@ def get_user_list_in_time_slot_for_resource(resource_name, time_instance):
 @db_session
 def get_resource_list_in_time_slot(time_instance):
     """Get the list of resources in a time slot."""
+    
     time_instance = datetime.fromisoformat(time_instance)
     quantum_db = open_database()
 
