@@ -22,7 +22,10 @@ It provides ORM-backed data access modules for domain entities such as users, jo
 3. Install dependencies and developer tools:
 
 ```bash
+git clone https://github.com/Munich-Quantum-Software-Stack/MQP-Database-Access.git
+cd MQP-Database-Access
 pdm install
+
 ```
 
 ## Environment Variables
