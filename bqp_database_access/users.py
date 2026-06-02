@@ -52,6 +52,7 @@ def create_new_user_with_secret(
     force_secret_reset: bool = False,
 ) -> None:
     """Create a new user with a salted, peppered, and hashed secret."""
+
     quantum_db = open_database()
 
     peppered_password = secret.encode() + PEPPER
@@ -74,6 +75,7 @@ def create_new_ldap_user(
     identity: str, security_level: str, email: str, affiliation: str, association: str
 ) -> None:
     """Create a new user record without storing a local secret hash."""
+
     quantum_db = open_database()
 
     quantum_db.User(
@@ -98,6 +100,7 @@ def create_new_security_level(
     login_max_interval: int,
 ) -> None:
     """Create a new user security level configuration."""
+
     quantum_db = open_database()
 
     quantum_db.UserSecurityLevel(
@@ -116,6 +119,7 @@ def create_new_security_level(
 
 def fetch_user_security_level(name: str):
     """Fetch a user security level by name."""
+    
     quantum_db = open_database()
 
     return quantum_db.UserSecurityLevel.get(name=name)
