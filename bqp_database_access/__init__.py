@@ -1,4 +1,4 @@
-from . import budgets, feedback, jobs, resources, status, tokens, users
+from . import budgets, feedback, jobs, resources, status, tokens, users, job_metrics
 
 
 def create_app():

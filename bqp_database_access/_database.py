@@ -6,6 +6,7 @@ import os
 from datetime import datetime
 from pony.orm import Database, Optional, PrimaryKey, Required, Set  # type: ignore
 
+
 # if os.getenv("QUANTUM_DB_TESTING") is not None:
 #     db_config.set_test_env()
 
@@ -86,8 +87,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
         name = PrimaryKey(str, auto=False)
         note = Optional(str)
-        users = Set("User", table="users_in_user_groups",
-                    reverse="user_groups")
+        users = Set("User", table="users_in_user_groups", reverse="user_groups")
         budgets = Set("Budget", table="user_groups_in_budgets")
         time_slots = Set("TimeSlots", table="user_groups_in_time_slots")
         owner = Required("User")
@@ -150,6 +150,87 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
         executed_circuit = Optional(str)
 
         queued = Required(bool, default=False)
+
+        timestamp_data = Optional("TimestampData", reverse="circuit_job")
+
+    class TimestampData(database.Entity):
+        """Table for storing job metrics.
+        For each metric, there are two corresponding columns in the table reffering to start and finist times as timestamps.
+        Coloumns:
+            api_entry: timestamp when the job entered the MQP API
+            api_exit: timestamp when the job exited the MQP API
+            qdb_entry: timestamp when the job entered the QuantumDB
+            qdb_exit: timestamp when the job exited the QuantumDB
+            qjr_entry: timestamp when the job entered the MQSS Quantum Job Runner
+            qjr_exit: timestamp when the job exited the MQSS Quantum Job Runner
+            isv_jr_entry: timestamp when the job entered the ISV Job Runner
+            isv_jr_exit: timestamp when the job exited the ISV Job Runner
+            quantum_daemon_jr_entry: timestamp when the job entered the Quantum Daemon Job Runner
+            quantum_daemon_jr_exit: timestamp when the job exited the Quantum Daemon Job Runner
+            generator_entry: timestamp when the job entered the circuit generator
+            generator_exit: timestamp when the job exited the circuit generator
+            scheduler_entry: timestamp when the job entered the scheduler
+            scheduler_exit: timestamp when the job exited the scheduler
+            pass_runner_entry: timestamp when the job entered the pass runner
+            pass_runner_exit: timestamp when the job exited the pass runner
+            passes_applied: dictionary listing entry and exit-times for each pass applied
+            transpiler_entry: timestamp when the job entered the transpiler
+            transpiler_exit: timestamp when the job exited the transpiler
+            submitter_entry: timestamp when the job entered the submitter
+            submitter_exit: timestamp when the job exited the submitter
+            pass_selection_entry: timestamp when the job entered the pass selection
+            pass_selection_exit: timestamp when the job exited the pass selection
+            knitter_entry: timestamp when the job entered the knitter
+            knitter_exit: timestamp when the job exited the knitter
+            job_execution_start: timestamp when the job started execution on the quantum hardware
+            job_execution_end: timestamp when the job finished execution on the quantum hardware
+        """
+
+        _table_ = "timestamp_data"
+        circuit_job = Required(CircuitJob, reverse="timestamp_data")
+
+        api_entry = Required(datetime)
+        api_exit = Required(datetime)
+
+        qdb_entry = Optional(datetime)
+        qdb_exit = Optional(datetime)
+
+        qjr_entry = Optional(datetime)
+        qjr_exit = Optional(datetime)
+
+        isv_jr_entry = Optional(datetime)
+        isv_jr_exit = Optional(datetime)
+
+        quantum_daemon_jr_entry = Optional(datetime)
+        quantum_daemon_jr_exit = Optional(datetime)
+
+        generator_entry = Optional(datetime)
+        generator_exit = Optional(datetime)
+
+        scheduler_entry = Optional(datetime)
+        scheduler_exit = Optional(datetime)
+
+        pass_runner_entry = Optional(datetime)
+        pass_runner_exit = Optional(datetime)
+
+        passes_applied = Optional(
+            str
+        )  # This is a dictionary listing entry and exit-times for passes
+
+        transpiler_entry = Optional(datetime)
+        transpiler_exit = Optional(datetime)
+
+        submitter_entry = Optional(datetime)
+        submitter_exit = Optional(datetime)
+
+        pass_selection_entry = Optional(datetime)
+        pass_selection_exit = Optional(datetime)
+
+        knitter_entry = Optional(datetime)
+        knitter_exit = Optional(datetime)
+
+        job_execution_start = Optional(datetime)
+        job_execution_end = Optional(datetime)
 
     class HamiltonianJob(database.Entity):
         _table_ = "hamiltonian_job"
@@ -286,19 +367,24 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 # pylint: enable=unused-variable
 
 
-def _define_database(create_tables: bool = False, **db_params):
+def _define_database(create_tables: bool = False, **db_params) -> Database:
+
     db = Database(**db_params)
 
     _define_entities(db)
 
-    db.generate_mapping(create_tables=create_tables)
+    try:
+        db.generate_mapping(create_tables=create_tables)
+    except Exception as e:
+        print(e)
 
     return db
 
 
-def open_database(create_tables: bool = False):
-    if os.getenv("QUANTUM_DB_TESTING") is not None and [os.getenv("USER_TESTING") == ""
-    or os.getenv("USER_TESTING") is None]:
+def open_database(create_tables: bool = False) -> Database:
+    if os.getenv("QUANTUM_DB_TESTING") is not None and [
+        os.getenv("USER_TESTING") == "" or os.getenv("USER_TESTING") is None
+    ]:
         return _define_database(
             create_tables=create_tables,
             provider="sqlite",
