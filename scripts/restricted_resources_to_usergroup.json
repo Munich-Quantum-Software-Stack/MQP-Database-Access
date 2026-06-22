@@ -1,32 +1,42 @@
-[
-	{
-    "restricted_usergroup": "HQS",
-    "in_usergroup": true,
-    "exclusive_resources": ["QExa20"],
-    "inclusive_resources": []
-	},
-  {
-    "restricted_usergroup": "IQM",
-    "in_usergroup": true,
-    "exclusive_resources": [],
-    "inclusive_resources": ["WMI3", "AQT20"]
+{
+  "HQS": {
+    "member": {
+      "exclusive_resources": ["QExa20"],
+      "inclusive_resources": []
+    },
+    "non_member": {
+      "exclusive_resources": [],
+      "inclusive_resources": []
+    }
   },
-  {
-    "restricted_usergroup": "AQT",
-    "in_usergroup": true,
-    "exclusive_resources": [],
-    "inclusive_resources": ["Q5", "Q20", "QExa20"]
+  "IQM": {
+    "member": {
+      "exclusive_resources": [],
+      "inclusive_resources": ["WMI3", "AQT20"]
+    },
+    "non_member": {
+      "exclusive_resources": [],
+      "inclusive_resources": []
+    }
   },
-  {
-    "restricted_usergroup": "EQE",
-    "in_usergroup": false,
-    "exclusive_resources": [],
-    "inclusive_resources": ["EQE1"]
+  "AQT": {
+    "member": {
+      "exclusive_resources": [],
+      "inclusive_resources": ["Q5", "Q20", "QExa20"]
+    },
+    "non_member": {
+      "exclusive_resources": [],
+      "inclusive_resources": []
+    }
   },
-  {
-    "restricted_usergroup": "EQE",
-    "in_usergroup": true,
-    "exclusive_resources": ["EQE1"],
-    "inclusive_resources": []
-  }
-]
+  "EQE": {
+    "member": {
+      "exclusive_resources": ["EQE1"],
+      "inclusive_resources": []
+    },
+    "non_member": {
+      "exclusive_resources": [],
+      "inclusive_resources": ["EQE1"]
+    }
+  }  
+}

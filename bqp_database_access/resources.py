@@ -102,22 +102,27 @@ def fetch_resources_available_to_identity(
 
 @db_session
 def get_all_restricted_usergroups() -> list[str]:
-    return RESTRICTED_RESOURCE_CONFIG.get("restricted_usergroup", [])
+    return list(RESTRICTED_RESOURCE_CONFIG.keys())
 
 @db_session
-def get_restricted_usergroup(usergroup):
-    return RESTRICTED_RESOURCE_CONFIG.get(restricted_usergroup=usergroup)
+def get_group_rule(usergroup: str, is_member: bool) -> dict | None:
+    group = RESTRICTED_RESOURCE_CONFIG.get(usergroup)
+    if not group:
+        return None
+    
+    key = "member" if is_member else "non_member"
+    return group.get(key)
 
 @db_session
-def get_excluded_restricted_resources(usergroup: str) -> list[str]:
-    restricted_usergroup = get_restricted_usergroup(usergroup)
-    exclusive_resources_list = restricted_usergroup.get("exclusive_resources", [])
+def get_excluded_restricted_resources(usergroup: str, is_member: bool) -> list[str]:
+    rule = get_group_rule(usergroup, is_member)
+    exclusive_resources_list = rule.get("exclusive_resources", []) if rule else []
     return exclusive_resources_list
 
 @db_session
-def get_inclusive_restricted_resources(usergroup: str) -> list[str]:
-    restricted_usergroup = get_restricted_usergroup(usergroup)
-    inclusive_resources_list = restricted_usergroup.get("inclusive_resources", [])
+def get_inclusive_restricted_resources(usergroup: str, is_member: bool) -> list[str]:
+    rule = get_group_rule(usergroup, is_member)
+    inclusive_resources_list = rule.get("inclusive_resources", []) if rule else []
     return inclusive_resources_list
 
 @db_session
@@ -125,33 +130,23 @@ def fetch_resource_names_restricted_to_identity(identity: str) -> list[str]:
     """Restrict users access to resources."""
     quantum_db = open_database()
     user = quantum_db.User.get(identity=identity)
+    restricted_resource_names = []
     _user_group_names = [user_group.name.upper() for user_group in user.user_groups]
     _restricted_usergroups = get_all_restricted_usergroups()
     for r_usergroup in _restricted_usergroups:
-        config_restricted_usergroup = get_restricted_usergroup(r_usergroup)
-        if r_usergroup in _user_group_names and \
-            config_restricted_usergroup.get("in_usergroup") is True:
-            # The exclusive_resources is not None \
-            # then inclusive_resources must be None and vice versa
-            exclusive_resources = get_excluded_restricted_resources(r_usergroup)
-            if exclusive_resources is not None:
-                restricted_resource_names = fetch_all_resource_names()
-                restricted_resource_names.remove(r for r in exclusive_resources)
-            else:
-                inclusive_resources = get_inclusive_restricted_resources(r_usergroup)
-                restricted_resource_names.append(r for r in inclusive_resources)
-        elif r_usergroup not in _user_group_names \
-            and config_restricted_usergroup.get("in_usergroup") is False:
-            inclusive_resources = get_inclusive_restricted_resources(r_usergroup)
-            if inclusive_resources is not None:
-                restricted_resource_names.append(r for r in inclusive_resources)
-        else:
-            exclusive_resources = get_excluded_restricted_resources(r_usergroup)
-            if exclusive_resources is not None:
-                restricted_resource_names = fetch_all_resource_names()
-                restricted_resource_names.remove(r for r in exclusive_resources)
+        is_member = r_usergroup in _user_group_names
 
-    restricted_resource_names = []
+        exclusive_resources = get_excluded_restricted_resources(r_usergroup, is_member)
+        if exclusive_resources:
+            restricted_resource_names = fetch_all_resource_names()
+            for r in exclusive_resources:
+                if r in restricted_resource_names:
+                    restricted_resource_names.remove(r)
+        else:
+            inclusive_resources = get_inclusive_restricted_resources(r_usergroup, is_member)
+            if inclusive_resources:
+                restricted_resource_names.extend(inclusive_resources)
+
     return restricted_resource_names
 
 
