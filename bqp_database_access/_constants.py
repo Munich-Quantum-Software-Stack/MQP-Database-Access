@@ -19,7 +19,10 @@
 """MQP-Database-Access Constant module"""
 
 import os
+from dotenv import load_dotenv
 
-PEPPER = os.environ["QUANTUM_DB_PEPPER"].encode()
+load_dotenv()
 
-TOKEN_PEPPER = os.environ["QUANTUM_DB_TOKEN_PEPPER"].encode()
+PEPPER = os.getenv("QUANTUM_DB_PEPPER")
+
+TOKEN_PEPPER = os.getenv("QUANTUM_DB_TOKEN_PEPPER")
