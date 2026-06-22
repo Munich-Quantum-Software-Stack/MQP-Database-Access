@@ -131,7 +131,8 @@ def fetch_resource_names_restricted_to_identity(identity: str) -> list[str]:
         config_restricted_usergroup = get_restricted_usergroup(r_usergroup)
         if r_usergroup in _user_group_names and \
             config_restricted_usergroup.get("in_usergroup") is True:
-            # The exclusive_resources is not None then inclusive_resources must be None and vice versa
+            # The exclusive_resources is not None \
+            # then inclusive_resources must be None and vice versa
             exclusive_resources = get_excluded_restricted_resources(r_usergroup)
             if exclusive_resources is not None:
                 restricted_resource_names = fetch_all_resource_names()
