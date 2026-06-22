@@ -56,7 +56,6 @@ def create_new_user_with_secret(
     quantum_db = open_database()
     if PEPPER is None:
         raise RuntimeError("PEPPER is not set")
-    
     peppered_password = secret.encode() + PEPPER.encode()
     passhash = bcrypt.hashpw(peppered_password, bcrypt.gensalt())
 
