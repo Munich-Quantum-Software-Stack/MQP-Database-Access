@@ -109,7 +109,6 @@ def get_group_rule(usergroup: str, is_member: bool) -> dict | None:
     group = RESTRICTED_RESOURCE_CONFIG.get(usergroup)
     if not group:
         return None
-    
     key = "member" if is_member else "non_member"
     return group.get(key)
 
