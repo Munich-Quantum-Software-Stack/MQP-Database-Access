@@ -100,3 +100,6 @@ omit = [
 [tool.coverage.report]
 show_missing = true
 skip_covered = false
+
+[[tool.uv.index]]
+url = "https://pypi.quantum.lrz.de"
