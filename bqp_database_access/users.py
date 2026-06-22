@@ -54,8 +54,10 @@ def create_new_user_with_secret(
     """Create a new user with a salted, peppered, and hashed secret."""
 
     quantum_db = open_database()
-
-    peppered_password = secret.encode() + PEPPER
+    if PEPPER is None:
+        raise RuntimeError("PEPPER is not set")
+    
+    peppered_password = secret.encode() + PEPPER.encode()
     passhash = bcrypt.hashpw(peppered_password, bcrypt.gensalt())
 
     quantum_db.User(
@@ -136,7 +138,9 @@ def set_new_secret_for_identity(
     if user is None:
         raise UnknownIdentityError
 
-    peppered_password = new_secret.encode() + PEPPER
+    if PEPPER is None:
+        raise RuntimeError("PEPPER is not set")
+    peppered_password = new_secret.encode() + PEPPER.encode()
 
     user.secret_hash = bcrypt.hashpw(peppered_password, bcrypt.gensalt()).decode()
     user.last_secret_change = datetime.now()
@@ -154,7 +158,9 @@ def authenticate(identity: str, password: str) -> None:
     if user is None:
         raise UnknownIdentityError
 
-    peppered_password = password.encode() + PEPPER
+    if PEPPER is None:
+        raise RuntimeError("PEPPER is not set")
+    peppered_password = password.encode() + PEPPER.encode()
 
     authenticated = bcrypt.checkpw(peppered_password, user.secret_hash.encode())
 

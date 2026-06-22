@@ -1,0 +1,32 @@
+[
+	{
+    "restricted_usergroup": "HQS",
+    "in_usergroup": true,
+    "exclusive_resources": ["QExa20"],
+    "inclusive_resources": []
+	},
+  {
+    "restricted_usergroup": "IQM",
+    "in_usergroup": true,
+    "exclusive_resources": [],
+    "inclusive_resources": ["WMI3", "AQT20"]
+  },
+  {
+    "restricted_usergroup": "AQT",
+    "in_usergroup": true,
+    "exclusive_resources": [],
+    "inclusive_resources": ["Q5", "Q20", "QExa20"]
+  },
+  {
+    "restricted_usergroup": "EQE",
+    "in_usergroup": false,
+    "exclusive_resources": [],
+    "inclusive_resources": ["EQE1"]
+  },
+  {
+    "restricted_usergroup": "EQE",
+    "in_usergroup": true,
+    "exclusive_resources": ["EQE1"],
+    "inclusive_resources": []
+  }
+]

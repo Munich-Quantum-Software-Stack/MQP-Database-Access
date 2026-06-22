@@ -1,0 +1,65 @@
+site_name: MQP Dashboard Backend Documentation
+
+docs_dir: "docs"
+site_dir: build/docs/site
+use_directory_urls: true
+dev_addr: "0.0.0.0:8000"
+watch:
+  - docs
+  - mkdocs.yml
+
+nav:
+  - MQSS Interfaces: https://munich-quantum-software-stack.github.io/MQSS-Interfaces/
+  - Home: index.md
+  - User Guide:
+      - Getting Started: user_guide/getting_started.md
+      - Development Guide: user_guide/development_guide.md
+  - Change Log: CHANGELOG.md
+  - Contact Us: contact.md
+
+theme:
+  name: material
+  logo: img/mqss_logo_white.svg
+  palette:
+    - scheme: default          # Light mode
+      toggle:
+        icon: material/lightbulb-night-outline
+        name: Light mode
+      primary: custom
+      accent: deep purple
+    - scheme: slate            # Dark mode
+      toggle:
+        icon: material/lightbulb-on-outline
+        name: Dark mode
+      primary: indigo
+      accent: deep orange
+  features:
+    - content.code.copy
+    - navigation.instant
+    - navigation.footer
+
+plugins:
+  - search
+  - autorefs
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - codehilite
+  - footnotes
+  - meta
+  - toc:
+      permalink: true
+
+extra_css:
+  - css/extra.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Munich-Quantum-Software-Stack/MQP-Database-Access
+    - icon: fontawesome/solid/envelope
+      link: mailto:quantum@lrz.de
+
+copyright: Copyright &copy; 2026 MQV

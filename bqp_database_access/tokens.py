@@ -111,7 +111,10 @@ def add_new_token(
     ):
         raise TooManyTokensError(token_count_limit, owner)
 
-    token_hash = hashlib.sha256(token.encode() + TOKEN_PEPPER).hexdigest()
+    if TOKEN_PEPPER is None:
+        raise RuntimeError("TOKEN_PEPPER is not set")
+    
+    token_hash = hashlib.sha256(token.encode() + TOKEN_PEPPER.encode()).hexdigest()
 
     if quantum_db.Token.exists(remember_name=name, owner=owner, revoked=False):
         raise TokenExistsError(name)
@@ -164,6 +167,9 @@ def verify_token(token: str) -> Optional["Token"]:  # type: ignore
 
     quantum_db = open_database()
 
-    token_hash = hashlib.sha256(token.encode() + TOKEN_PEPPER).hexdigest()
+    if TOKEN_PEPPER is None:
+        raise RuntimeError("TOKEN_PEPPER is not set")
+    
+    token_hash = hashlib.sha256(token.encode() + TOKEN_PEPPER.encode()).hexdigest()
 
     return quantum_db.Token.get(token_hash=token_hash, revoked=False)

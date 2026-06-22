@@ -30,42 +30,16 @@ pdm install
 
 ## Environment Variables
 
-The package and test setup rely on the following environment variables:
-
-- `QUANTUM_DB_TESTING`
-- `QUANTUM_DB_FILENAME`
-- `QUANTUM_DB_USER`
-- `QUANTUM_DB_PASS`
-- `QUANTUM_DB_HOST`
-- `QUANTUM_DB_PEPPER`
-- `QUANTUM_DB_TOKEN_PEPPER`
+The package and test setup rely on the environment variables. \
 
 Use `.env.example` as a template for local configuration, then set environment-specific secret values before running tests or integrations.
-
-## Running Tests
-
-```bash
-pdm run pytest
-```
-
-## Type Checking and Linting
-
-```bash
-pdm run mypy bqp_database_access/
-pdm run pylint bqp_database_access/
-```
-
-## Building the Package
-
-```bash
-pdm build
-```
 
 ## Utility Scripts
 
 - `scripts/import_from_csv.py`
 - `scripts/export_to_csv.py`
 - `scripts/insert_time_slot.sql`
+- `scripts/restricted_resources_to_usergroup.json`
 
 Review and adapt script configuration (for paths, credentials, and hosts) before use in your environment.
 
@@ -78,11 +52,11 @@ Review and adapt script configuration (for paths, credentials, and hosts) before
 
 ## Contributing
 
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions are welcome. Please read [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## Code of Conduct
 
-Please review [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+Please review [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).
 
 ## License
 

@@ -35,36 +35,6 @@ Open an issue on the same GitHub issues page and clearly describe:
 - The proposed improvement
 - Why it is useful for MQP/MQSS users
 
-## 💻 Local Development Setup
-
-1. Fork and clone the repository.
-2. Install dependencies with PDM:
-
-```bash
-pdm install
-```
-
-3. Create a branch using the naming conventions below.
-
-## 🧪 Running Tests
-
-Run the test suite with:
-
-```bash
-pdm run pytest
-```
-
-> Note: test environment values are configured via `pyproject.toml` (`[tool.pytest.ini_options].env`).
-
-## 🔍 Type Checking and Linting
-
-Run static checks before opening a PR:
-
-```bash
-pdm run mypy bqp_database_access/
-pdm run pylint bqp_database_access/
-```
-
 ## 🌿 Branch Naming Conventions
 
 Please use:
@@ -84,9 +54,9 @@ Please use:
 
 ## 🗄️ Database and Environment Notes
 
-- This repository is a **Python database access package** (not a frontend app and not a Flask backend).
+- This repository is a **Python database access package** (neither Frontend app nor a Flask backend).
 - Ensure local database/environment settings are consistent with project expectations when running tests and development workflows.
-- Review environment-dependent pytest defaults in `pyproject.toml` before troubleshooting test behavior.
+- Review environment-dependent pytest defaults in `.env` before troubleshooting test behavior.
 
 ## 🔐 Security and Secrets
 
