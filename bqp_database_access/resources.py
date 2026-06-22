@@ -19,15 +19,16 @@
 """MQP-Database-Access Resource module"""
 
 import os
+import json
+from pathlib import Path
 from typing import Optional
 from warnings import warn
 from pony.orm import db_session  # type: ignore
 from ._database import open_database
-import json
-from pathlib import Path
 
 ROOT_PATH = Path(os.path.dirname(os.path.abspath(__file__))).parent
-RESTRICTED_RESOURCE_FILE = os.path.join(ROOT_PATH, "scripts/restricted_resources_to_usergroup.json")
+JSON_FILE_PATH = "scripts/restricted_resources_to_usergroup.json"
+RESTRICTED_RESOURCE_FILE = os.path.join(ROOT_PATH, JSON_FILE_PATH)
 # Read json file
 with open(RESTRICTED_RESOURCE_FILE, "r", encoding="utf-8") as f:
     RESTRICTED_RESOURCE_CONFIG = json.load(f)
@@ -122,14 +123,14 @@ def get_inclusive_restricted_resources(usergroup: str) -> list[str]:
 @db_session
 def fetch_resource_names_restricted_to_identity(identity: str) -> list[str]:
     """Restrict users access to resources."""
-    
     quantum_db = open_database()
     user = quantum_db.User.get(identity=identity)
     _user_group_names = [user_group.name.upper() for user_group in user.user_groups]
     _restricted_usergroups = get_all_restricted_usergroups()
     for r_usergroup in _restricted_usergroups:
         config_restricted_usergroup = get_restricted_usergroup(r_usergroup)
-        if r_usergroup in _user_group_names and config_restricted_usergroup.get("in_usergroup") == True:
+        if r_usergroup in _user_group_names and \
+            config_restricted_usergroup.get("in_usergroup") is True:
             # The exclusive_resources is not None then inclusive_resources must be None and vice versa
             exclusive_resources = get_excluded_restricted_resources(r_usergroup)
             if exclusive_resources is not None:
@@ -138,7 +139,8 @@ def fetch_resource_names_restricted_to_identity(identity: str) -> list[str]:
             else:
                 inclusive_resources = get_inclusive_restricted_resources(r_usergroup)
                 restricted_resource_names.append(r for r in inclusive_resources)
-        elif r_usergroup not in _user_group_names and config_restricted_usergroup.get("in_usergroup") == False:
+        elif r_usergroup not in _user_group_names \
+            and config_restricted_usergroup.get("in_usergroup") is False:
             inclusive_resources = get_inclusive_restricted_resources(r_usergroup)
             if inclusive_resources is not None:
                 restricted_resource_names.append(r for r in inclusive_resources)
@@ -151,40 +153,6 @@ def fetch_resource_names_restricted_to_identity(identity: str) -> list[str]:
     restricted_resource_names = []
     return restricted_resource_names
 
-"""
-@db_session
-def fetch_resource_names_restricted_to_identity(identity: str) -> list[str]:
-    # Comment docstring
-    # Restrict users access to resources.
-
-    quantum_db = open_database()
-
-    user = quantum_db.User.get(identity=identity)
-    _user_group_names = [user_group.name.upper() for user_group in user.user_groups]
-
-    restricted_resource_names = []
-
-    # Hardcode any restrictions here
-    # TODO after budgeting, replace implement restrictions through budget allocation.
-    if "HQS" in _user_group_names:
-        # block access to all resources except QExa20
-        restricted_resource_names = fetch_all_resource_names()
-        restricted_resource_names.remove("QExa20")
-    elif "IQM" in _user_group_names:
-        # block access to WMI3 and AQT20
-        restricted_resource_names.append("WMI3")
-        restricted_resource_names.append("AQT20")
-    elif "AQT" in _user_group_names:
-        # block access to IQM devices
-        restricted_resource_names.append("Q5")
-        restricted_resource_names.append("Q20")
-        restricted_resource_names.append("QExa20")
-    if "EQE" not in _user_group_names:
-        # block access to EQE1 device
-        restricted_resource_names.append("EQE1")
-
-    return restricted_resource_names
-"""
 
 @db_session
 def fetch_resources_restricted_to_identity(
