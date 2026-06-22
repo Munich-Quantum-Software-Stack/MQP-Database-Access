@@ -80,7 +80,7 @@ addopts = [
 
 
 [dependency-groups]
-test = [
+dev = [
     "pytest>=7.4.2",
     "pytest-cov>=6.2.1",
     "pytest-env>=1.0.1",
@@ -100,3 +100,6 @@ omit = [
 [tool.coverage.report]
 show_missing = true
 skip_covered = false
+
+[[tool.uv.index]]
+url = "https://pypi.quantum.lrz.de"
