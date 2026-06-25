@@ -4,7 +4,7 @@
 
 ## Overview
 
-`MQP-Database-Access` is the Python database access package for the Munich Quantum Portal (MQP) Dashboard and part of the Munich Quantum Software Stack (MQSS).
+MQP-Database-Access is the Python database access package for the Munich Quantum Portal (MQP) Dashboard and part of the Munich Quantum Software Stack (MQSS).
 
 It provides ORM-backed data access modules for domain entities such as users, jobs, resources, budgets, tokens, time slots, feedback, and status handling.
 
@@ -30,7 +30,7 @@ pdm install
 
 ## Environment Variables
 
-The package and test setup rely on the environment variables. \
+The package and test setup rely on the environment variables.
 
 Use `.env.example` as a template for local configuration, then set environment-specific secret values before running tests or integrations.
 
