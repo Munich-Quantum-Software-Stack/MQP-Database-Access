@@ -33,8 +33,7 @@ jobs:
         run: uv sync --all-extras --dev
          
       - name: Build documentation
-        run: |
-          mkdocs build
+        run: uv run mkdocs build
 
       - name: Copy documentation to gh-pages branch
         run: |
