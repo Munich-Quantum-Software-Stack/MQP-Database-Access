@@ -1,6 +1,6 @@
 # MQP-Database-Access
 
-[![CI](https://github.com/Munich-Quantum-Software-Stack/MQP-Database-Access/actions/workflows/ci.yml/badge.svg)](https://github.com/Munich-Quantum-Software-Stack/MQP-Database-Access/actions/workflows/ci.yml)
+[![Documentation](https://img.shields.io/badge/Documentation-Read%20the%20Docs-blue)](https://munich-quantum-software-stack.github.io/MQP-Database-Access/index.html)
 
 ## Overview
 
