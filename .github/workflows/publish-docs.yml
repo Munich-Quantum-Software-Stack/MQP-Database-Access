@@ -1,13 +1,17 @@
-name: Update docs
+name: Build and Deploy Docs
 
 on:
   push:
     branches:
       - develop
 
+
 jobs:
-  update-docs:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -17,36 +21,37 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install uv
-          uv sync
+       - name: Install UV
+          run: curl -LsSf https://astral.sh/uv/install.sh | sh
+          shell: bash
 
+        - name: Add UV to the environment
+          run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+          shell: bash
+
+        - name: Install the project
+          run: uv sync --all-extras --dev
+         
       - name: Build documentation
-        run: uv run mkdocs build
-        # Output goes to: build/docs/site/
-
-      - name: Checkout MQSS Interfaces repository
         run: |
-          git clone https://x-access-token:${{ secrets.MQSS_INTERFACES_DOCS_TOKEN }}@github.com/Munich-Quantum-Software-Stack/MQSS-Interfaces.git
-          git remote set-url origin https://x-access-token:${{ secrets.MQSS_INTERFACES_DOCS_TOKEN }}@github.com/Munich-Quantum-Software-Stack/MQSS-Interfaces.git
-          cd MQSS-Interfaces
-          git checkout gh-pages
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull origin gh-pages
+          mkdocs build
 
-      - name: Copy documentation to MQSS Interfaces repository
+      - name: Copy documentation to gh-pages branch
         run: |
-          cd MQSS-Interfaces
-          rm -rf bqp_database_access/*
-          mkdir -p bqp_database_access/
-          cp -r ../build/docs/site/* bqp_database_access/
+          git clone --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} gh-pages
+          cp -rf build/docs/site/* gh-pages/
 
-      - name: Commit and push changes to MQSS Interfaces repository
+      - name: Commit and push changes
         run: |
-          cd MQSS-Interfaces
+          cd gh-pages
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
           git add .
-          git commit -m "Update MQP Database Access docs from GitHub Action" || echo "No changes to commit"
+          git commit -m "Update docs from GitHub Action" || echo "No changes to commit"
           git push origin gh-pages
+
+      - name: Clean up
+        run: |
+          cd ..
+          rm -rf gh-pages
+          rm -rf build

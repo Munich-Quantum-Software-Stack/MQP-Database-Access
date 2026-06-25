@@ -1,5 +1,4 @@
-from uuid import uuid4
-from pony.orm import db_session, flush, commit
+from pony.orm import db_session
 from bqp_database_access.resources import (
     fetch_resource_names_restricted_to_identity
 )

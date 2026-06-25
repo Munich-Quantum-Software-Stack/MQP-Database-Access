@@ -3,7 +3,7 @@ import psycopg2
 import os
 import numpy as np
 from datetime import datetime, timedelta
-import bqp_database_access as db_access
+
 
 """
 Following queries are used to populate data to test specific features
