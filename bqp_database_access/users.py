@@ -171,7 +171,7 @@ def authenticate(identity: str, password: str) -> None:
         raise IncorrectSecretError
 
 
-def fetch_user_by_identity(identity: str) -> "User":  # type: ignore
+def fetch_user_by_identity(identity: str) -> "User":  # type: ignore    # noqa: F821
     """Fetch database user data through identity."""
 
     quantum_db = open_database()

@@ -29,7 +29,7 @@ def _weighted_sample_without_replacement(population, weights, k, rng=random):
     return [population[i] for i in order[-k:]]
 
 
-def fetch_current_announcements() -> tuple["Announcement"]:  # type: ignore
+def fetch_current_announcements() -> tuple["Announcement"]:  # type: ignore # noqa: F821
     """Fetch all mandatory announcements."""
 
     quantum_db = open_database()
@@ -41,7 +41,7 @@ def fetch_current_announcements() -> tuple["Announcement"]:  # type: ignore
     return tuple(announcements)
 
 
-def get_random_pointers(count: int) -> list["Pointer"]:  # type: ignore
+def get_random_pointers(count: int) -> list["Pointer"]:  # type: ignore # noqa: F821
     """Return a weighted random selection of currently active pointers."""
 
     quantum_db = open_database()

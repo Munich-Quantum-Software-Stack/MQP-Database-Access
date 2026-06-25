@@ -1,4 +1,3 @@
-from uuid import uuid4
 from pony.orm import db_session, flush, commit
 from datetime import datetime
 from bqp_database_access.jobs import (
@@ -7,7 +6,6 @@ from bqp_database_access.jobs import (
     fetch_result_by_job_id_and_identity,
     create_job,
     is_within_active_job_limit,
-    MAX_ACTIVE_JOBS_PER_USER_PER_RESOURCE,
     filter_queued_if_offline_and_fetch,
     fetch_all_pending_jobs,
     fetch_all_pending_jobs_from_users,

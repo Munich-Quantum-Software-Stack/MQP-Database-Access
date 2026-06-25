@@ -34,7 +34,7 @@ with open(RESTRICTED_RESOURCE_FILE, "r", encoding="utf-8") as f:
     RESTRICTED_RESOURCE_CONFIG = json.load(f)
 
 @db_session
-def fetch_all_resources() -> set["Resource", ...]:  # type: ignore
+def fetch_all_resources() -> set["Resource", ...]:  # type: ignore  # noqa: F821
     """Fetch all resources."""
 
     quantum_db = open_database()
@@ -72,7 +72,7 @@ def fetch_all_target_specification_names() -> list[str]:
 @db_session
 def fetch_resources_available_to_identity(
     identity: str,
-) -> set["Resource", ...]:  # type: ignore
+) -> set["Resource", ...]:  # type: ignore  # noqa: F821
     """Fetch all budgets."""
 
     _restricted_resource_names = fetch_resource_names_restricted_to_identity(identity)
@@ -152,7 +152,7 @@ def fetch_resource_names_restricted_to_identity(identity: str) -> list[str]:
 @db_session
 def fetch_resources_restricted_to_identity(
     identity: str,
-) -> set["Resource", ...]:  # type: ignore
+) -> set["Resource", ...]:  # type: ignore  # noqa: F821
     """Restrict users access to resources."""
 
     restricted_resource_names = fetch_resource_names_restricted_to_identity(identity)
