@@ -90,7 +90,8 @@ def fetch_by_identity_pages(
             "totaljob_nr": int(n_total)}
 
 @db_session
-def fetch_hamiltonian_job_by_identity(identity: str) -> list["HamiltonianJob"]:  # type: ignore   # noqa: F821
+def fetch_hamiltonian_job_by_identity(identity: str) \
+    -> list["HamiltonianJob"]:  # type: ignore   # noqa: F821
     """Return all Hamiltonian jobs owned by the given identity."""
 
     quantum_db = open_database()
@@ -104,7 +105,8 @@ def fetch_hamiltonian_job_by_identity(identity: str) -> list["HamiltonianJob"]: 
 
 
 @db_session
-def fetch_hamiltonian_job_by_task_id(task_id: int) -> list["HamiltonianJob"]:  # type: ignore   # noqa: F821
+def fetch_hamiltonian_job_by_task_id(task_id: int) \
+    -> list["HamiltonianJob"]:  # type: ignore   # noqa: F821
     """Return Hamiltonian jobs matching the provided task ID."""
 
     quantum_db = open_database()
@@ -341,7 +343,8 @@ def fetch_all_pending_jobs_except_for_resource_not_from_users(
 
 
 @db_session
-def fetch_all_pending_hamiltonian_jobs() -> list["HamiltonianJob"]:  # type: ignore   # noqa: F821
+def fetch_all_pending_hamiltonian_jobs() \
+    -> list["HamiltonianJob"]:  # type: ignore   # noqa: F821
     """Return pending Hamiltonian jobs after marking them as waiting."""
 
     quantum_db = open_database()
@@ -365,7 +368,8 @@ def fetch_all_waiting_jobs() -> list["CircuitJob"]: # type: ignore   # noqa: F82
 
 
 @db_session
-def fetch_all_waiting_hamiltonian_jobs() -> list["HamiltonianJob"]: # type: ignore   # noqa: F821
+def fetch_all_waiting_hamiltonian_jobs() \
+    -> list["HamiltonianJob"]: # type: ignore   # noqa: F821
     """Return all Hamiltonian jobs currently in waiting state."""
 
     quantum_db = open_database()

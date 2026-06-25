@@ -26,7 +26,8 @@ def create_new_budget(name: str, owner: str, credit_amount: int):
     raise NotImplementedError
 
 
-def fetch_budgets_of_identity(identity: str) -> set["Budget", ...]:  # type: ignore   # noqa: F821
+def fetch_budgets_of_identity(identity: str) \
+    -> set["Budget", ...]:  # type: ignore   # noqa: F821
     """Fetch all budgets."""
 
     quantum_db = open_database()

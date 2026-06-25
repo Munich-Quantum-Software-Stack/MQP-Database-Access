@@ -148,7 +148,8 @@ def revoke_token_by_name_and_identity(name: str, owner: str) -> None:
     quantum_db.commit()
 
 
-def fetch_active_tokens_of_identity(owner: str) -> list["Token"]:  # type: ignore   # noqa: F821
+def fetch_active_tokens_of_identity(owner: str) \
+    -> list["Token"]:  # type: ignore   # noqa: F821
     """Fetch all tokens"""
 
     quantum_db = open_database()
