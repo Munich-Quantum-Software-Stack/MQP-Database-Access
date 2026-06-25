@@ -148,7 +148,8 @@ def revoke_token_by_name_and_identity(name: str, owner: str) -> None:
     quantum_db.commit()
 
 
-def fetch_active_tokens_of_identity(owner: str) -> list["Token"]:  # type: ignore
+def fetch_active_tokens_of_identity(owner: str) \
+    -> list["Token"]:  # type: ignore   # noqa: F821
     """Fetch all tokens"""
 
     quantum_db = open_database()
@@ -156,7 +157,7 @@ def fetch_active_tokens_of_identity(owner: str) -> list["Token"]:  # type: ignor
     return quantum_db.Token.select(owner=owner, revoked=False)
 
 
-def verify_token(token: str) -> Optional["Token"]:  # type: ignore
+def verify_token(token: str) -> Optional["Token"]:  # type: ignore  # noqa: F821
     """
     This function verifies that a received token exists in the database
     and then returns the related user.

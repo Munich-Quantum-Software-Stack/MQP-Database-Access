@@ -9,12 +9,21 @@ watch:
   - mkdocs.yml
 
 nav:
-  - MQSS Interfaces: https://munich-quantum-software-stack.github.io/MQSS-Interfaces/
+  - MQP-Database-Access: https://munich-quantum-software-stack.github.io/MQP-Database-Access
   - Home: index.md
   - User Guide:
       - Getting Started: user_guide/getting_started.md
       - Development Guide: user_guide/development_guide.md
-  - Change Log: CHANGELOG.md
+  - API Documentation:
+      - Budgets: api/budgets.md
+      - Feedback: api/feedback.md
+      - Jobs: api/jobs.md
+      - Resources: api/resources.md
+      - Status: api/status.md
+      - Timeslots: api/timeslots.md
+      - Tokens: api/tokens.md
+      - Users: api/users.md
+  #- Change Log: CHANGELOG.md
   - Contact Us: contact.md
 
 theme:
@@ -41,6 +50,16 @@ theme:
 plugins:
   - search
   - autorefs
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_source: false
+            separate_signature: true
+            show_if_no_docstring: false
+            show_root_full_path: true
+            show_signature_annotations: true
 
 markdown_extensions:
   - admonition

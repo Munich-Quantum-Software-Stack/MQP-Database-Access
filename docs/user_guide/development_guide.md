@@ -11,37 +11,50 @@ cd MQP-Database-Access
 
 ### Environment Variables
 
-To run the project locally, you need to configure your environment variables:
+To run the project locally, you need to configure your environment variables:\
 1. Locate the .env.example file in the project root
 2. Create a copy of this file and rename it to .env
 3. Open the .env file and update the configuration values to match your local setup.
 
+### Install dependencies
+
+```sh
+pdm install
+```
 
 ### Unit testing with pytest
 
-In order for the unit-tests to run, following environment-variables need to be set (test_db.db can in principle be anything except already existing files):
+In order for the unit-tests running, following environment-variables need to be set (test_db.db can in principle be anything except already existing files):
 
 ```sh
-export QUANTUM_DB_TESTING=1
+export QUANTUM_DB_TESTING=TRUE
 export QUANTUM_DB_FILENAME=test_db.sqlite
 export QUANTUM_DS_HOST=ldap://localhost:8888
 ```
 
 To run the tests, use pytest:
 ```sh
-pytest
+pdm run pytest
 ```
 
 
-## Building the Package
+### Building the Package
 
 ```bash
 pdm build
 ```
 
-### Building Documentation
+## Building Documentation
 
-To build the documentation, follow these steps:\
+### Prerequisites
+
+- Python 3.9 or newer
+- Required Python packages:
+```sh
+pip install mkdocs mkdocs-material mkdocstrings[python] mkdocs-autorefs
+```
+
+### Build Commands
 
 **Install MkDocs and the Material theme:**
 ```sh
