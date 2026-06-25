@@ -1,4 +1,4 @@
-site_name: MQP Dashboard Backend Documentation
+site_name: MQP Database Access Documentation
 
 docs_dir: "docs"
 site_dir: build/docs/site
