@@ -18,20 +18,20 @@
 
 """MQP-Database-Access Resource module"""
 
-import os
 import json
-from pathlib import Path
+from importlib.resources import files
 from typing import Optional
 from warnings import warn
 from pony.orm import db_session  # type: ignore
 from ._database import open_database
 
-ROOT_PATH = Path(os.path.dirname(os.path.abspath(__file__))).parent
-JSON_FILE_PATH = "scripts/restricted_resources_to_usergroup.json"
-RESTRICTED_RESOURCE_FILE = os.path.join(ROOT_PATH, JSON_FILE_PATH)
+
+RESTRICTED_RESOURCES_FILE = files("bqp_database_access").joinpath(
+    "configs/restricted_resources_to_usergroup.json"
+)
 # Read json file
-with open(RESTRICTED_RESOURCE_FILE, "r", encoding="utf-8") as f:
-    RESTRICTED_RESOURCE_CONFIG = json.load(f)
+with RESTRICTED_RESOURCES_FILE.open("r", encoding="utf-8") as f:
+    RESTRICTED_RESOURCES = json.load(f)
 
 @db_session
 def fetch_all_resources() -> set["Resource", ...]:  # type: ignore  # noqa: F821
@@ -102,11 +102,11 @@ def fetch_resources_available_to_identity(
 
 @db_session
 def get_all_restricted_usergroups() -> list[str]:
-    return list(RESTRICTED_RESOURCE_CONFIG.keys())
+    return list(RESTRICTED_RESOURCES.keys())
 
 @db_session
 def get_group_rule(usergroup: str, is_member: bool) -> dict | None:
-    group = RESTRICTED_RESOURCE_CONFIG.get(usergroup)
+    group = RESTRICTED_RESOURCES.get(usergroup)
     if not group:
         return None
     key = "member" if is_member else "non_member"
