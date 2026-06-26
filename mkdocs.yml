@@ -49,7 +49,6 @@ theme:
 
 plugins:
   - search
-  - autorefs
   - mkdocstrings:
       handlers:
         python:
@@ -60,6 +59,8 @@ plugins:
             show_if_no_docstring: false
             show_root_full_path: true
             show_signature_annotations: true
+            signature_crossrefs: true
+  - autorefs
 
 markdown_extensions:
   - admonition
