@@ -1216,7 +1216,7 @@
 
 
 <a href="#bqp_database_access.users.authenticate" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">authenticate</span><span class="p">(</span><span class="n">identity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">authenticate</span><span class="p">(</span><span class="n">identity</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n">password</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -1237,11 +1237,11 @@
 
 <a href="#bqp_database_access.users.create_new_ldap_user" class="headerlink" title="Permanent link">&para;</a></h2>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">create_new_ldap_user</span><span class="p">(</span>
-    <span class="n">identity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">security_level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">affiliation</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">association</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">identity</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
+    <span class="n">security_level</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
+    <span class="n">email</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
+    <span class="n">affiliation</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
+    <span class="n">association</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
@@ -1263,14 +1263,14 @@
 
 <a href="#bqp_database_access.users.create_new_security_level" class="headerlink" title="Permanent link">&para;</a></h2>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">create_new_security_level</span><span class="p">(</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">token_max_live_count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">token_max_lifetime</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">token_min_creation_interval</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">token_max_jobs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">token_max_budget</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">token_max_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">login_max_interval</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
+    <span class="n">token_max_live_count</span><span class="p">:</span> <span class="n"><span title="int">int</span></span><span class="p">,</span>
+    <span class="n">token_max_lifetime</span><span class="p">:</span> <span class="n"><span title="int">int</span></span><span class="p">,</span>
+    <span class="n">token_min_creation_interval</span><span class="p">:</span> <span class="n"><span title="int">int</span></span><span class="p">,</span>
+    <span class="n">token_max_jobs</span><span class="p">:</span> <span class="n"><span title="int">int</span></span><span class="p">,</span>
+    <span class="n">token_max_budget</span><span class="p">:</span> <span class="n"><span title="int">int</span></span><span class="p">,</span>
+    <span class="n">token_max_rate</span><span class="p">:</span> <span class="n"><span title="int">int</span></span><span class="p">,</span>
+    <span class="n">login_max_interval</span><span class="p">:</span> <span class="n"><span title="int">int</span></span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
@@ -1292,13 +1292,13 @@
 
 <a href="#bqp_database_access.users.create_new_user_with_secret" class="headerlink" title="Permanent link">&para;</a></h2>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">create_new_user_with_secret</span><span class="p">(</span>
-    <span class="n">identity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">security_level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">affiliation</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">association</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">force_secret_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">identity</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
+    <span class="n">secret</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
+    <span class="n">security_level</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
+    <span class="n">email</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
+    <span class="n">affiliation</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
+    <span class="n">association</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
+    <span class="n">force_secret_reset</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
@@ -1319,7 +1319,7 @@
 
 
 <a href="#bqp_database_access.users.fetch_user_by_identity" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">fetch_user_by_identity</span><span class="p">(</span><span class="n">identity</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">User</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">fetch_user_by_identity</span><span class="p">(</span><span class="n">identity</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="User">User</span></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -1339,7 +1339,7 @@
 
 
 <a href="#bqp_database_access.users.fetch_user_security_level" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">fetch_user_security_level</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">fetch_user_security_level</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -1360,7 +1360,7 @@
 
 <a href="#bqp_database_access.users.set_new_secret_for_identity" class="headerlink" title="Permanent link">&para;</a></h2>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">set_new_secret_for_identity</span><span class="p">(</span>
-    <span class="n">identity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_secret</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">forced</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">identity</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n">new_secret</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n">forced</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 

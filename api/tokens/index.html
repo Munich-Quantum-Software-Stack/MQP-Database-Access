@@ -1342,12 +1342,12 @@
 
 <a href="#bqp_database_access.tokens.add_new_token" class="headerlink" title="Permanent link">&para;</a></h2>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">add_new_token</span><span class="p">(</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">owner</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">expiration</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
-    <span class="n">max_budget_usage</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">max_jobs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
+    <span class="n">owner</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
+    <span class="n">token</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span>
+    <span class="n">expiration</span><span class="p">:</span> <span class="n"><span title="datetime.datetime">datetime</span></span><span class="p">,</span>
+    <span class="n">max_budget_usage</span><span class="p">:</span> <span class="n"><span title="int">int</span></span><span class="p">,</span>
+    <span class="n">max_jobs</span><span class="p">:</span> <span class="n"><span title="int">int</span></span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
@@ -1368,7 +1368,7 @@
 
 
 <a href="#bqp_database_access.tokens.fetch_active_tokens_of_identity" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">fetch_active_tokens_of_identity</span><span class="p">(</span><span class="n">owner</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Token</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">fetch_active_tokens_of_identity</span><span class="p">(</span><span class="n">owner</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="Token">Token</span></span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -1389,7 +1389,7 @@
 
 <a href="#bqp_database_access.tokens.revoke_token_by_name_and_identity" class="headerlink" title="Permanent link">&para;</a></h2>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">revoke_token_by_name_and_identity</span><span class="p">(</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">owner</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n">owner</span><span class="p">:</span> <span class="n"><span title="str">str</span></span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
@@ -1410,7 +1410,7 @@
 
 
 <a href="#bqp_database_access.tokens.verify_token" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">verify_token</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Token</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">verify_token</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="Token">Token</span></span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
