@@ -9,7 +9,6 @@ watch:
   - mkdocs.yml
 
 nav:
-  - MQP-Database-Access: https://munich-quantum-software-stack.github.io/MQP-Database-Access
   - Home: index.md
   - User Guide:
       - Getting Started: user_guide/getting_started.md
