@@ -19,6 +19,7 @@
 """MQP-Database-Access Database module"""
 
 import os
+import threading
 from datetime import datetime
 from pony.orm import Database, Optional, PrimaryKey, Required, Set  # type: ignore
 
@@ -328,9 +329,37 @@ def _define_database(create_tables: bool = False, **db_params):
     return db
 
 
-def open_database(create_tables: bool = False):
-    """Create and return a database connection configured from environment variables."""
+_DATABASE = None
+_DATABASE_LOCK = threading.Lock()
 
+
+def open_database(create_tables: bool = False):
+    """Return the database configured from environment variables.
+    """
+
+    global _DATABASE  # pylint: disable=global-statement
+
+    with _DATABASE_LOCK:
+        if _DATABASE is None:
+            _DATABASE = _create_database(create_tables)
+        elif create_tables:
+            _DATABASE.create_tables()
+        return _DATABASE
+
+
+def close_database() -> None:
+    """Close the cached database 
+    """
+
+    global _DATABASE  # pylint: disable=global-statement
+
+    with _DATABASE_LOCK:
+        if _DATABASE is not None:
+            _DATABASE.disconnect()
+            _DATABASE = None
+
+
+def _create_database(create_tables: bool):
     if os.getenv("QUANTUM_DB_TESTING") is not None and [os.getenv("USER_TESTING") == ""
     or os.getenv("USER_TESTING") is None]:
         return _define_database(
@@ -345,5 +374,6 @@ def open_database(create_tables: bool = False):
         user=os.getenv("QUANTUM_DB_USER"),
         password=os.getenv("QUANTUM_DB_PASS"),
         host=os.getenv("QUANTUM_DB_HOST"),
+        port=int(os.getenv("QUANTUM_DB_PORT", "5432")),
         database="quantumdb",
     )
