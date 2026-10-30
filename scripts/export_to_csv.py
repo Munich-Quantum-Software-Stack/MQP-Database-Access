@@ -10,12 +10,12 @@ import os
 # DB_PORT = '5432'
 # EXPORT_DIR = '/workspaces/bqp-database-access/qdb-csv'
 
-DB_NAME = 'quantumdb'
-DB_USER = 'postgres'
-DB_PASSWORD = 'postgres'
-DB_HOST = 'db'
-DB_PORT = '5432'
-EXPORT_DIR = '/workspaces/bqp-database-access/qdb-csv'
+DB_NAME = "quantumdb"
+DB_USER = "postgres"
+DB_PASSWORD = "postgres"
+DB_HOST = "db"
+DB_PORT = "5432"
+EXPORT_DIR = "/workspaces/bqp-database-access/qdb-csv"
 
 # Create export directory if it doesn't exist
 os.makedirs(EXPORT_DIR, exist_ok=True)
@@ -33,9 +33,9 @@ tables = cur.fetchall()
 for table in tables:
     table_name = table[0]
     csv_file = os.path.join(EXPORT_DIR, f"{table_name}.csv")
-    with open(csv_file, 'w') as f:
-        if table_name == 'user':
-            copy_sql = f"COPY \"{table_name}\" TO STDOUT WITH CSV HEADER"
+    with open(csv_file, "w") as f:
+        if table_name == "user":
+            copy_sql = f'COPY "{table_name}" TO STDOUT WITH CSV HEADER'
         else:
             copy_sql = f"COPY {table_name} TO STDOUT WITH CSV HEADER"
         cur.copy_expert(copy_sql, f)

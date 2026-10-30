@@ -1,12 +1,13 @@
-import os
 import datetime
-import pytest
+import os
 from pathlib import Path
-import bqp_database_access as database_access
-from bqp_database_access._database import open_database
+
+import pytest
 from pony.orm import TransactionError, db_session
+from pony.orm.core import CacheIndexError
 
-
+import bqp_database_access as database_access
+from bqp_database_access._database import close_database, open_database
 
 NOW = datetime.datetime.now()
 
@@ -23,9 +24,12 @@ def delete_local_database() -> None:
     try:
         db = open_database()
         db_path = Path(db.provider.pool.filename).resolve()
-        db.disconnect()
     except Exception:
         db_path = _test_db_path()
+
+    # open_database() caches the Database object; drop it so the next call
+    # connects to the new file instead of the deleted one.
+    close_database()
 
     if db_path.exists():
         db_path.unlink()
@@ -43,8 +47,7 @@ def configured_test_environment():
 
 
 def create_local_database():
-    db = open_database(create_tables=True)
-    db.disconnect()
+    open_database(create_tables=True)
 
     try:
         with db_session:
@@ -60,10 +63,20 @@ def create_local_database():
             )
 
             database_access.users.create_new_user_with_secret(
-                "test_user", "test_password", "BASIC", "test@test.mail", "TEST_HPC_CENTER", "QUANTUM"
+                "test_user",
+                "test_password",
+                "BASIC",
+                "test@test.mail",
+                "TEST_HPC_CENTER",
+                "QUANTUM",
             )
             database_access.users.create_new_user_with_secret(
-                "test_user2", "test_password", "BASIC", "test@test.mail", "TEST_HPC_CENTER", "QUANTUM"
+                "test_user2",
+                "test_password",
+                "BASIC",
+                "test@test.mail",
+                "TEST_HPC_CENTER",
+                "QUANTUM",
             )
             database_access.users.create_new_user_with_secret(
                 "portal_test_user",
@@ -74,11 +87,22 @@ def create_local_database():
                 "QUANTUM",
             )
             database_access.users.create_new_user_with_secret(
-                "test_eqe_user", "test_password", "BASIC", "test@test.mail", "TEST_HPC_CENTER", "QUANTUM"
+                "test_eqe_user",
+                "test_password",
+                "BASIC",
+                "test@test.mail",
+                "TEST_HPC_CENTER",
+                "QUANTUM",
             )
             quantum_db = open_database()
-            quantum_db.insert(
-                "budget", name="temp_budget", note=" ", owner="test_user", credits=1000
+            # Use the ORM, not a raw insert: open_database() returns one cached
+            # Database, so test_user is already in this session's cache and a
+            # raw insert would appear as a "phantom" budget.
+            quantum_db.Budget(
+                name="temp_budget",
+                note=" ",
+                owner=quantum_db.User["test_user"],
+                credits=1000,
             )
 
             user = quantum_db.User.get(identity="test_user")
@@ -303,10 +327,17 @@ def create_local_database():
             )
 
             database_access.users.create_new_ldap_user(
-                "ldap_test_user", "BASIC", "ldap_test@test.mail", "TEST_HPC_CENTER", "LDAP"
+                "ldap_test_user",
+                "BASIC",
+                "ldap_test@test.mail",
+                "TEST_HPC_CENTER",
+                "LDAP",
             )
 
-    except TransactionError:
+    except (TransactionError, CacheIndexError):
+        # ldap_test_user is created twice above; the second create fails and
+        # is ignored, as before. With the cached Database it raises
+        # CacheIndexError instead of a TransactionError.
         pass
 
 
@@ -316,11 +347,11 @@ def seeded_db():
     create_local_database()
     db = open_database()
     yield db
-    db.disconnect()
+    close_database()
 
 
 @pytest.fixture
 def empty_db():
     db = open_database(create_tables=True)
     yield db
-    db.disconnect()
+    close_database()

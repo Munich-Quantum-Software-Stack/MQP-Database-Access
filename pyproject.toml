@@ -3,19 +3,27 @@ name = "bqp-database-access"
 version = "0.3.33"
 description = ""
 authors = [
-    { name = "Martin Ruefenacht", email = "martin.ruefenacht@lrz.de" }, 
-    { name = "Tobias Bauer", email = "Tobias.Bauer@lrz.de" }, 
+    { name = "Martin Ruefenacht", email = "martin.ruefenacht@lrz.de" },
+    { name = "Tobias Bauer", email = "Tobias.Bauer@lrz.de" },
     { name = "Ege Özmeral", email = "Nazim.Oezmeral@lrz.de" },
-    { name = "Trang Huynh", email = "Trang.Huynh@lrz.de" }
-    ]
+    { name = "Trang Huynh", email = "Trang.Huynh@lrz.de" },
+]
+keywords = ["MQSS", "database", "MQP"]
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
 dependencies = [
-    "pony>=0.7.19", 
-    "bcrypt>=4.0", 
-    "psycopg2-binary>=2.9.10", 
-    "numpy>=2.2.6", 
-    "eliot>=1.17.5", 
-    "cffi>=2.0.0", 
-    "werkzeug>=3.1.4", 
+    "pony>=0.7.19",
+    "bcrypt>=4.0",
+    "psycopg2-binary>=2.9.10",
+    "numpy>=2.2.6",
+    "eliot>=1.17.5",
+    "cffi>=2.0.0",
+    "werkzeug>=3.1.4",
     "fixture>=1.5.11",
     "python-dotenv>=1.2.2",
     ]
@@ -26,20 +34,6 @@ license = { text = "MIT" }
 [tool.setuptools]
 packages = ["bqp_database_access"]
 
-[project.optional-dependencies]
-dev = [
-    "black>=25.1.0",
-    "isort>=6.0.0",
-    "mypy>=1.14.1",
-    "pylint>=3.3.8",
-    "pre-commit>=4.1.0",
-    "pytest>=9.0.2",
-    "pytest-cov>=7.0.0",
-    "mkdocs>=1.6.1",
-    "mkdocs-material>=9.6.2",
-    "mkdocstrings[python]>=0.26.1",
-    "mkdocs-autorefs>=1.2.0",
-]
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
@@ -72,21 +66,25 @@ max-positional-arguments = 10
 [tool.black]
 target-version = ['py310']
 
-addopts = [
-    "--cov=bqp_database_access",
-    "--cov-report=term-missing",
-    "--cov-report=xml",
-]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-v", "-s"]
 
 
 [dependency-groups]
 dev = [
-    "pytest>=7.4.2",
-    "pytest-cov>=6.2.1",
-    "pytest-env>=1.0.1",
-    "mkdocs",
-    "mkdocs-material",
-    "mkdocstrings[python]",
+    "black>=25.1.0",
+    "isort>=6.0.0",
+    "mypy>=1.14.1",
+    "pylint>=3.3.8",
+    "pre-commit>=4.6.0",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.11.5",
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.2",
+    "mkdocstrings[python]>=0.26.1",
+    "mkdocs-autorefs>=1.2.0",
 ]
 
 

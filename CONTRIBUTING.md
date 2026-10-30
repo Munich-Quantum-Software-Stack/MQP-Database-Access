@@ -1,6 +1,8 @@
 # 🤝 Contributing to MQP Database Access
 
-Thank you for your interest in contributing to **MQP-Database-Access**, the database access component of the Munich Quantum Portal (MQP) Dashboard and part of the Munich Quantum Software Stack (MQSS).
+Thank you for your interest in contributing to **MQP-Database-Access**, the database access
+component of the Munich Quantum Portal (MQP) Dashboard and part of the Munich Quantum Software Stack
+(MQSS).
 
 ## 📜 Code of Conduct
 
@@ -14,7 +16,8 @@ You can help by:
 - Suggesting improvements or new features
 - Contributing code, tests, or documentation
 
-Use the GitHub issues page: <https://github.com/Munich-Quantum-Software-Stack/MQP-Database-Access/issues>
+Use the GitHub issues page:
+<https://github.com/Munich-Quantum-Software-Stack/MQP-Database-Access/issues>
 
 ## 🐛 Reporting Bugs
 
@@ -54,8 +57,10 @@ Please use:
 
 ## 🗄️ Database and Environment Notes
 
-- This repository is a **Python database access package** (neither Frontend app nor a Flask backend).
-- Ensure local database/environment settings are consistent with project expectations when running tests and development workflows.
+- This repository is a **Python database access package** (neither Frontend app nor a Flask
+  backend).
+- Ensure local database/environment settings are consistent with project expectations when running
+  tests and development workflows.
 - Review environment-dependent pytest defaults in `.env` before troubleshooting test behavior.
 
 ## 🔐 Security and Secrets
@@ -69,4 +74,5 @@ Never commit secrets or sensitive material, including:
 - private keys
 - any credential-like value
 
-If sensitive data is committed accidentally, rotate/revoke it immediately and remove it from git history.
+If sensitive data is committed accidentally, rotate/revoke it immediately and remove it from git
+history.

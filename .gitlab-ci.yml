@@ -9,23 +9,17 @@
 image: dockerhub.quantum.lrz.de/python-gcc
 
 variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  UV_CACHE_DIR: "$CI_PROJECT_DIR/.cache/uv"
 
-# Pip's cache doesn't store the python packages
-# https://pip.pypa.io/en/stable/reference/pip_install/#caching
-#
-# If you want to also cache the installed packages, you have to install
-# them in a virtualenv and cache it as well.
 cache:
   paths:
-    - .cache/pip
-    - venv/
+    - .cache/uv
 
 # https://hub.docker.com/r/library/rabbitmq/tags/
 
 before_script:
-  - pip install pdm
-  - pdm install -G dev
+  - pip install --no-cache-dir uv
+  - uv sync --dev
 
 stages:
   - type_check_and_lint
@@ -33,5 +27,5 @@ stages:
 type_checking:
   stage: type_check_and_lint
   script:
-    - pdm run mypy bqp_database_access/
-    - pdm run pylint bqp_database_access/
+    - uv run mypy bqp_database_access/
+    - uv run pylint bqp_database_access/

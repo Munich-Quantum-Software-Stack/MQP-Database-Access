@@ -19,6 +19,7 @@
 """MQP-Database-Access Constant module"""
 
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()

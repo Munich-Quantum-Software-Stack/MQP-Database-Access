@@ -3,12 +3,12 @@ import psycopg2
 import os
 
 # --- Configuration ---
-DB_NAME = 'quantumdb'
-DB_USER = 'postgres'
-DB_PASSWORD = 'postgres'
-DB_HOST = 'db'
-DB_PORT = '5432'
-IMPORT_DIR = '/workspaces/bqp-database-access/qdb-csv'
+DB_NAME = "quantumdb"
+DB_USER = "postgres"
+DB_PASSWORD = "postgres"
+DB_HOST = "db"
+DB_PORT = "5432"
+IMPORT_DIR = "/workspaces/bqp-database-access/qdb-csv"
 
 # Connect to the PostgreSQL database
 conn = psycopg2.connect(
@@ -21,9 +21,9 @@ for filename in os.listdir(IMPORT_DIR):
     if filename.endswith(".csv"):
         table_name = filename[:-4]  # Remove the .csv extension to get the table name
         csv_file = os.path.join(IMPORT_DIR, filename)
-        with open(csv_file, 'r') as f:
-            if table_name == 'user':
-                copy_sql = f"COPY \"{table_name}\" FROM STDIN WITH CSV HEADER"
+        with open(csv_file, "r") as f:
+            if table_name == "user":
+                copy_sql = f'COPY "{table_name}" FROM STDIN WITH CSV HEADER'
             else:
                 copy_sql = f"COPY {table_name} FROM STDIN WITH CSV HEADER"
             cur.copy_expert(copy_sql, f)

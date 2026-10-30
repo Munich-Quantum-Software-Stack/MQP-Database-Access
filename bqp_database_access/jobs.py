@@ -21,7 +21,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pony.orm import db_session, commit  # type: ignore
+from pony.orm import commit, db_session  # type: ignore
 
 from ._database import open_database
 from .budgets import fetch_budgets_of_identity
@@ -52,7 +52,7 @@ def fetch_by_identity_pages(
     order: str,
     order_by: str,
     filter_query: str,
-    ) -> dict[str, list["CircuitJob"] | int]:  # type: ignore   # noqa: F821
+) -> dict[str, list["CircuitJob"] | int]:  # type: ignore   # noqa: F821
     """Fetch paginated circuit jobs belonging to a user identity.
 
     Only the requested page of jobs is fetched, instead of all database
@@ -76,22 +76,20 @@ def fetch_by_identity_pages(
         query += f"AND status = '{filter_query}'"
     else:
         n_total = quantum_db.select(
-        "SELECT COUNT(*) FROM circuit_job "
-        f"WHERE owner = '{identity}'"
+            f"SELECT COUNT(*) FROM circuit_job WHERE owner = '{identity}'"
         )[0]
     if order_by:
-        query+=f" ORDER BY {order_by}"
+        query += f" ORDER BY {order_by}"
 
-    query+=f" {order}"
-    query+=f" LIMIT {jobs_per_page}"
-    query+=f" OFFSET {start_list}"
+    query += f" {order}"
+    query += f" LIMIT {jobs_per_page}"
+    query += f" OFFSET {start_list}"
     query_res = table.select_by_sql(query)
-    return {"jobs": query_res,
-            "totaljob_nr": int(n_total)}
+    return {"jobs": query_res, "totaljob_nr": int(n_total)}
+
 
 @db_session
-def fetch_hamiltonian_job_by_identity(identity: str) \
-    -> list["HamiltonianJob"]:  # type: ignore   # noqa: F821
+def fetch_hamiltonian_job_by_identity(identity: str) -> list["HamiltonianJob"]:  # type: ignore   # noqa: F821
     """Return all Hamiltonian jobs owned by the given identity."""
 
     quantum_db = open_database()
@@ -105,8 +103,7 @@ def fetch_hamiltonian_job_by_identity(identity: str) \
 
 
 @db_session
-def fetch_hamiltonian_job_by_task_id(task_id: int) \
-    -> list["HamiltonianJob"]:  # type: ignore   # noqa: F821
+def fetch_hamiltonian_job_by_task_id(task_id: int) -> list["HamiltonianJob"]:  # type: ignore   # noqa: F821
     """Return Hamiltonian jobs matching the provided task ID."""
 
     quantum_db = open_database()
@@ -216,7 +213,8 @@ def is_within_active_job_limit(qdb, job: "CircuitJob") -> bool:  # type: ignore 
 
 
 def filter_queued_if_offline_and_fetch(
-    qdb, jobs: list["CircuitJob"]  # type: ignore   # noqa: F821
+    qdb,
+    jobs: list["CircuitJob"],  # type: ignore   # noqa: F821
 ) -> list["CircuitJob"]:  # type: ignore    # noqa: F821
     """Return pending jobs that are eligible to move into waiting state."""
 
@@ -343,8 +341,7 @@ def fetch_all_pending_jobs_except_for_resource_not_from_users(
 
 
 @db_session
-def fetch_all_pending_hamiltonian_jobs() \
-    -> list["HamiltonianJob"]:  # type: ignore   # noqa: F821
+def fetch_all_pending_hamiltonian_jobs() -> list["HamiltonianJob"]:  # type: ignore   # noqa: F821
     """Return pending Hamiltonian jobs after marking them as waiting."""
 
     quantum_db = open_database()
@@ -359,7 +356,7 @@ def fetch_all_pending_hamiltonian_jobs() \
 
 
 @db_session
-def fetch_all_waiting_jobs() -> list["CircuitJob"]: # type: ignore   # noqa: F821
+def fetch_all_waiting_jobs() -> list["CircuitJob"]:  # type: ignore   # noqa: F821
     """Return all circuit jobs currently in waiting state."""
 
     quantum_db = open_database()
@@ -368,8 +365,7 @@ def fetch_all_waiting_jobs() -> list["CircuitJob"]: # type: ignore   # noqa: F82
 
 
 @db_session
-def fetch_all_waiting_hamiltonian_jobs() \
-    -> list["HamiltonianJob"]: # type: ignore   # noqa: F821
+def fetch_all_waiting_hamiltonian_jobs() -> list["HamiltonianJob"]:  # type: ignore   # noqa: F821
     """Return all Hamiltonian jobs currently in waiting state."""
 
     quantum_db = open_database()

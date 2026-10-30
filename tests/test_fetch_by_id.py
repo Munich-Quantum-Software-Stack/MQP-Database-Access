@@ -1,11 +1,13 @@
-import bqp_database_access as db_access
 from pony.orm import db_session
+
+import bqp_database_access as db_access
+
 
 def test_create_security_level(seeded_db) -> None:
     """
     Use seeded fixture to ensure full schema exists before user-level checks.
     """
-    
+
     with db_session:
         level = db_access.users.fetch_user_security_level("BASIC")
     assert level is not None

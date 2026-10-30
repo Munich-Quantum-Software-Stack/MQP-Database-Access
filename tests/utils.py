@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-import psycopg2
+"""Utilities and SQL fixtures used by the database tests."""
+
 import os
-import numpy as np
 from datetime import datetime, timedelta
 
+import numpy as np
+import psycopg2
 
-"""
-Following queries are used to populate data to test specific features
-"""
+# Following queries are used to populate data to test specific features.
 
 sql_queries = {
     "user": """INSERT INTO public.user (
@@ -25,7 +25,7 @@ sql_queries = {
         ) VALUES (
             %s,        'COMPLETED',           'COMPLETED'::text,    10000,               'OPENQASM 2.0'::text, 'circuit format', \
             false::boolean , %s::timestamp,   %s::timestamp,        %s::timestamp,       %s::timestamp,         %s, \
-            'PASS',     'testuser1'::text,                'temp_budget1',          Null::text,         'qubits sim',         'done', 
+            'PASS',     'testuser1'::text,                'temp_budget1',          Null::text,         'qubits sim',         'done',
             true::boolean )  \
             ; """,
     "budget": """INSERT INTO public.budget (name, note, owner, credits) VALUES \
