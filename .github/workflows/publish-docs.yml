@@ -5,7 +5,6 @@ on:
     branches:
       - develop
 
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -31,7 +30,7 @@ jobs:
 
       - name: Install the project
         run: uv sync --all-extras --dev
-         
+
       - name: Build documentation
         run: uv run mkdocs build
 

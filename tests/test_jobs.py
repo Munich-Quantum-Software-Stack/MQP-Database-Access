@@ -1,24 +1,26 @@
-from pony.orm import db_session, flush, commit
 from datetime import datetime
+
+import pytest
+from pony.orm import commit, db_session, flush
+
 from bqp_database_access.jobs import (
+    cancel_job,
+    complete_job_with_result,
+    create_job,
+    fetch_all_pending_jobs,
+    fetch_all_pending_jobs_except_for_resource_not_from_users,
+    fetch_all_pending_jobs_except_for_resources,
+    fetch_all_pending_jobs_for_resource_from_users,
+    fetch_all_pending_jobs_for_resource_not_from_users,
+    fetch_all_pending_jobs_from_users,
+    fetch_all_waiting_jobs,
     fetch_by_identity,
     fetch_by_identity_pages,
     fetch_result_by_job_id_and_identity,
-    create_job,
-    is_within_active_job_limit,
     filter_queued_if_offline_and_fetch,
-    fetch_all_pending_jobs,
-    fetch_all_pending_jobs_from_users,
-    fetch_all_pending_jobs_for_resource_from_users,
-    fetch_all_pending_jobs_for_resource_not_from_users,
-    fetch_all_pending_jobs_except_for_resources,
-    fetch_all_pending_jobs_except_for_resource_not_from_users,
-    fetch_all_waiting_jobs,
-    complete_job_with_result,
-    cancel_job
+    is_within_active_job_limit,
 )
 
-import pytest
 pytestmark = pytest.mark.usefixtures("seeded_db")
 
 
@@ -38,7 +40,7 @@ def test_fetch_by_identity(seeded_db):
 
         assert len(jobs) == 3
         assert all(j.owner.identity == "test_user" for j in jobs)
-        assert {j.status for j in jobs} == {"PENDING","CANCELLED", "COMPLETED"}
+        assert {j.status for j in jobs} == {"PENDING", "CANCELLED", "COMPLETED"}
         assert fetch_by_identity("does_not_exist") == []
 
 
@@ -140,8 +142,12 @@ def test_create_job(seeded_db, monkeypatch):
     * flags `no_modify` and `queued` are persisted
     * cost is set to 0 and timestamp_submitted is populated
     """
-    monkeypatch.setattr("bqp_database_access.jobs.open_database", lambda *a, **k: seeded_db)
-    monkeypatch.setattr("bqp_database_access.budgets.open_database", lambda *a, **k: seeded_db)
+    monkeypatch.setattr(
+        "bqp_database_access.jobs.open_database", lambda *a, **k: seeded_db
+    )
+    monkeypatch.setattr(
+        "bqp_database_access.budgets.open_database", lambda *a, **k: seeded_db
+    )
 
     with db_session:
         job = create_job(
@@ -184,7 +190,9 @@ def test_filter_queued_if_offline_and_fetch(seeded_db, monkeypatch):
     * jobs are released only if `is_within_active_job_limit` is True
     * released jobs are updated (status, timestamp_scheduled) and returned
     """
-    monkeypatch.setattr("bqp_database_access.jobs.is_within_active_job_limit", lambda *_: True)
+    monkeypatch.setattr(
+        "bqp_database_access.jobs.is_within_active_job_limit", lambda *_: True
+    )
 
     NOTE_OK = "JOB_PENDING_QUEUED_TEST_QPU_1"
     NOTE_BLOCK = "JOB_PENDING_QUEUED_TEST_QPU_2"
@@ -204,12 +212,16 @@ def test_filter_queued_if_offline_and_fetch(seeded_db, monkeypatch):
 
 
 def test_fetch_all_pending_jobs(seeded_db, monkeypatch):
-    monkeypatch.setattr("bqp_database_access.jobs.open_database", lambda *a, **k: seeded_db)
-    monkeypatch.setattr("bqp_database_access.jobs.is_within_active_job_limit", lambda *a, **k: True)
+    monkeypatch.setattr(
+        "bqp_database_access.jobs.open_database", lambda *a, **k: seeded_db
+    )
+    monkeypatch.setattr(
+        "bqp_database_access.jobs.is_within_active_job_limit", lambda *a, **k: True
+    )
 
     released = fetch_all_pending_jobs()
 
-    assert {j.id for j in released} == {111 , 201}
+    assert {j.id for j in released} == {111, 201}
 
     # Assert: DB side effects match expectations
     with db_session:
@@ -289,7 +301,8 @@ def test_fetch_all_pending_jobs_for_resource_from_users(seeded_db):
 
         job_a = (
             qdb.CircuitJob.select(
-                lambda j: j.owner == user and j.target_specification.resource_name == resource
+                lambda j: j.owner == user
+                and j.target_specification.resource_name == resource
             )
             .order_by(qdb.CircuitJob.id)
             .first()
@@ -333,7 +346,9 @@ def test_fetch_all_pending_jobs_for_resource_from_users(seeded_db):
     assert all(j.owner.identity == user_b for j in res_other_user)
     assert all(j.id != job_a_id for j in res_other_user)
 
-    assert fetch_all_pending_jobs_for_resource_from_users("DOES_NOT_EXIST", [user_a]) == []
+    assert (
+        fetch_all_pending_jobs_for_resource_from_users("DOES_NOT_EXIST", [user_a]) == []
+    )
 
 
 def test_fetch_all_pending_jobs_for_resource_not_from_users(seeded_db):
@@ -382,7 +397,9 @@ def test_fetch_all_pending_jobs_for_resource_not_from_users(seeded_db):
     res = fetch_all_pending_jobs_for_resource_not_from_users(resource, ["someone_else"])
     assert any(j.id == job_ok_id for j in res)
 
-    res_excluded = fetch_all_pending_jobs_for_resource_not_from_users(resource, [excluded_user])
+    res_excluded = fetch_all_pending_jobs_for_resource_not_from_users(
+        resource, [excluded_user]
+    )
     assert all(j.id != job_ok_id for j in res_excluded)
 
 
@@ -491,7 +508,8 @@ def test_fetch_all_pending_jobs_except_for_resource_not_from_users(seeded_db):
     )
     assert all(j.id != job_q5_id for j in res_blocked)
     assert all(
-        (j.target_specification.resource_name != resource) or (j.owner.identity in ["someone_else"])
+        (j.target_specification.resource_name != resource)
+        or (j.owner.identity in ["someone_else"])
         for j in res_blocked
     )
 
@@ -505,9 +523,7 @@ def test_fetch_all_waiting_jobs(seeded_db):
 
     with db_session:
         waiting_job = (
-            qdb.CircuitJob.select(status="WAITING")
-            .order_by(qdb.CircuitJob.id)
-            .first()
+            qdb.CircuitJob.select(status="WAITING").order_by(qdb.CircuitJob.id).first()
         )
 
         if waiting_job is None:

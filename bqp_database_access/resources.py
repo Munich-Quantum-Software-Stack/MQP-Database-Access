@@ -22,9 +22,10 @@ import json
 from importlib.resources import files
 from typing import Optional
 from warnings import warn
-from pony.orm import db_session  # type: ignore
-from ._database import open_database
 
+from pony.orm import db_session  # type: ignore
+
+from ._database import open_database
 
 RESTRICTED_RESOURCES_FILE = files("bqp_database_access").joinpath(
     "configs/restricted_resources_to_usergroup.json"
@@ -32,6 +33,7 @@ RESTRICTED_RESOURCES_FILE = files("bqp_database_access").joinpath(
 # Read json file
 with RESTRICTED_RESOURCES_FILE.open("r", encoding="utf-8") as f:
     RESTRICTED_RESOURCES = json.load(f)
+
 
 @db_session
 def fetch_all_resources() -> set["Resource", ...]:  # type: ignore  # noqa: F821
@@ -100,9 +102,11 @@ def fetch_resources_available_to_identity(
 
     # return user_group_budget_resources
 
+
 @db_session
 def get_all_restricted_usergroups() -> list[str]:
     return list(RESTRICTED_RESOURCES.keys())
+
 
 @db_session
 def get_group_rule(usergroup: str, is_member: bool) -> dict | None:
@@ -112,17 +116,20 @@ def get_group_rule(usergroup: str, is_member: bool) -> dict | None:
     key = "member" if is_member else "non_member"
     return group.get(key)
 
+
 @db_session
 def get_excluded_restricted_resources(usergroup: str, is_member: bool) -> list[str]:
     rule = get_group_rule(usergroup, is_member)
     exclusive_resources_list = rule.get("exclusive_resources", []) if rule else []
     return exclusive_resources_list
 
+
 @db_session
 def get_inclusive_restricted_resources(usergroup: str, is_member: bool) -> list[str]:
     rule = get_group_rule(usergroup, is_member)
     inclusive_resources_list = rule.get("inclusive_resources", []) if rule else []
     return inclusive_resources_list
+
 
 @db_session
 def fetch_resource_names_restricted_to_identity(identity: str) -> list[str]:
@@ -142,7 +149,9 @@ def fetch_resource_names_restricted_to_identity(identity: str) -> list[str]:
                 if r in restricted_resource_names:
                     restricted_resource_names.remove(r)
         else:
-            inclusive_resources = get_inclusive_restricted_resources(r_usergroup, is_member)
+            inclusive_resources = get_inclusive_restricted_resources(
+                r_usergroup, is_member
+            )
             if inclusive_resources:
                 restricted_resource_names.extend(inclusive_resources)
 

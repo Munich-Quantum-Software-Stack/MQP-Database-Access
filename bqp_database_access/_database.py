@@ -19,7 +19,9 @@
 """MQP-Database-Access Database module"""
 
 import os
+import threading
 from datetime import datetime
+
 from pony.orm import Database, Optional, PrimaryKey, Required, Set  # type: ignore
 
 # if os.getenv("QUANTUM_DB_TESTING") is not None:
@@ -31,6 +33,7 @@ from pony.orm import Database, Optional, PrimaryKey, Required, Set  # type: igno
 def _define_entities(database: Database):  # pylint: disable=too-many-statements
     class User(database.Entity):
         """User account and profile entity."""
+
         _table_ = "user"
 
         identity = PrimaryKey(str, auto=False)
@@ -67,6 +70,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
     class UserSecurityLevel(database.Entity):
         """User security policy limits entity."""
+
         _table_ = "user_security_level"
 
         name = PrimaryKey(str, auto=False)
@@ -84,6 +88,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
     class SuperUserLevel(database.Entity):
         """Superuser permission set entity."""
+
         _table_ = "super_user_level"
 
         name = PrimaryKey(str, auto=False)
@@ -102,12 +107,12 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
     class UserGroup(database.Entity):
         """User grouping and shared budget entity."""
+
         _table_ = "user_group"
 
         name = PrimaryKey(str, auto=False)
         note = Optional(str)
-        users = Set("User", table="users_in_user_groups",
-                    reverse="user_groups")
+        users = Set("User", table="users_in_user_groups", reverse="user_groups")
         budgets = Set("Budget", table="user_groups_in_budgets")
         time_slots = Set("TimeSlots", table="user_groups_in_time_slots")
         owner = Required("User")
@@ -115,6 +120,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
     class Token(database.Entity):
         """Authentication token entity."""
+
         _table_ = "token"
 
         token_hash = PrimaryKey(str, auto=False)
@@ -138,6 +144,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
     class TokenUsage(database.Entity):
         """Mapping of token use to circuit jobs."""
+
         _table_ = "token_usage"
 
         job = Required("CircuitJob")
@@ -145,6 +152,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
     class CircuitJob(database.Entity):
         """Circuit execution job entity."""
+
         _table_ = "circuit_job"
 
         id = PrimaryKey(int, auto=True)
@@ -176,6 +184,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
     class HamiltonianJob(database.Entity):
         """Hamiltonian execution job entity."""
+
         _table_ = "hamiltonian_job"
 
         id = PrimaryKey(int, auto=True)
@@ -198,6 +207,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
     class Budget(database.Entity):
         """Budget allocation entity."""
+
         _table_ = "budget"
 
         name = PrimaryKey(str, auto=False)
@@ -213,6 +223,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
     class TargetSpecification(database.Entity):
         """Execution target specification entity."""
+
         _table_ = "target_specification"
 
         name = PrimaryKey(str, auto=False)
@@ -229,6 +240,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
     class Resource(database.Entity):
         """Quantum resource entity."""
+
         _table_ = "resource"
 
         name = PrimaryKey(str, auto=False)
@@ -255,6 +267,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
     class ResourceSecurityLevel(database.Entity):
         """Resource security policy limits entity."""
+
         _table_ = "resource_security_level"
 
         name = PrimaryKey(str, auto=False)
@@ -269,6 +282,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
     class Announcement(database.Entity):
         """Administrative announcement entity."""
+
         _table_ = "admin_announcements"
 
         id = PrimaryKey(int, auto=True)
@@ -280,6 +294,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
     class Pointer(database.Entity):
         """Homepage pointer/banner entity."""
+
         _table_ = "pane_pointers"
 
         id = PrimaryKey(int, auto=True)
@@ -292,6 +307,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
     class Feedback(database.Entity):
         """User feedback submission entity."""
+
         _table_ = "feedback"
 
         id = PrimaryKey(int, auto=True)
@@ -303,6 +319,7 @@ def _define_entities(database: Database):  # pylint: disable=too-many-statements
 
     class TimeSlots(database.Entity):
         """Resource availability time slot entity."""
+
         _table_ = "time_slots"
 
         id = PrimaryKey(int, auto=True)
@@ -328,11 +345,38 @@ def _define_database(create_tables: bool = False, **db_params):
     return db
 
 
-def open_database(create_tables: bool = False):
-    """Create and return a database connection configured from environment variables."""
+_DATABASE = None
+_DATABASE_LOCK = threading.Lock()
 
-    if os.getenv("QUANTUM_DB_TESTING") is not None and [os.getenv("USER_TESTING") == ""
-    or os.getenv("USER_TESTING") is None]:
+
+def open_database(create_tables: bool = False):
+    """Return the database configured from environment variables."""
+
+    global _DATABASE  # pylint: disable=global-statement
+
+    with _DATABASE_LOCK:
+        if _DATABASE is None:
+            _DATABASE = _create_database(create_tables)
+        elif create_tables:
+            _DATABASE.create_tables()
+        return _DATABASE
+
+
+def close_database() -> None:
+    """Close the cached database"""
+
+    global _DATABASE  # pylint: disable=global-statement
+
+    with _DATABASE_LOCK:
+        if _DATABASE is not None:
+            _DATABASE.disconnect()
+            _DATABASE = None
+
+
+def _create_database(create_tables: bool):
+    if os.getenv("QUANTUM_DB_TESTING") is not None and [
+        os.getenv("USER_TESTING") == "" or os.getenv("USER_TESTING") is None
+    ]:
         return _define_database(
             create_tables=create_tables,
             provider="sqlite",
@@ -345,5 +389,6 @@ def open_database(create_tables: bool = False):
         user=os.getenv("QUANTUM_DB_USER"),
         password=os.getenv("QUANTUM_DB_PASS"),
         host=os.getenv("QUANTUM_DB_HOST"),
+        port=int(os.getenv("QUANTUM_DB_PORT", "5432")),
         database="quantumdb",
     )

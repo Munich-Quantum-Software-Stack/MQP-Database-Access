@@ -4,9 +4,11 @@
 
 ## Overview
 
-MQP-Database-Access is the Python database access package for the Munich Quantum Portal (MQP) Dashboard and part of the Munich Quantum Software Stack (MQSS).
+MQP-Database-Access is the Python database access package for the Munich Quantum Portal (MQP)
+Dashboard and part of the Munich Quantum Software Stack (MQSS).
 
-It provides ORM-backed data access modules for domain entities such as users, jobs, resources, budgets, tokens, time slots, feedback, and status handling.
+It provides ORM-backed data access modules for domain entities such as users, jobs, resources,
+budgets, tokens, time slots, feedback, and status handling.
 
 ## Features
 
@@ -17,14 +19,14 @@ It provides ORM-backed data access modules for domain entities such as users, jo
 
 ## Getting Started
 
-1. Install [PDM](https://pdm-project.org/).
+1. Install [uv](https://docs.astral.sh/uv/).
 2. Clone this repository.
 3. Install dependencies and developer tools:
 
 ```bash
 git clone https://github.com/Munich-Quantum-Software-Stack/MQP-Database-Access.git
 cd MQP-Database-Access
-pdm install
+uv sync --dev
 
 ```
 
@@ -32,7 +34,8 @@ pdm install
 
 The package and test setup rely on the environment variables.
 
-Use `.env.example` as a template for local configuration, then set environment-specific secret values before running tests or integrations.
+Use `.env.example` as a template for local configuration, then set environment-specific secret
+values before running tests or integrations.
 
 ## Utility Scripts
 
@@ -41,14 +44,15 @@ Use `.env.example` as a template for local configuration, then set environment-s
 - `scripts/insert_time_slot.sql`
 - `scripts/restricted_resources_to_usergroup.json`
 
-Review and adapt script configuration (for paths, credentials, and hosts) before use in your environment.
+Review and adapt script configuration (for paths, credentials, and hosts) before use in your
+environment.
 
 ## Security Notes
 
 - Never commit `.env` files, database passwords, peppers, tokens, or private keys.
 - Treat `QUANTUM_DB_PASS`, `QUANTUM_DB_PEPPER`, and `QUANTUM_DB_TOKEN_PEPPER` as secrets.
 - Use different secret values for local testing and production.
-- Rotate credentials and tokens according to your organization’s security policy.
+- Rotate credentials and tokens according to your organization's security policy.
 
 ## Contributing
 

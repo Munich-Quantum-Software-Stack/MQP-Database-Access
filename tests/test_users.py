@@ -1,5 +1,7 @@
-import bqp_database_access as db_access
 from pony.orm import db_session
+
+import bqp_database_access as db_access
+
 
 def test_create_security_level(empty_db) -> None:
     with db_session:

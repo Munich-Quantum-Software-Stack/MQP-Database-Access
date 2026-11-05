@@ -18,14 +18,7 @@
 
 """MQP-Database-Access Python Package"""
 
-
-from . import budgets
-from . import feedback
-from . import jobs
-from . import resources
-from . import status
-from . import tokens
-from . import users
+from . import budgets, feedback, jobs, resources, status, tokens, users
 
 __all__ = [
     "budgets",
@@ -36,6 +29,7 @@ __all__ = [
     "tokens",
     "users",
 ]
+
 
 def create_app():
     """
