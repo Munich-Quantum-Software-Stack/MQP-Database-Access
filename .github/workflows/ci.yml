@@ -4,6 +4,14 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   ci:
@@ -21,10 +29,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.11"
 
@@ -39,6 +49,10 @@ jobs:
 
       - name: Install Ruff
         run: python -m pip install ruff
+
+      # The full pre-commit config is not run in CI yet; check the workflow files at least.
+      - name: Check GitHub workflows (schema and zizmor)
+        run: pdm run pre-commit run --all-files check-github-workflows && pdm run pre-commit run --all-files check-renovate && pdm run pre-commit run --all-files zizmor
 
       - name: Run Ruff Linter
         run: pdm run ruff check .
@@ -56,7 +70,27 @@ jobs:
         run: pdm run pytest -s --maxfail=1 --disable-warnings --cov=bqp_database_access --cov-report=term-missing --cov-report=xml
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: coverage-xml
           path: coverage.xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          # Switch to true (as in QDMI) once the repository is registered with Codecov.
+          fail_ci_if_error: false
+          files: coverage.xml
+          flags: python
+
+  required-checks-pass: # This job does nothing and is only used for branch protection
+    name: 🚦 Check
+    if: always()
+    needs:
+      - ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Decide whether the needed jobs succeeded or failed
+        uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
+        with:
+          jobs: ${{ toJSON(needs) }}
